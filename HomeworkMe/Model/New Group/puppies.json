@@ -1,0 +1,84 @@
+ [
+  
+  {
+  "id" : 12252012,
+  "name" : "Penny",
+  "breed" : "Dachshund",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/dachshund.jpeg",
+  "cuddle_factor" : 5,
+  "price" : 29999
+  },
+  
+  {
+  "id" : 12252013,
+  "name" : "Lassy",
+  "breed" : "Cocker Spaniel",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/spaniel.jpeg",
+  "price" : 39999
+  },
+  
+  {
+  "id" : 12252014,
+  "name" : "Ramon",
+  "breed" : "Chihuahua",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/chihuahua.jpeg",
+  "price" : 19999
+  },
+  
+  {
+  "id" : 12252015,
+  "name" : "Victor",
+  "breed" : "Great Dane",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/dane.jpeg",
+  "price" : 49999
+  },
+  
+  {
+  "id" : 12252016,
+  "name" : "Governor",
+  "breed" : "French Bulldog",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/french.jpeg",
+  "price" : 69999
+  },
+  
+  {
+  "id" : 12252017,
+  "name" : "Sally",
+  "breed" : "English Bulldog",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/english.jpeg",
+  "price" : 29999
+  },
+  
+  {
+  "id" : 12252018,
+  "name" : "Stanley",
+  "breed" : "Basset Hound",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/basset.jpeg",
+  "price" : 25999
+  },
+  
+  {
+  "id" : 12252019,
+  "name" : "Tina",
+  "breed" : "Beagle",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/beagle.jpeg",
+  "price" : 44999
+  },
+  
+  {
+  "id" : 12252020,
+  "name" : "Rufus",
+  "breed" : "Chow Chow",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/chow.jpeg",
+  "price" : 69999
+  },
+  
+  {
+  "id" : 12252021,
+  "name" : "Perdita",
+  "breed" : "Dalmatian",
+  "photo_large" : "http://www.raywenderlich.com/downloads/puppies/dalmatian.jpeg",
+  "price" : 46999
+  }
+  
+]

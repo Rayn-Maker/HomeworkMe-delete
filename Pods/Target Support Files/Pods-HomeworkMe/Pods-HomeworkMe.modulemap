@@ -1,0 +1,6 @@
+framework module Pods_HomeworkMe {
+  umbrella header "Pods-HomeworkMe-umbrella.h"
+
+  export *
+  module * { export * }
+}

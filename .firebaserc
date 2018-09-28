@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "default": "hmwrkme",
+    "stripe": "hmwrkme",
+    "?": "hmwrkme",
+    "--help": "hmwrkme"
+  }
+}
