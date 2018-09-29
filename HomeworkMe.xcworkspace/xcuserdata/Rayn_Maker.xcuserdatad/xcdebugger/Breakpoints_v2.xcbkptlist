@@ -10,7 +10,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HomeworkMe/ViewControls/PostView.swift"
-            timestampString = "559891579.2167881"
+            timestampString = "559945824.106617"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "263"
@@ -42,7 +42,7 @@
                   moduleName = "HomeworkMe"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/Rayn_Maker/Downloads/HomeworkMe-delete/HomeworkMe/ViewControls/ProfileVC.swift"
-                  timestampString = "559891579.551187"
+                  timestampString = "559945824.719524"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "258"
@@ -57,7 +57,7 @@
                   moduleName = "HomeworkMe"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/Rayn_Maker/Downloads/HomeworkMe-delete/HomeworkMe/ViewControls/ProfileVC.swift"
-                  timestampString = "559891579.554828"
+                  timestampString = "559945824.723295"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "259"
@@ -74,7 +74,7 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HomeworkMe/ViewControls/PostView.swift"
-            timestampString = "559891579.217932"
+            timestampString = "559945824.107434"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "392"
@@ -89,29 +89,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "HomeworkMe/ViewControls/MyRequests.swift"
-            timestampString = "559891579.2185971"
+            filePath = "HomeworkMe/AppDelegate.swift"
+            timestampString = "559949693.074501"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "396"
-            endingLineNumber = "396"
-            landmarkName = "startTimer()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "HomeworkMe/ViewControls/MyRequests.swift"
-            timestampString = "559891579.219033"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "399"
-            endingLineNumber = "399"
-            landmarkName = "startTimer()"
+            startingLineNumber = "90"
+            endingLineNumber = "90"
+            landmarkName = "notificationCheck()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

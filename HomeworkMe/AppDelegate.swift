@@ -9,6 +9,7 @@
 import UIKit
 import CoreData
 import Firebase
+import FirebaseDatabase
 import Stripe
 import SquarePointOfSaleSDK
 import GooglePlaces
@@ -17,11 +18,19 @@ import GoogleSignIn
 import FacebookLogin
 import FBSDKLoginKit
 import FacebookCore
+import UserNotifications
+import AudioToolbox
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUserNotificationCenterDelegate  {
 
     var window: UIWindow?
+    let ref = Database.database().reference()
+    var handle: DatabaseHandle?
+    var seconds = 1200
+    var timer = Timer()
+    var isTimerRunning = false
+    var isGrantedAccess = false
 
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
@@ -32,9 +41,71 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         logUser()
         GIDSignIn.sharedInstance().clientID = FirebaseApp.app()?.options.clientID
         GIDSignIn.sharedInstance().delegate = self
+        
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound]){(granted, error) in
+            self.isGrantedAccess = granted
+        }
+        let stopAction = UNNotificationAction(identifier: "stop.action", title: "Stop", options: [])
+        let timerCategory = UNNotificationCategory(identifier: "timer.category", actions: [stopAction], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([timerCategory])
+        
         return FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
         
         return true
+    }
+    
+    //notifications configuration
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        completionHandler()
+    }
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) { completionHandler([.alert,.sound])
+    }
+    func sendNotification(){
+        if isGrantedAccess{
+            let content = UNMutableNotificationContent()
+            content.title = "HIIT Timer"
+            content.body = "30 Seconds Elapsed"
+            content.sound = UNNotificationSound.default()
+            content.categoryIdentifier = "timer.category"
+            
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.001, repeats: false) //close to immediate as we can get.
+            let request = UNNotificationRequest(identifier: "timer.request", content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request) { (error) in
+                if let error = error{
+                    print("Error posting notification:\(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    func startTimer(){
+        let timeInterval = 2.0
+        if isGrantedAccess && !timer.isValid { //allowed notification and timer off
+            timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true, block: { (timer) in
+                self.sendNotification()
+            })
+        }
+    }
+    func notificationCheck(){
+        let ref = Database.database().reference()
+        handle = ref.child("Students").child(Auth.auth().currentUser?.uid ?? " ").queryOrderedByKey().observe( .value, with: { response in
+            if response.value is NSNull {
+            } else {
+                let tutDict = response.value as! [String:AnyObject]
+                if let newNotice = tutDict["newNotice"] as? Bool {
+                    if newNotice {
+                        self.startTimer()
+                    }
+                }
+            }
+        })
+    }
+    func stopTimer(){
+        //shut down timer
+        timer.invalidate()
+        //clear out any pending and delivered notifications
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
     
     func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
@@ -162,6 +233,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
+        notificationCheck()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -170,6 +242,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
+        stopTimer()
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

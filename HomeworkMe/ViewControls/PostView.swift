@@ -390,6 +390,8 @@ func downloadImage(url:String) -> Data {
             picUrl = " "
         }
         if tutor.uid != senderId {
+            let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
+            
             if tutor.tutorStatus == "live" {
                 let place: [String:String] = ["address":meetUpLocation.address ?? "",
                                               "long":meetUpLocation.long ?? "",
@@ -410,12 +412,11 @@ func downloadImage(url:String) -> Data {
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
                                                       "price":self.postss.price as AnyObject]
-                
-                
+        
                 let par = [postKey : parameters] as [String: Any]
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
-                //            ref.child("Requests").child(postKey).updateChildValues(parameters)
+                self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
                 
             } else if tutor.tutorStatus == "off" {
                 // send a text message after sending request
@@ -446,6 +447,7 @@ func downloadImage(url:String) -> Data {
                 let par = [postKey : parameters] as [String: Any]
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
+                self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
             } else if tutor.tutorStatus == "hot" {
                 // display map of where the tutor is.
                 // join session button
@@ -473,6 +475,7 @@ func downloadImage(url:String) -> Data {
                 let par = [postKey : parameters] as [String: Any]
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
+                self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
             }
         } else {
             // you cant send a request to yourself.

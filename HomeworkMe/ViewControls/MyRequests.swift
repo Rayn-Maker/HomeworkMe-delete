@@ -35,7 +35,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     @IBOutlet weak var tutorReqView: UIView!
     @IBOutlet weak var tutorReqTable: UITableView!
     @IBOutlet weak var mapViewDisplay: UIView!
-    
     @IBOutlet weak var cancelTutor: UIButton!
     @IBOutlet weak var mapView: GMSMapView!
     
@@ -82,13 +81,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             displayingTutReqview = true
             tutorReqView.isHidden = true
         }
-        UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (resp, err) in
-            self.isGrantedAccess = resp
-        }
-        let stopAction = UNNotificationAction(identifier: "stop.action", title: "Stop", options: [])
-        let timerCategory = UNNotificationCategory(identifier: "timer.category", actions: [stopAction], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([timerCategory])
         tutorReqTable.estimatedRowHeight = 45
         tutorReqTable.rowHeight = UITableViewAutomaticDimension
         myRequestsTable.estimatedRowHeight = 45
@@ -102,20 +94,26 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     }
     
     override func viewDidAppear(_ animated: Bool) {
-        var isTimerRunning = false
+//        isTimerRunning = false
 //        stopTimer()
-
+        let parameter2: [String:AnyObject] = ["newNotice":false as AnyObject]
+        let parameter3: [String:AnyObject] = ["newNotice":false as AnyObject]
+        
+        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
+        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter3)
     }
     
     @IBAction func rejectReq(_ sender: Any) {
         let dateString = String(describing: Date())
+        let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
         
         let par = ["time": dateString as AnyObject,
                    "status":"rejected"] as! [String: Any]
-        self.ref.child("Students").child(request.receiverId ?? "").child("sentReqs").child(request.reqID).updateChildValues(par) //"status":"pending"
+        self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
+        self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
         
         requestersView.isHidden = true
-       
     }
     
     @IBAction func switchView(_ sender: Any) {
@@ -138,26 +136,31 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         runTimer()
         
         let dateString = String(describing: Date())
+        let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
+        let parameter3: [String:AnyObject] = ["newNotice":false as AnyObject]
+        
         if self.tutor.tutorStatus == "live" {
             let par = ["time": dateString as AnyObject,
                        "status":"approved",
-                       "currLocationCoord": "\(self.request.place.lat) \(self.request.place.long)",
+                       "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
                 "currLocationName":self.request.place.name] as! [String: Any]
             
-            self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
-            self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
+        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter3)
+        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
+        self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+        self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
             
-            let para = ["status":"hot"] as! [String: Any]
+        let para = ["status":"hot"] as! [String: Any]
             
-            
-            
-            requestersView.isHidden = true
+//            requestersView.isHidden = true
 //            drawPath(start: currentLocation!, end: request.place)
 //            mapViewDisplay.isHidden = false
         } else if self.tutor.tutorStatus == "hot" {
             let par = ["time": dateString as AnyObject,
                        "status":"approved"] as [String : Any]
             
+            self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
+            self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter3)
             self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         } else if self.tutor.tutorStatus == "off" {
             // a callendar should be shown when cell is clicked on.
@@ -167,9 +170,9 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     
     @IBAction func callPrsd(_ sender: Any) {
         
-        self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "-", with: "")
-        self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: " ", with: "")
-        self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: ")", with: "")
+       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "-", with: "")
+       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: " ", with: "")
+       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: ")", with: "")
        self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "(", with: "")
        self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "+", with: "")
         
@@ -251,6 +254,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                 }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
+                }
+                if let newNotice = tutDict["newNotice"] as? Bool {
+                    if newNotice {
+                        self.startTimer()
+                    }
                 }
                 self.tutor.customerId = tutDict["customerId"] as? String
                 self.tutor.phoneNumebr = tutDict["phoneNumber"] as? String
@@ -349,7 +357,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             if req.reqStatus == "pending" {
                 tableArr.requestsArrPending.append(req)
             } else if req.reqStatus == "approved" {
-                self.notify()
                 tableArr.requestsArrAccepted.append(req)
                 self.notificationRepeats = true
             } else if req.reqStatus == "rejected"{
