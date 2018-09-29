@@ -47,7 +47,8 @@ class Student {
     var requestsSentApprd = [Request]()
     var requestsSentReject = [Request]()
     var request = Request()
-    var requestsObject = [String:AnyObject]()
+    var sentObject = [String:AnyObject]()
+    var receivedObject = [String:AnyObject]()
     var coorLocCoord = String()
     var coorLocName = String()
 }
@@ -70,14 +71,19 @@ class Classroom {
 class Request {
     var place = Place()
     var reqID: String!
-    var author: String!
-    var authorId: String!
+    var senderName: String!
+    var receiverName: String!
+    var senderId: String!
+    var receiverId: String!
     var time: Date!
     var timeString: String!
     var postTite: String!
-    var phoneNumber: String!
-    var picUrl: String!
+    var senderPhone: String!
+    var receiverPhone: String!
+    var senderPicUrl: String!
+    var receiverPicUrl: String!
     var reqStatus: String!
+    var phoneNumber: String!
 }
 
 class Post {
@@ -103,6 +109,7 @@ class Post {
     var disLikers = [String]()
     var notes = [Note]()
     var noteDict = [String:String]()
+    var phoneNumber = String()
 }
 
 struct Place {

@@ -3,6 +3,14 @@
    version = "1.0">
    <ContextStates>
       <ContextState
+         contextName = "closure #2 in MyClassRoomVC.creatPost(cat:placeHolder:):MyClassRoomVC.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "postTitle">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in closure #1 in Sign_Up.registerPrsd(_:):Sign_Up.swift">
          <PersistentStrings>
             <PersistentString
@@ -14,10 +22,13 @@
          contextName = "closure #2 in MyClassRoomVC.creatPost(cat:):MyClassRoomVC.swift">
       </ContextState>
       <ContextState
-         contextName = "closure #2 in MyClassRoomVC.creatPost(cat:placeHolder:):MyClassRoomVC.swift">
+         contextName = "MyRequests.tableView(_:cellForRowAt:):MyRequests.swift">
          <PersistentStrings>
             <PersistentString
-               value = "postTitle">
+               value = "tutor.requestsArrPending">
+            </PersistentString>
+            <PersistentString
+               value = "student.requestsArrPending">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

@@ -35,14 +35,14 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
     
     func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!,
               withError error: Error!) {
-        ref = Database.database().reference()
-        guard let authentication = user.authentication else { return }
-        let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken,
-                                                       accessToken: authentication.accessToken)
         // ...
         if let error = error {
             print("\(error.localizedDescription)")
         } else {
+            ref = Database.database().reference()
+            guard let authentication = user.authentication else { return }
+            let credential = GoogleAuthProvider.credential(withIDToken: authentication.idToken,
+                                                           accessToken: authentication.accessToken)
             // Perform any operations on signed in user here.
             let userId = user.userID
             user.userID// For client-side use only!
@@ -52,7 +52,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
             let familyName = user.profile.familyName
             let email = user.profile.email
             // ...
-        }
+        
         
         Auth.auth().signInAndRetrieveData(with: credential) { (authResult, error) in
             if let error = error {
@@ -77,7 +77,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                 
                             }
                         })
-                        self.addCustomer(child: Auth.auth().currentUser?.uid ?? "", userEmail: user.profile.email)
+//                        self.addCustomer(child: Auth.auth().currentUser?.uid ?? "", userEmail: user.profile.email)
                     }
                 })
 //                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile")
@@ -86,6 +86,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                 let appDel : AppDelegate = UIApplication.shared.delegate as! AppDelegate
                 appDel.logUser()
             }
+          }
         }
     }
     

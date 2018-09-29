@@ -26,9 +26,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     // edit account pluggins
 
-    @IBOutlet weak var schoolEmail: UITextField!
-    @IBOutlet weak var major: UITextField!
-    @IBOutlet weak var classification: UITextField!
     @IBOutlet weak var profilePic: UIImageView!
     @IBOutlet weak var editViewBtn: UIButton!
     @IBOutlet weak var changePicBtn: UIButton!
@@ -38,14 +35,13 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet weak var schoolInstructionsLabel: UILabel!
     @IBOutlet weak var editView: UIView!
     @IBOutlet weak var tutorEdit: UIView!
-    @IBOutlet weak var addPlaceStackView: UIStackView! 
     @IBOutlet weak var phoneNumber: UITextField!
     @IBOutlet weak var goLiveSwitch: UISwitch!
 
     @IBOutlet weak var goLiveLable: UILabel!
     @IBOutlet weak var goliveView: UIStackView!
     @IBOutlet weak var meetUpLocationsTable: UITableView!
-    @IBOutlet weak var tutorEditLbl: UILabel!
+    
     // finish edit account pluggins
     
     // edit school var
@@ -217,7 +213,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     if goLiveSwitch.isOn {
         goLiveLable.text = "I'm Live"
         let par = ["status": "live"] as [String: Any]
-        ref.child("Tutors").child((Auth.auth().currentUser?.uid)!).updateChildValues(par)
+        
         
         ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par) { (err, resp) in
             if err != nil {
@@ -227,7 +223,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     } else {
         goLiveLable.text = "Go Live!!!"
         let par = ["status": "off"] as [String: Any]
-        ref.child("Tutors").child((Auth.auth().currentUser?.uid)!).updateChildValues(par)
+        
         
         ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par) { (err, resp) in
             if err != nil {
@@ -244,10 +240,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     // Done button for editView pressed
-    @IBAction func signUpEditDone(_ sender: Any) {
-        editView.isHidden = true
-        tutorEdit.isHidden = true
-    }
     
     @IBAction func backToEditView(_ sender: Any) {
         editView.isHidden = false
@@ -257,47 +249,38 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     @IBAction func saveTutor(_ sender: Any) {
         
-        if major.text != nil && classification.text != nil && schoolEmail.text != nil && phoneNumber.text != nil {
-            let parameters = [
-                "meetUpLocations":placeesDict,
-                "major": major.text ?? "",
-                "classification":classification.text ?? "",
-                "schoolEmail":schoolEmail.text ?? "",
-                "tutor": userName.text ?? "",
-                "isTutorApproved":true,
-                "status":"live"] as [String : Any]
+        if phoneNumber.text != nil && !placeesDict.isEmpty {
+         
+            let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
+                                           "status":"live",
+                                           "phoneNumber": self.phoneNumber.text]
             
-            let userInfo: [String: Any] = ["uid": self.student.uid ?? " ",
-                                           "fName": self.student.fName ?? " ",
-                                           "full_name": self.student.full_name ?? " ",
-                                           "lName": self.student.lName ?? "",
-                                           "email": self.student.email ?? " ",
-                                           "phoneNumber": self.student.phoneNumebr ?? " ",
-                                           "customerId": self.student.customerId ?? " "]
-            
-            let para = ["phoneNumber":phoneNumber.text ?? "",
-                        "isTutor":true] as [String : Any]
-            let par = ["status": "live"] as [String: Any]
-            self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par)
-            
-            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(para) { (err, resp) in
+            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
                     
                 }
             }
-        ref.child("Students").child((Auth.auth().currentUser?.uid)!).child("TutorProfile").updateChildValues(parameters) { (err, resp) in
+        } else if !placeesDict.isEmpty  {
+            let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
+                                           "status":"live"]
+            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
-                    
-                } else {
                     
                 }
             }
-            ref.child("Tutors").child((Auth.auth().currentUser?.uid)!).setValue(parameters)
-            ref.child("Tutors").child((Auth.auth().currentUser?.uid)!).child("StudentProfile").setValue(userInfo)
+        } else if phoneNumber.text != nil {
+            
+            let userInfo: [String: Any] = ["status":"live",
+                                           "phoneNumber": self.phoneNumber.text]
+            
+            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
+                if err != nil {
+                    
+                }
+            }
         } else {
-            // display warning
+            // show warning
         }
-        
         tutorEdit.isHidden = true
     }
     
@@ -482,11 +465,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 if let status = myclass["status"] as? String {
                     self.student.tutorStatus = status
                 }
-                if let tutor = myclass["isTutorApproved"] as? Bool {
-                    self.isTutor = tutor
-                    UserDefaults.standard.set(tutor, forKey: "isTutorApproved")
-                    self.student.tutorApproved = tutor
-                }
                 if let lname = myclass["lName"] as? String {
                     UserDefaults.standard.set(lname, forKey: "lName")
                     name += " " + lname + "\n " + (Auth.auth().currentUser?.email)!
@@ -497,12 +475,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     self.Id = id
                     self.student.uid = id
                 } //TutorProfile
-                if let tutorProfile = myclass["TutorProfile"] as? [String : AnyObject] {
-                    self.classification.text = tutorProfile["classification"] as? String
-                    self.schoolEmail.text = tutorProfile["schoolEmail"] as? String
-                    self.major.text = tutorProfile["major"] as? String
-                }
-                if let customer = myclass["customerId"] as? String {
+                if let customer = myclass["customer_Id"] as? String {
                     UserDefaults.standard.set(customer, forKey: "customerId")
                     self.student.customerId = customer
                 }
@@ -527,32 +500,16 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     func fetchMyClass(dictCheck: [String:AnyObject]){
-        let ref = Database.database().reference()
-        handle = ref.child("Classes").queryOrderedByKey().observe( .value, with: { response in
-            if response.value is NSNull {
-                /// dont do anything \\\
-            } else {
-                self.myClassesArr.removeAll()
-                let classes = response.value as! [String:AnyObject]
-                for (a,_) in dictCheck {
-                    for (c,b) in classes {
-                        if a == c {
-                            var classe = FetchObject()
-                            if let uid = b["uid"] {
-                                classe.uid = uid as? String
-                            }
-                            if let title = b["name"] {
-                                classe.title = title as? String
-                            }
-                            self.myClassesArr.append(classe)
-                        }
-                    }
-                }
-                self.activitySpinner.stopAnimating()
-                self.activitySpinner.isHidden = true 
-                self.myClassesTableView.reloadData()
-            }
-        })
+        var fetchObject = FetchObject()
+        for (x,y) in dictCheck {
+            fetchObject.title = y["className"] as! String
+            fetchObject.uid = y["uid"] as! String
+            self.myClassesArr.append(fetchObject)
+        }
+        self.activitySpinner.stopAnimating()
+        self.activitySpinner.isHidden = true
+        self.myClassesTableView.reloadData()
+
     }
     
     func fetchSub(uniKey:String, dictCheck: [String:AnyObject]) {
@@ -652,13 +609,17 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             classArray = uni_sub_array
             let ref = Database.database().reference()
             let key = uni_sub_array[indexPath.row].uid
+            let className = uni_sub_array[indexPath.row].title
             let uid = Auth.auth().currentUser?.uid
-            let parameters: [String:String] = [key! : key!]
-            let parameters2: [String:String] = [uid! : uid!]
+            let parameters: [String:String] = ["uid" : key!,
+                                               "className":className ?? ""]
+            let parameters2: [String:String] = ["uid" : uid!,
+                                                "studentName":self.student.full_name ?? ""]
             if myClassesArr.contains(where: { $0.uid == key }) {
+                
             } else {
-                ref.child("Students").child(uid!).child("Classes").updateChildValues(parameters)
-                ref.child("Classes").child(key!).child("Students").updateChildValues(parameters2)
+                ref.child("Students").child(uid!).child("Classes").child(key!).updateChildValues(parameters)
+                ref.child("Classes").child(key!).child("Students").child(uid!).updateChildValues(parameters2)
             }
             // delete it from the class array
          }

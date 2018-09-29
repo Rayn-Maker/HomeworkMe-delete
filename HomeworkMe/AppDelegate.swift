@@ -126,13 +126,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
     }
     
     
-//    @available(iOS 9.0, *)
-//    func application(_ application: UIApplication,
-//                     open url: URL,
-//                     options: [UIApplication.OpenURLOptionsKey: Any]) -> Bool {
-//        return SDKApplicationDelegate.shared.application(application, open: url, options: options)
-//    }
-    
     func application(_ application: UIApplication, open url: URL, sourceApplication: String?, annotation: Any) -> Bool {
         return GIDSignIn.sharedInstance().handle(url,
                                                  sourceApplication: sourceApplication,
@@ -140,17 +133,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate {
         return FBSDKApplicationDelegate.sharedInstance().application(application, open: url, sourceApplication: sourceApplication, annotation: annotation)
         
     }
-    
-//    func application(application: UIApplication,
-//                     openURL url: NSURL, sourceApplication: String?, annotation: AnyObject?) -> Bool {
-//        var options: [String: AnyObject] = [UIApplicationOpenURLOptionsKey.sourceApplication.rawValue: sourceApplication as AnyObject,
-//                                            UIApplicationOpenURLOptionsKey.annotation.rawValue: annotation ?? "" as AnyObject]
-//        return GIDSignIn.sharedInstance().handle(url as URL,
-//                                                    sourceApplication: sourceApplication,
-//                                                    annotation: annotation)
-//
-//    }
- 
+
     
     // This method is where you handle URL opens if you are using univeral link URLs (eg "https://example.com/stripe_ios_callback")
     func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void) -> Bool {

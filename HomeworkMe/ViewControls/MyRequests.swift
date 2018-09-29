@@ -14,15 +14,18 @@ import MessageUI
 import GoogleMaps
 import GooglePlaces
 import Alamofire
+import UserNotifications
+import AudioToolbox
 
 
-class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
+class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUserNotificationCenterDelegate  {
 
     @IBOutlet weak var navBat: UINavigationBar!
     @IBOutlet weak var requestersView: UIView!
     @IBOutlet weak var myRequestsTable: UITableView!
     @IBOutlet weak var postTitle: UILabel!
     @IBOutlet weak var callBtn: UIButton!
+    @IBOutlet weak var timerLabel: UILabel!
     @IBOutlet weak var timeSincePstLable: UILabel!
     @IBOutlet weak var bioLable: UILabel!
     @IBOutlet weak var image: UIImageView!
@@ -48,6 +51,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
     var handle2: DatabaseHandle?
     var isTutor = true
     var locationGoingTo = Place()
+    var notificationRepeats = true
+    private var notTimer = Timer()
     
 // google map setup
     var place = Place()
@@ -61,6 +66,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
     // The currently selected place.
     var selectedPlace: GMSPlace?
     
+    var seconds = 1200
+    var timer = Timer()
+    var isTimerRunning = false
+    var isGrantedAccess = false
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         if let istutor = UserDefaults.standard.bool(forKey: "isTutorApproved") as? Bool {
@@ -72,6 +82,13 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
             displayingTutReqview = true
             tutorReqView.isHidden = true
         }
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { (resp, err) in
+            self.isGrantedAccess = resp
+        }
+        let stopAction = UNNotificationAction(identifier: "stop.action", title: "Stop", options: [])
+        let timerCategory = UNNotificationCategory(identifier: "timer.category", actions: [stopAction], intentIdentifiers: [], options: [])
+        UNUserNotificationCenter.current().setNotificationCategories([timerCategory])
         tutorReqTable.estimatedRowHeight = 45
         tutorReqTable.rowHeight = UITableViewAutomaticDimension
         myRequestsTable.estimatedRowHeight = 45
@@ -79,9 +96,15 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
         let storage = Storage.storage().reference(forURL: "gs://hmwrkme.appspot.com")
         userStorage = storage.child("Students")
         googleMapsetup()
-        fetchTutor()
-        fetchSent()
+        fetchStudent()
         editImage()
+        startTimer()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        var isTimerRunning = false
+//        stopTimer()
+
     }
     
     @IBAction func rejectReq(_ sender: Any) {
@@ -89,8 +112,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
         
         let par = ["time": dateString as AnyObject,
                    "status":"rejected"] as! [String: Any]
-        self.ref.child("Students").child(request.authorId ?? "").child("sentReqs").child(request.reqID).updateChildValues(par) //"status":"pending"
-        self.ref.child("Tutors").child(Auth.auth().currentUser?.uid ?? "").child("requests").child(request.reqID).updateChildValues(par)
+        self.ref.child("Students").child(request.receiverId ?? "").child("sentReqs").child(request.reqID).updateChildValues(par) //"status":"pending"
+        
         requestersView.isHidden = true
        
     }
@@ -112,6 +135,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
         // remove profile from request cup and put it in jobs cup
         // check status of tutor
         // start timer for 20 mins
+        runTimer()
+        
         let dateString = String(describing: Date())
         if self.tutor.tutorStatus == "live" {
             let par = ["time": dateString as AnyObject,
@@ -119,11 +144,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
                        "currLocationCoord": "\(self.request.place.lat) \(self.request.place.long)",
                 "currLocationName":self.request.place.name] as! [String: Any]
             
-            self.ref.child("Students").child(request.authorId ?? "").child("sentReqs").child(request.reqID).updateChildValues(par)
-            self.ref.child("Tutors").child(Auth.auth().currentUser?.uid ?? "").child("requests").child(request.reqID).updateChildValues(par)
+            self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+            self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
             
             let para = ["status":"hot"] as! [String: Any]
-            self.ref.child("Tutors").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(para)
+            
             
             
             requestersView.isHidden = true
@@ -133,7 +158,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
             let par = ["time": dateString as AnyObject,
                        "status":"approved"] as [String : Any]
             
-            self.ref.child("Students").child(request.authorId ?? "").child("sentReqs").child(request.reqID).updateChildValues(par)
+            self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         } else if self.tutor.tutorStatus == "off" {
             // a callendar should be shown when cell is clicked on.
         }
@@ -186,24 +211,40 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
         self.dismiss(animated: true, completion: nil)
     }
     
+    func runTimer() {
+        timer = Timer.scheduledTimer(timeInterval: 1, target: self,   selector: (#selector(MyRequests.updateTimer)), userInfo: nil, repeats: true)
+    }
+    
+    @objc func updateTimer() {
+        seconds -= 1     //This will decrement(count down)the seconds.
+        timerLabel.text = timeString(time: TimeInterval(seconds))
+    }
+    
+    func timeString(time:TimeInterval) -> String {
+        let hours = Int(time) / 3600
+        let minutes = Int(time) / 60 % 60
+        let seconds = Int(time) % 60
+        return String(format:"%02i:%02i:%02i", hours, minutes, seconds)
+    }
+    
     var storageRef: Storage {
         return Storage.storage()
     }
     
-    func fetchTutor(){
+    func fetchStudent() {
         let ref = Database.database().reference()
-          handle = ref.child("Tutors").child(Auth.auth().currentUser?.uid ?? " ").queryOrderedByKey().observe( .value, with: { response in
+          handle = ref.child("Students").child(Auth.auth().currentUser?.uid ?? " ").queryOrderedByKey().observe( .value, with: { response in
             if response.value is NSNull {
             } else {
                 let tutDict = response.value as! [String:AnyObject]
 
-                if let json = tutDict["requests"] as? [String:AnyObject] {
-                    self.student.requestsObject = json
-                    self.tutor.requestsArrAccepted.removeAll()
-                    self.tutor.requestsArrRejected.removeAll()
-                    self.tutor.requestsArrPending.removeAll()
+                if let json = tutDict["received"] as? [String:AnyObject] {
+//                    self.tutor.receivedObject = json
                     self.tutor = self.setUpReqArr(tableArr: self.tutor, object: json, table: self.myRequestsTable)
-                    //                    self.getLocations()
+                }
+                if let json = tutDict["sent"] as? [String:AnyObject] {
+//                    self.student.receivedObject = json
+                    self.student = self.setUpReqArr(tableArr: self.student, object: json, table: self.tutorReqTable)
                 }
                 if let scdul = tutDict["appointMents"] as? [String] {
                     self.tutor.schedule = scdul
@@ -211,66 +252,61 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
                 }
-                if let studentProf = tutDict["StudentProfile"] as? [String:AnyObject] {
-                    self.tutor.studentProfile = studentProf
-                    self.tutor.customerId = studentProf["customerId"] as? String
-                    self.tutor.phoneNumebr = studentProf["phoneNumber"] as? String
-                    self.tutor.full_name = studentProf["full_name"] as? String
-                    self.tutor.email = studentProf["email"] as? String
-                }
+                self.tutor.customerId = tutDict["customerId"] as? String
+                self.tutor.phoneNumebr = tutDict["phoneNumber"] as? String
+                self.tutor.full_name = tutDict["full_name"] as? String
+                self.tutor.email = tutDict["email"] as? String
                 if let status = tutDict["status"] as? String {
-                    self.tutor.tutorStatus = status
-                    
+                    self.tutor.tutorStatus = status 
                 }
             }
         })
     }
     
-    func fetchSent(){
-        let ref = Database.database().reference()
-        handle2 = ref.child("Students").child(Auth.auth().currentUser?.uid ?? " ").queryOrderedByKey().observe( .value, with: { response in
-            if response.value is NSNull {
-            } else {
-                let tutDict = response.value as! [String:AnyObject]
-                
-                if let json = tutDict["sentReqs"] as? [String:AnyObject] {
-                    self.student.requestsArrAccepted.removeAll()
-                    self.student.requestsArrRejected.removeAll()
-                    self.student.requestsArrPending.removeAll()
-                    self.student = self.setUpReqArr(tableArr: self.student, object: json, table: self.tutorReqTable)
-                }
-            }
-        })
-    }
-    
-    func connectProfile(req: Request, tutStat:String, isRequest:Bool) {
-        if isRequest{
-            cancelTutor.isHidden = true
-            if req.reqStatus == "hot"{
-                downlaodPic(url: req.picUrl)
+    func connectProfile(req: Request, tutStat:String, isRequest:Bool, meetUplocationMesg:String) {
+        if !isRequest{
+            cancelTutor.isHidden = false
+            if tutor.tutorStatus == "hot"{
+                downlaodPic(url: req.receiverPicUrl)
                 postTitle.text = req.postTite
                 timeSincePstLable.text = req.timeString
-                bioLable.text = req.author
-                meetUpLocation.text = "Meeting you at"
+                bioLable.text = req.receiverName
+                meetUpLocation.text = meetUplocationMesg
                 
-            } else if req.reqStatus == "live"{
-                downlaodPic(url: req.picUrl)
+            } else if tutor.tutorStatus == "live"{
+                downlaodPic(url: req.receiverPicUrl)
                 postTitle.text = req.postTite
                 timeSincePstLable.text = req.timeString
-                bioLable.text = req.author
-                meetUpLocation.text = "\(req.place.name ?? "")\n\(req.place.address ?? "")"
+                bioLable.text = req.receiverName
+                meetUpLocation.text = meetUplocationMesg
                 
-            } else if req.reqStatus == "off"{
-                
+            } else if tutor.tutorStatus  == "off"{
+                downlaodPic(url: req.receiverPicUrl)
+                postTitle.text = req.postTite
+                timeSincePstLable.text = req.timeString
+                bioLable.text = req.receiverName
+                meetUpLocation.text = meetUplocationMesg
             }
         } else {
-            cancelTutor.isHidden = false
-            if req.reqStatus == "hot"{
-                
-            } else if req.reqStatus == "live"{
-                
-            } else if req.reqStatus == "off"{
-                
+            cancelTutor.isHidden = true
+            if tutor.tutorStatus  == "hot"{
+                downlaodPic(url: req.senderPicUrl)
+                postTitle.text = req.postTite
+                timeSincePstLable.text = req.timeString
+                bioLable.text = req.senderName
+                meetUpLocation.text = meetUplocationMesg
+            } else if tutor.tutorStatus  == "live"{
+                downlaodPic(url: req.senderPicUrl)
+                postTitle.text = req.postTite
+                timeSincePstLable.text = req.timeString
+                bioLable.text = req.senderName
+                meetUpLocation.text = meetUplocationMesg
+            } else if tutor.tutorStatus  == "off"{
+                downlaodPic(url: req.senderPicUrl)
+                postTitle.text = req.postTite
+                timeSincePstLable.text = req.timeString
+                bioLable.text = req.senderName
+                meetUpLocation.text = meetUplocationMesg
             }
         }
     }
@@ -289,8 +325,10 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
         tableArr.requestsArrAccepted.removeAll()
         tableArr.requestsArrPending.removeAll()
         for (_,b) in object {
-            req.author = b["author"] as? String
-            req.authorId = b["senderId"] as? String
+            req.senderName = b["senderName"] as? String
+            req.receiverName = b["receiverName"] as? String
+            req.senderId = b["senderId"] as? String
+            req.receiverId = b["receiverId"] as? String
             let ts = b["time"] as? String
             let dateFormatter = DateFormatter()
             dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
@@ -298,8 +336,9 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
             req.timeString = functions.getTimeSince(date: dat ?? Date())
             req.reqID = b["reqId"] as? String
             req.postTite = b["postTitle"] as? String
-            req.phoneNumber = b["phoneNumber"] as? String
-            req.picUrl = b["picUrl"] as? String
+            req.senderPhone = b["senderPhone"] as? String
+            req.senderPicUrl = b["senderPic"] as? String
+            req.receiverPicUrl = b["receiverPic"] as? String
             req.reqStatus = b["status"] as? String
             if let place = b["place"] as? [String:AnyObject] {
                  req.place.address = place["address"] as? String
@@ -310,7 +349,9 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
             if req.reqStatus == "pending" {
                 tableArr.requestsArrPending.append(req)
             } else if req.reqStatus == "approved" {
+                self.notify()
                 tableArr.requestsArrAccepted.append(req)
+                self.notificationRepeats = true
             } else if req.reqStatus == "rejected"{
                 tableArr.requestsArrRejected.append(req)
             }
@@ -318,6 +359,54 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
         }
         table.reloadData()
         return tableArr
+    }
+    
+    func notify() {
+        if isGrantedAccess{
+            let content = UNMutableNotificationContent()
+            content.title = "HmwkMe"
+            content.subtitle = ""
+            content.body = ""
+            content.badge = 1
+//            content.sound = UNNotificationSound.default()
+            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.001, repeats: false)
+            
+            let request = UNNotificationRequest(identifier: "timerDone", content: content, trigger: trigger)
+            UNUserNotificationCenter.current().add(request) { (err) in
+                //
+                self.notificationRepeats = false
+//                self.stopTimer()
+            }
+            
+            let systemSoundId: SystemSoundID = 1016
+            AudioServicesPlaySystemSound(systemSoundId)
+            AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
+        }
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        //
+    }
+  
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.alert,.sound])
+    }
+    
+    func startTimer(){
+        let timeInterval = 2.0
+        if isGrantedAccess && !timer.isValid { //allowed notification and timer off
+            timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true, block: { (timer) in
+                self.notify()
+            })
+        }
+    }
+    
+    func stopTimer(){
+        //shut down timer
+        timer.invalidate()
+        //clear out any pending and delivered notifications
+        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
     }
     
     func downlaodPic(url:String) {
@@ -400,40 +489,39 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate  {
 extension MyRequests: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         if tableView == myRequestsTable {
-            
             let cell = tableView.dequeueReusableCell(withIdentifier: "myRequests", for: indexPath)
             if indexPath.section == 0 {
-                cell.textLabel?.text = "\( tutor.requestsArrPending[indexPath.row].author ?? "")\n\(tutor.requestsArrPending[indexPath.row].postTite ?? "")"
+                cell.textLabel?.text = "\( tutor.requestsArrPending[indexPath.row].senderName ?? "")\n\(tutor.requestsArrPending[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrPending[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 1 {
-                cell.textLabel?.text = "\( tutor.requestsArrAccepted[indexPath.row].author ?? "")\n\(tutor.requestsArrAccepted[indexPath.row].postTite ?? "")"
+                cell.textLabel?.text = "\( tutor.requestsArrAccepted[indexPath.row].senderName ?? "")\n\(tutor.requestsArrAccepted[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrAccepted[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 2 {
-                cell.textLabel?.text = "\( tutor.requestsArrRejected[indexPath.row].author ?? "")\n\(tutor.requestsArrRejected[indexPath.row].postTite ?? "")"
+                cell.textLabel?.text = "\( tutor.requestsArrRejected[indexPath.row].senderName ?? "")\n\(tutor.requestsArrRejected[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrRejected[indexPath.row].postTite
                 return cell
             }
         } else if tableView == tutorReqTable {
             let cell = tableView.dequeueReusableCell(withIdentifier: "myTutorRequests", for: indexPath)
             if indexPath.section == 0 {
-                cell.textLabel?.text = "\( student.requestsArrPending[indexPath.row].author ?? "")\n\(student.requestsArrPending[indexPath.row].postTite ?? "")"
+                cell.textLabel?.text = "\( student.requestsArrPending[indexPath.row].receiverName ?? "")\n\(student.requestsArrPending[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = student.requestsArrPending[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 1 {
-                cell.textLabel?.text = "\( student.requestsArrAccepted[indexPath.row].author ?? "")\n\(student.requestsArrAccepted[indexPath.row].postTite ?? "")"
+                cell.textLabel?.text = "\( student.requestsArrAccepted[indexPath.row].receiverName ?? "")\n\(student.requestsArrAccepted[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = student.requestsArrAccepted[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 2 {
-                cell.textLabel?.text = "\( student.requestsArrRejected[indexPath.row].author ?? "")\n\(student.requestsArrRejected[indexPath.row].postTite ?? "")"
+                cell.textLabel?.text = "\( student.requestsArrRejected[indexPath.row].receiverName ?? "")\n\(student.requestsArrRejected[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = student.requestsArrRejected[indexPath.row].postTite
                 return cell
             }
 
         } else {
             let cell = tableView.dequeueReusableCell(withIdentifier: "myRequests", for: indexPath)
-            cell.textLabel?.text = "\( tutor.requestsArrRejected[indexPath.row].author ?? "")\n\(tutor.requestsArrRejected[indexPath.row].postTite ?? "")"
+            cell.textLabel?.text = "\( tutor.requestsArrRejected[indexPath.row].receiverName ?? "")\n\(tutor.requestsArrRejected[indexPath.row].postTite ?? "")"
             cell.detailTextLabel?.text = tutor.requestsArrRejected[indexPath.row].postTite
             return cell
         }
@@ -458,7 +546,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if tableView == myRequestsTable {
-            switch (section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
+            switch (section) {
             case 0:
                 return tutor.requestsArrPending.count
             case 1:
@@ -469,7 +557,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 return 0
             }
         } else if tableView == tutorReqTable {
-            switch (section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
+            switch (section) {
             case 0:
                 return student.requestsArrPending.count
             case 1:
@@ -490,27 +578,27 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
         if tableView == tutorReqTable {
             if indexPath.section == 0 {
                 request = student.requestsArrPending[indexPath.row]
-                connectProfile(req: student.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false)
+                connectProfile(req: student.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "Tutor's yet to respond")
                 
             } else if indexPath.section == 1 {
                 request = student.requestsArrAccepted[indexPath.row]
-                connectProfile(req: student.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false)
+                connectProfile(req: student.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg:  request.place.name)
                 self.place = student.requestsArrAccepted[indexPath.row].place
             } else if indexPath.section == 2 {
                 request = student.requestsArrRejected[indexPath.row]
-                connectProfile(req: student.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false)
+                connectProfile(req: student.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "Tutor request was rejected kinldy find another.")
             }
         } else if tableView == myRequestsTable {
             if indexPath.section == 0 {
                 request = tutor.requestsArrPending[indexPath.row]
-                connectProfile(req: tutor.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true)
+                connectProfile(req: tutor.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: request.place.name)
             } else if indexPath.section == 1 {
                 request = tutor.requestsArrAccepted[indexPath.row]
-                connectProfile(req: tutor.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true)
+                connectProfile(req: tutor.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: request.place.name)
                
             } else if indexPath.section == 2 {
                 request = tutor.requestsArrRejected[indexPath.row]
-                connectProfile(req: tutor.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true)
+                connectProfile(req: tutor.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "You rejected the request")
             }
         }
     }

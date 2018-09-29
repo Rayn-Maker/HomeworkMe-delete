@@ -11,6 +11,7 @@ import Firebase
 import FirebaseAuth
 import FirebaseDatabase
 
+
 class MyClassRoomVC: UIViewController {
 
     @IBOutlet weak var addPostBtn: UIButton!
@@ -54,13 +55,7 @@ class MyClassRoomVC: UIViewController {
         classRoomLbl.text = fetchObject.title
         fetchMyPostsKey()
         priceLbl.text = "$5"
-       
-       
-        if isTutor {
-            addPostBtn.isHidden = false
-        } else {
-            addPostBtn.isHidden = true 
-        }
+
     }
     
     @IBAction func addPostPrsd(_ sender: Any) {
@@ -197,6 +192,7 @@ class MyClassRoomVC: UIViewController {
         var picUrl:String!
         var authorFname: String!
         var authorLname: String!
+        var phoneNumber: String?
         if let picurl = UserDefaults.standard.object(forKey: "pictureUrl") as? String {
            picUrl = picurl
         } //UserDefaults.standard.set(lname, forKey: "lName")
@@ -205,6 +201,9 @@ class MyClassRoomVC: UIViewController {
         }
         if let lname = UserDefaults.standard.object(forKey: "lName") as? String {
             authorLname = lname
+        } // UserDefaults.standard.set(phone, forKey: "phoneNumber")
+        if let phone = UserDefaults.standard.object(forKey: "phoneNumber") as? String {
+            phoneNumber = phone
         }
         if titleText.text != "" || titleText.text != nil {
             let name = titleLabel.text! + " " + titleText.text! + " " + teacherName.text!
@@ -220,12 +219,22 @@ class MyClassRoomVC: UIViewController {
                               "studentInClass":self.inClassSwitch.isOn,
                               "postPic": picUrl,
                               "classId": self.fetchObject.uid ?? "",
-                              "className":self.fetchObject.title ?? ""] as? [String : Any]
-            let postParam = [postKey : parameters]
+                              "className":self.fetchObject.title ?? "",
+                              "phoneNumber":phoneNumber as Any] as? [String : Any]
+            
+            let parameters2 = ["uid":postKey,
+                              "name": name,
+                              "authorID":Auth.auth().currentUser?.uid ?? " ",
+                              "authorName": authorFname + " " + authorLname,
+                              "timeStamp":dateString,
+                              "category":self.category,
+                              "price": self.price ] as? [String : Any]
+            
+            let postParam = [postKey : parameters2]
             
             
-        ref.child("Tutors").child((Auth.auth().currentUser?.uid)!).child("Posts").setValue(parameters)
-            ref.child("Posts").updateChildValues(postParam)
+        
+            ref.child("Posts").child(postKey).updateChildValues(parameters!)
             ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
             self.postPresetView.isHidden = true
             categoryBtn.isSelected = false
@@ -244,116 +253,73 @@ class MyClassRoomVC: UIViewController {
             } else {
                 let posts = response.value as! [String:AnyObject]
                 if let dict = posts["Posts"] as? [String : AnyObject] {
-                    self.fetchMyClass(dictCheck: dict)
+                    self.fetchPostInfo(dictCheck: dict)
                 }
             }
         })
     }
     
-    func fetchMyClass(dictCheck: [String:AnyObject]){
-        let ref = Database.database().reference()
-        handle2 = ref.child("Posts").queryOrderedByKey().observe( .value, with: { response in
-            if response.value is NSNull {
-                /// dont do anything \\\
+    func fetchPostInfo(dictCheck: [String:AnyObject]){
+         let postss = Post()
+        for (x,b) in dictCheck {
+            if let fname = b["authorName"] as? String {
+                postss.authorName = fname
             } else {
-                self.myPostArr.removeAll()
-                self.hmwrkArr.removeAll()
-                self.notesArr.removeAll()
-                self.tutorArr.removeAll()
-                self.testArr.removeAll()
-                self.otherArr.removeAll()
-                let posts = response.value as! [String:AnyObject]
-                for (a,_) in dictCheck {
-                    for (c,b) in posts {
-                        if a == c {
-                            let postss = Post()
-                            if let fname = b["authorName"] as? String {
-                                 postss.authorName = fname
-                            } else {
-                                postss.authorName = " "
-                            }
-                            if let uid = b["uid"] {
-                                postss.uid = uid as? String
-                            }
-                            if let title = b["name"] {
-                                postss.title = title as? String
-                            }
-                            if let authId = b["authorID"] {
-                                postss.authorID = authId as? String
-                            }
-                            if let authEmal = b["authorEmail"] {
-                                postss.authorEmail = authEmal as? String
-                            }
-                            if let tmStmp = b["timeStamp"] {
-                                let dateFormatter = DateFormatter()
-                                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
-                                let dat = dateFormatter.date(from: tmStmp as! String)
-                                postss.timeStamp = dat
-                            }
-                            if let catgry = b["category"] {
-                                postss.category = catgry as? String
-                            } //postPic studentInClass schedule
-                            if let postic = b["postPic"] {
-                                if postic != nil {
-                                    postss.postPic = postic as? String
-                                    postss.data = self.downloadImage(url: postic as! String) 
-                                }
-                              }
-                            if let stIn = b["studentInClass"] {
-                                postss.studentInClas = stIn as? Bool
-                            }
-                            if let skedl = b["schedule"] {
-                                if skedl != nil  {
-                                    postss.schedule = skedl as! [String]
-                                }
-                            }
-                            if let comments = b["comments"] as? [String:Any] {
-                                
-                            }
-                            if let price = b["price"] {
-                                postss.price = price as! Int
-                            } else {
-                                postss.price = 0
-                            }
-                            if let dlikers = b["disLikers"] as? [String:String] {
-                                if dlikers != nil {
-                                   postss.disLikers = [""]//dlikers.values as! [String]
-                                }
-                            }
-                            if let liker = b["likers"] as? [String:Any] {
-                                if liker != nil {
-                                    postss.likers = Array(liker.values) as! [String]
-                                }
-                            }
-                            self.myPostArr.append(postss)
-                            
-                            if postss.category == "Homework" {
-                                self.hmwrkArr.append(postss)
-                            }
-                            if postss.category == "Notes" {
-                                self.notesArr.append(postss)
-                            }
-                            if postss.category == "Tutoring" {
-                                self.tutorArr.append(postss)
-                            }
-                            if postss.category == "Test" {
-                                self.testArr.append(postss)
-                            }
-                            if postss.category == "Other" {
-                                self.otherArr.append(postss)
-                            }
-                        }
-                    }
-                }
-                self.myPostArr.sort(by: { $0.timeStamp?.compare(($1.timeStamp)!) == ComparisonResult.orderedDescending})
-                self.allPostHolder = self.myPostArr
-                self.postsTableView.reloadData()
-                self.activitySpinner.stopAnimating()
-                self.activitySpinner.isHidden = true
+                postss.authorName = " "
             }
-        })
+            if let uid = b["uid"] {
+                postss.uid = uid as? String
+            }
+            if let title = b["name"] {
+                postss.title = title as? String
+            }
+            if let authId = b["authorID"] {
+                postss.authorID = authId as? String
+            }
+            if let authEmal = b["authorEmail"] {
+                postss.authorEmail = authEmal as? String
+            }
+            if let tmStmp = b["timeStamp"] {
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+                let dat = dateFormatter.date(from: tmStmp as! String)
+                postss.timeStamp = dat
+            }
+            if let catgry = b["category"] {
+                postss.category = catgry as? String
+            }
+            if let price = b["price"] {
+                postss.price = price as! Int
+            } else {
+                postss.price = 0
+            }
+            self.myPostArr.append(postss)
+            
+            if postss.category == "Homework" {
+                self.hmwrkArr.append(postss)
+            }
+            if postss.category == "Notes" {
+                self.notesArr.append(postss)
+            }
+            if postss.category == "Tutoring" {
+                self.tutorArr.append(postss)
+            }
+            if postss.category == "Test" {
+                self.testArr.append(postss)
+            }
+            if postss.category == "Other" {
+                self.otherArr.append(postss)
+            }
+        }
+        self.myPostArr.sort(by: { $0.timeStamp?.compare(($1.timeStamp)!) == ComparisonResult.orderedDescending})
+        self.allPostHolder = self.myPostArr
+        self.postsTableView.reloadData()
+        self.activitySpinner.stopAnimating()
+        self.activitySpinner.isHidden = true
+
     }
     
+
     func imageWithImage(image:UIImage,scaledToSize newSize:CGSize)-> UIImage {
         
         UIGraphicsBeginImageContext( newSize )

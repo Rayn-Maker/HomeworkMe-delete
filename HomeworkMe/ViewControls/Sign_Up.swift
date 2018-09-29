@@ -49,18 +49,18 @@ class Sign_Up: UIViewController {
                                                    "phoneNumber": self.phoneNumber.text ?? ""]
                     
                     self.ref.child("Students").child(user.user.uid).setValue(userInfo)
-                    StripeClient.shared.creatCustomer(email: self.emailTxt.text!, completion: { (res) in
-                        print(res)
-                        do {
-                            guard let json = try JSONSerialization.jsonObject(with: res.data!, options: .mutableContainers) as? JSON else {return}
-                            print("the Json \( json)")
-                            let par = ["customerId": json["id"]] as [String: Any]
-                            self.ref.child("Students").child(user.user.uid).updateChildValues(par)
-                            UserDefaults.standard.set(json["id"], forKey: "customerId")
-                        } catch {
-                            
-                        }
-                    })
+//                    StripeClient.shared.creatCustomer(email: self.emailTxt.text!, completion: { (res) in
+//                        print(res)
+//                        do {
+//                            guard let json = try JSONSerialization.jsonObject(with: res.data!, options: .mutableContainers) as? JSON else {return}
+//                            print("the Json \( json)")
+//                            let par = ["customerId": json["id"]] as [String: Any]
+//                            self.ref.child("Students").child(user.user.uid).updateChildValues(par)
+//                            UserDefaults.standard.set(json["id"], forKey: "customerId")
+//                        } catch {
+//
+//                        }
+//                    })
                     self.performSegue(withIdentifier: "registerToProfile", sender: self)
                 }
             }
