@@ -125,7 +125,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     func tutorStatus(){
         if tutor.tutorStatus == "hot" {
             
-        }else if tutor.tutorStatus == "live" {
+        } else if tutor.tutorStatus == "live" {
             
         } else if tutor.tutorStatus == "off" {
             

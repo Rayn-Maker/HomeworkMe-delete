@@ -9,22 +9,6 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "HomeworkMe/ViewControls/PostView.swift"
-            timestampString = "559945824.106617"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "263"
-            endingLineNumber = "263"
-            landmarkName = "fetchPost()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "Yes"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
             filePath = "HomeworkMe/ViewControls/ProfileVC.swift"
             timestampString = "559891579.217841"
             startingColumnNumber = "9223372036854775807"
@@ -42,7 +26,7 @@
                   moduleName = "HomeworkMe"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/Rayn_Maker/Downloads/HomeworkMe-delete/HomeworkMe/ViewControls/ProfileVC.swift"
-                  timestampString = "559945824.719524"
+                  timestampString = "559979131.3726031"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "258"
@@ -57,7 +41,7 @@
                   moduleName = "HomeworkMe"
                   usesParentBreakpointCondition = "Yes"
                   urlString = "file:///Users/Rayn_Maker/Downloads/HomeworkMe-delete/HomeworkMe/ViewControls/ProfileVC.swift"
-                  timestampString = "559945824.723295"
+                  timestampString = "559979131.375779"
                   startingColumnNumber = "9223372036854775807"
                   endingColumnNumber = "9223372036854775807"
                   startingLineNumber = "259"
@@ -73,13 +57,13 @@
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "HomeworkMe/ViewControls/PostView.swift"
-            timestampString = "559945824.107434"
+            filePath = "HomeworkMe/AppDelegate.swift"
+            timestampString = "559979131.345522"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "392"
-            endingLineNumber = "392"
-            landmarkName = "sendRequest()"
+            startingLineNumber = "89"
+            endingLineNumber = "89"
+            landmarkName = "notificationCheck()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -90,11 +74,43 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HomeworkMe/AppDelegate.swift"
-            timestampString = "559949693.074501"
+            timestampString = "559979131.346422"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "90"
-            endingLineNumber = "90"
+            startingLineNumber = "94"
+            endingLineNumber = "94"
+            landmarkName = "notificationCheck()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HomeworkMe/AppDelegate.swift"
+            timestampString = "559979131.347227"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "91"
+            endingLineNumber = "91"
+            landmarkName = "notificationCheck()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HomeworkMe/AppDelegate.swift"
+            timestampString = "559979131.3481261"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "96"
+            endingLineNumber = "96"
             landmarkName = "notificationCheck()"
             landmarkType = "7">
          </BreakpointContent>

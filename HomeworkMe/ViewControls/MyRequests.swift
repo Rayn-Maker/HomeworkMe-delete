@@ -97,10 +97,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
 //        isTimerRunning = false
 //        stopTimer()
         let parameter2: [String:AnyObject] = ["newNotice":false as AnyObject]
-        let parameter3: [String:AnyObject] = ["newNotice":false as AnyObject]
         
-        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
-        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter3)
+        self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(parameter2)
     }
     
     @IBAction func rejectReq(_ sender: Any) {
@@ -109,6 +107,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         
         let par = ["time": dateString as AnyObject,
                    "status":"rejected"] as! [String: Any]
+        
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
@@ -137,7 +136,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         
         let dateString = String(describing: Date())
         let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
-        let parameter3: [String:AnyObject] = ["newNotice":false as AnyObject]
         
         if self.tutor.tutorStatus == "live" {
             let par = ["time": dateString as AnyObject,
@@ -145,7 +143,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                        "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
                 "currLocationName":self.request.place.name] as! [String: Any]
             
-        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter3)
         self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
@@ -160,7 +157,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                        "status":"approved"] as [String : Any]
             
             self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
-            self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter3)
             self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         } else if self.tutor.tutorStatus == "off" {
             // a callendar should be shown when cell is clicked on.

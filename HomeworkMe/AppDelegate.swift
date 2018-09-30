@@ -21,17 +21,16 @@ import FacebookCore
 import UserNotifications
 import AudioToolbox
 
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUserNotificationCenterDelegate  {
 
     var window: UIWindow?
-    let ref = Database.database().reference()
-    var handle: DatabaseHandle?
     var seconds = 1200
     var timer = Timer()
     var isTimerRunning = false
     var isGrantedAccess = false
-
+    
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
         STPPaymentConfiguration.shared().publishableKey = Constants.publishableKey
@@ -69,7 +68,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
             content.sound = UNNotificationSound.default()
             content.categoryIdentifier = "timer.category"
             
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.001, repeats: false) //close to immediate as we can get.
+            let trigger =  UNTimeIntervalNotificationTrigger(timeInterval: 0.001, repeats: false) //close to immediate as we can get.
             let request = UNNotificationRequest(identifier: "timer.request", content: content, trigger: trigger)
             UNUserNotificationCenter.current().add(request) { (error) in
                 if let error = error{
@@ -87,6 +86,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         }
     }
     func notificationCheck(){
+        var handle: DatabaseHandle?
         let ref = Database.database().reference()
         handle = ref.child("Students").child(Auth.auth().currentUser?.uid ?? " ").queryOrderedByKey().observe( .value, with: { response in
             if response.value is NSNull {
