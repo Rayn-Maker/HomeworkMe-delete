@@ -37,6 +37,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     @IBOutlet weak var mapViewDisplay: UIView!
     @IBOutlet weak var cancelTutor: UIButton!
     @IBOutlet weak var mapView: GMSMapView!
+    @IBOutlet weak var acceptRejView: UIStackView!
     
     
     var tutor = Student()
@@ -132,10 +133,22 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         // remove profile from request cup and put it in jobs cup
         // check status of tutor
         // start timer for 20 mins
-        runTimer()
-        
         let dateString = String(describing: Date())
-        let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
+        
+//        let fdate = Date()/
+        var calendar = Calendar.current
+
+//
+//        TimeZone.ReferenceType.default = TimeZone(abbreviation: "CDT")!
+        let formatter = DateFormatter()
+//        formatter.timeZone = TimeZone.ReferenceType.default
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+        formatter.calendar.date(byAdding: .minute, value: 20, to: Date())
+        let strDate = formatter.string(from: Date())
+        let datesss = calendar.date(byAdding: .minute, value: 20, to: formatter.date(from: strDate)!)
+        let y = formatter.string(from: datesss!)
+        let parameter2: [String:String] = ["newNotice":"true" ,
+                                              "endTime": y ?? ""]
         
         if self.tutor.tutorStatus == "live" {
             let par = ["time": dateString as AnyObject,
@@ -144,14 +157,15 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                 "currLocationName":self.request.place.name] as! [String: Any]
             
         self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
+        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter2)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
             
         let para = ["status":"hot"] as! [String: Any]
             
-            requestersView.isHidden = true
-            drawPath(start: currentLocation!, end: request.place)
-            mapViewDisplay.isHidden = false
+//            requestersView.isHidden = true
+//            drawPath(start: currentLocation!, end: request.place)
+//            mapViewDisplay.isHidden = false
             setupPushNotification(fromDevice: request.senderDevice)
         } else if self.tutor.tutorStatus == "hot" {
             let par = ["time": dateString as AnyObject,
@@ -214,11 +228,18 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     
     func runTimer() {
         timer = Timer.scheduledTimer(timeInterval: 1, target: self,   selector: (#selector(MyRequests.updateTimer)), userInfo: nil, repeats: true)
+        isTimerRunning = true
     }
     
     @objc func updateTimer() {
-        seconds -= 1     //This will decrement(count down)the seconds.
-        timerLabel.text = timeString(time: TimeInterval(seconds))
+        if seconds < 1 {
+            timer.invalidate()
+            //Send alert to indicate "time's up!"
+        } else {
+            seconds -= 1     //This will decrement(count down)the seconds.
+            timerLabel.text = timeString(time: TimeInterval(seconds))
+        }
+        
     }
     
     func timeString(time:TimeInterval) -> String {
@@ -252,6 +273,43 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                 }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
+                } //endTime:
+                if let tmStmp = tutDict["endTime"] as? String {
+//
+//                    let dateFormatter = DateFormatter()
+//                    var calendar = Calendar.current
+//                    calendar.timeZone = TimeZone.ReferenceType.default
+//                    dateFormatter.timeZone = TimeZone(abbreviation: "CDT")
+//                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//
+//                    let dat = dateFormatter.date(from: tmStmp )
+//                    let x = calendar.dateComponents(in: TimeZone.current, from: dat!)
+//                    let k = self.UTCToLocal(date: tmStmp)
+//                    calendar.date(from: x)
+//                    self.tutor.endTime = dat ?? Date()
+//                    let date = Date()
+//
+//                    print("\(date.timeIntervalSince(dat ?? Date()))")
+                    
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+                    let dat = dateFormatter.date(from: tmStmp as String)
+                    self.tutor.endTime = dat!
+                    let k = Date()
+                    if k < dat! {
+                        // call timer and give it the set minute
+                        let m = dat!.timeIntervalSince(k)
+                        let minutes = floor(m/60)
+                        self.seconds = Int(round(m))
+                        if !self.isTimerRunning {
+                            self.runTimer()
+                        }
+                    } else {
+                        print(k); print(dat!)
+                        self.isTimerRunning = false
+                        self.timer.invalidate()
+                    }
                 }
                 if let newNotice = tutDict["newNotice"] as? Bool {
                     if newNotice {
@@ -268,6 +326,18 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             }
         })
     }
+//
+//    func UTCToLocal(date:String) -> Date {
+//        let dateFormatter = DateFormatter()
+//        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
+//
+//        let dt = dateFormatter.date(from: date)
+////        dateFormatter.timeZone = TimeZone.current
+////        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
+//
+//        return  dt!
+//    }
     
     func connectProfile(req: Request, tutStat:String, isRequest:Bool, meetUplocationMesg:String) {
         if !isRequest{
@@ -521,6 +591,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 cell.detailTextLabel?.text = tutor.requestsArrPending[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 1 {
+                
                 cell.textLabel?.text = "\( tutor.requestsArrAccepted[indexPath.row].senderName ?? "")\n\(tutor.requestsArrAccepted[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrAccepted[indexPath.row].postTite
                 return cell
@@ -610,6 +681,8 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 request = student.requestsArrAccepted[indexPath.row]
                 connectProfile(req: student.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg:  request.place.name)
                 self.place = student.requestsArrAccepted[indexPath.row].place
+                self.acceptRejView.isHidden = true
+                self.cancelTutor.isHidden = false
             } else if indexPath.section == 2 {
                 request = student.requestsArrRejected[indexPath.row]
                 connectProfile(req: student.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "Tutor request was rejected kinldy find another.")
@@ -617,11 +690,12 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
         } else if tableView == myRequestsTable {
             if indexPath.section == 0 {
                 request = tutor.requestsArrPending[indexPath.row]
-                connectProfile(req: tutor.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: request.place.name)
+                connectProfile(req: tutor.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "\(request.place.name ?? "")" + "\n" + "\(request.place.address ?? "")")
             } else if indexPath.section == 1 {
                 request = tutor.requestsArrAccepted[indexPath.row]
-                connectProfile(req: tutor.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: request.place.name)
-               
+                connectProfile(req: tutor.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "\(request.place.name ?? "")" + "\n" + "\(request.place.address ?? "")")
+                self.acceptRejView.isHidden = true
+                self.cancelTutor.isHidden = false
             } else if indexPath.section == 2 {
                 request = tutor.requestsArrRejected[indexPath.row]
                 connectProfile(req: tutor.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "You rejected the request")

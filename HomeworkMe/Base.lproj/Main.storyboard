@@ -1413,6 +1413,7 @@
                         <viewLayoutGuide key="safeArea" id="vRi-o6-hC3"/>
                     </view>
                     <connections>
+                        <outlet property="acceptRejView" destination="TrJ-Ik-Zq3" id="Cs3-Ou-KSy"/>
                         <outlet property="activitySpinner" destination="AFt-T8-cHP" id="ZpG-Sy-Q9b"/>
                         <outlet property="bioLable" destination="j64-af-mql" id="cgq-m8-MLP"/>
                         <outlet property="callBtn" destination="PgZ-01-2RI" id="fc2-NT-qcj"/>

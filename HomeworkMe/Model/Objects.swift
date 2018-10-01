@@ -52,6 +52,7 @@ class Student {
     var coorLocCoord = String()
     var coorLocName = String()
     var deviceId = String()
+    var endTime = Date()
 }
 
 enum Location {
