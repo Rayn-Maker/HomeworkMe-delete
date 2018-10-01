@@ -233,9 +233,9 @@ class MyClassRoomVC: UIViewController {
             let postParam = [postKey : parameters2]
             
             
-        
-            ref.child("Posts").child(postKey).updateChildValues(parameters!)
-            ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
+        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(postParam ?? [:])
+        ref.child("Posts").child(postKey).updateChildValues(parameters!)
+        ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
             self.postPresetView.isHidden = true
             categoryBtn.isSelected = false
         } else {

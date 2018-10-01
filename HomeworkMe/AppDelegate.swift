@@ -10,6 +10,8 @@ import UIKit
 import CoreData
 import Firebase
 import FirebaseDatabase
+import FirebaseMessaging
+import FirebaseInstanceID
 import Stripe
 import SquarePointOfSaleSDK
 import GooglePlaces
@@ -22,6 +24,7 @@ import UserNotifications
 import AudioToolbox
 
 
+
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUserNotificationCenterDelegate  {
 
@@ -30,6 +33,12 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
     var timer = Timer()
     var isTimerRunning = false
     var isGrantedAccess = false
+    
+    //Notificaiton Var
+    static let NOTIFICATION_URL = "https://gcm-http.googleapis.com/gcm/send"
+    static var DEVICEID = String()
+    
+    static let SERVERKEY = "AAAAEwJPepM:APA91bGjsWw0SMNXJZGDeGzDJmqgS8FXK5cYy863_5hNkQLpneX5fW-zOVjoUxgA14Ioc6bm7Fvbkryb6ps-GG-KIIUuVEALqedTOlGXc8CjoXiPoDNZ4lGDaXwaPXMCMlB_cfWgv9mHdagbqLOJAXTqgmfUCav1-Q"
     
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplicationLaunchOptionsKey: Any]?) -> Bool {
@@ -40,72 +49,60 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         logUser()
         GIDSignIn.sharedInstance().clientID = FirebaseApp.app()?.options.clientID
         GIDSignIn.sharedInstance().delegate = self
-        
-        UNUserNotificationCenter.current().delegate = self
-        UNUserNotificationCenter.current().requestAuthorization(options: [.alert,.sound]){(granted, error) in
-            self.isGrantedAccess = granted
+        // Notification implementation
+        if #available(iOS 10.0, *)
+        {
+            UNUserNotificationCenter.current().delegate = self
+            
+            let option : UNAuthorizationOptions = [.alert,.badge,.sound]
+            UNUserNotificationCenter.current().requestAuthorization(options: option, completionHandler: { (bool, err) in
+                
+            })
+            
+        }else{
+            let settings : UIUserNotificationSettings = UIUserNotificationSettings(types: [.alert,.badge,.sound], categories: nil)
+            application.registerUserNotificationSettings(settings)
         }
-        let stopAction = UNNotificationAction(identifier: "stop.action", title: "Stop", options: [])
-        let timerCategory = UNNotificationCategory(identifier: "timer.category", actions: [stopAction], intentIdentifiers: [], options: [])
-        UNUserNotificationCenter.current().setNotificationCategories([timerCategory])
+        
+        application.registerForRemoteNotifications()
+        UIApplication.shared.applicationIconBadgeNumber = 0
         
         return FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
-        
-        return true
     }
     
     //notifications configuration
+    func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
+        guard  let newToken = InstanceID.instanceID().token() else {return}
+        AppDelegate.DEVICEID = newToken
+        connectToFCM()
+    }
+    
+    
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        
+        let notification =  response.notification.request.content.body
+        
+        
+        
+        print(notification)
+        
         completionHandler()
     }
-    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) { completionHandler([.alert,.sound])
+    
+    
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        guard let token = InstanceID.instanceID().token() else {return}
+        
+        AppDelegate.DEVICEID = token
+        print(token)
+        connectToFCM()
     }
-    func sendNotification(){
-        if isGrantedAccess{
-            let content = UNMutableNotificationContent()
-            content.title = "HIIT Timer"
-            content.body = "30 Seconds Elapsed"
-            content.sound = UNNotificationSound.default()
-            content.categoryIdentifier = "timer.category"
-            
-            let trigger =  UNTimeIntervalNotificationTrigger(timeInterval: 0.001, repeats: false) //close to immediate as we can get.
-            let request = UNNotificationRequest(identifier: "timer.request", content: content, trigger: trigger)
-            UNUserNotificationCenter.current().add(request) { (error) in
-                if let error = error{
-                    print("Error posting notification:\(error.localizedDescription)")
-                }
-            }
-        }
-    }
-    func startTimer(){
-        let timeInterval = 2.0
-        if isGrantedAccess && !timer.isValid { //allowed notification and timer off
-            timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true, block: { (timer) in
-                self.sendNotification()
-            })
-        }
-    }
-    func notificationCheck(){
-        var handle: DatabaseHandle?
-        let ref = Database.database().reference()
-        handle = ref.child("Students").child(Auth.auth().currentUser?.uid ?? " ").queryOrderedByKey().observe( .value, with: { response in
-            if response.value is NSNull {
-            } else {
-                let tutDict = response.value as! [String:AnyObject]
-                if let newNotice = tutDict["newNotice"] as? Bool {
-                    if newNotice {
-                        self.startTimer()
-                    }
-                }
-            }
-        })
-    }
-    func stopTimer(){
-        //shut down timer
-        timer.invalidate()
-        //clear out any pending and delivered notifications
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+    
+    
+    func connectToFCM()
+    {
+        Messaging.messaging().shouldEstablishDirectChannel = true
     }
     
     func loginButton(_ loginButton: FBSDKLoginButton!, didCompleteWith result: FBSDKLoginManagerLoginResult!, error: Error!) {
@@ -233,7 +230,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
     func applicationDidEnterBackground(_ application: UIApplication) {
         // Use this method to release shared resources, save user data, invalidate timers, and store enough application state information to restore your application to its current state in case it is terminated later.
         // If your application supports background execution, this method is called instead of applicationWillTerminate: when the user quits.
-        notificationCheck()
     }
 
     func applicationWillEnterForeground(_ application: UIApplication) {
@@ -242,7 +238,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
 
     func applicationDidBecomeActive(_ application: UIApplication) {
         // Restart any tasks that were paused (or not yet started) while the application was inactive. If the application was previously in the background, optionally refresh the user interface.
-        stopTimer()
+        
     }
 
     func applicationWillTerminate(_ application: UIApplication) {

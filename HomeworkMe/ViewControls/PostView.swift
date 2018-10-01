@@ -13,6 +13,7 @@ import FirebaseStorage
 import Stripe
 import SquarePointOfSaleSDK
 import MessageUI
+import Alamofire
 
 
 class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
@@ -195,6 +196,9 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
+                }
+                if let did = tutDict["fromDevice"] as? String {
+                    self.tutor.deviceId = did
                 }
                
                 if let status = tutDict["status"] as? String {
@@ -411,13 +415,15 @@ func downloadImage(url:String) -> Data {
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
-                                                      "price":self.postss.price as AnyObject]
+                                                      "price":self.postss.price as AnyObject,
+                                                      "senderDevice":AppDelegate.DEVICEID as AnyObject,
+                                                      "receiverDevice":tutor.deviceId as AnyObject]
         
                 let par = [postKey : parameters] as [String: Any]
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                
+                self.setupPushNotification(fromDevice: tutor.deviceId)
             } else if tutor.tutorStatus == "off" {
                 // send a text message after sending request
                 // decide on time off the app.
@@ -448,6 +454,7 @@ func downloadImage(url:String) -> Data {
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
+                self.setupPushNotification(fromDevice: tutor.deviceId)
             } else if tutor.tutorStatus == "hot" {
                 // display map of where the tutor is.
                 // join session button
@@ -476,12 +483,33 @@ func downloadImage(url:String) -> Data {
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
+                self.setupPushNotification(fromDevice: tutor.deviceId)
             }
         } else {
             // you cant send a request to yourself.
         }
         
     }
+    
+    fileprivate func setupPushNotification(fromDevice:String)
+    {
+//        guard let message = "text.text" else {return}
+        let title = "tech build dreams"
+        let body = "message"
+        let toDeviceID = fromDevice
+        var headers:HTTPHeaders = HTTPHeaders()
+        
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)"
+            
+        ]
+        let notification = ["to":"\(toDeviceID)","notification":["body":body,"title":title,"badge":1,"sound":"default"]] as [String:Any]
+        
+        Alamofire.request(AppDelegate.NOTIFICATION_URL as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+        }
+        
+    }
+    
 }
 
 extension PostView: UITableViewDataSource, UITableViewDelegate {
@@ -500,16 +528,10 @@ extension PostView: UITableViewDataSource, UITableViewDelegate {
                     present(alert, animated: true, completion: nil)
                 } else if tutor.tutorStatus == "live" {
                     meetUpLocation = tutor.places[indexPath.row]
-                    //            chargeCard()
                     sendRequest()
                     let alert = UIAlertController(title: "Tutor request sent", message: "", preferredStyle: .alert)
-                    let ok = UIAlertAction(title: "Request", style: .default) { (res) in
-                        //
-                      self.sendTextMesg()
-                    }
-                    let cancel = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
-                    alert.addAction(ok); alert.addAction(cancel)
-                    alert.addAction(ok); alert.addAction(cancel)
+                    let cancel = UIAlertAction(title: "Ok", style: .destructive, handler: nil)
+                    alert.addAction(cancel)
                     present(alert, animated: true, completion: nil)
                     // show alert to make purchase
                 }

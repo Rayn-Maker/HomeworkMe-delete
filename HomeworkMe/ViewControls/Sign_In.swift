@@ -67,7 +67,8 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                                        "fName": user.profile.givenName ?? " ",
                                                        "lName": user.profile.familyName ?? " ",
                                                        "full_name": user.profile.name ?? " ",
-                                                       "email": user.profile.email ?? " "]
+                                                       "email": user.profile.email ?? " ",
+                                                       "fromDevice":AppDelegate.DEVICEID]
                         
                         self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo)
                         self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo, withCompletionBlock: { (err, resp) in

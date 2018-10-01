@@ -51,6 +51,7 @@ class Student {
     var receivedObject = [String:AnyObject]()
     var coorLocCoord = String()
     var coorLocName = String()
+    var deviceId = String()
 }
 
 enum Location {
@@ -84,6 +85,8 @@ class Request {
     var receiverPicUrl: String!
     var reqStatus: String!
     var phoneNumber: String!
+    var senderDevice: String!
+    var recieverDevice: String!
 }
 
 class Post {

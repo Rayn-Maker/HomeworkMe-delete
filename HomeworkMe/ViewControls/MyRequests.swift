@@ -149,20 +149,22 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             
         let para = ["status":"hot"] as! [String: Any]
             
-//            requestersView.isHidden = true
-//            drawPath(start: currentLocation!, end: request.place)
-//            mapViewDisplay.isHidden = false
+            requestersView.isHidden = true
+            drawPath(start: currentLocation!, end: request.place)
+            mapViewDisplay.isHidden = false
+            setupPushNotification(fromDevice: request.senderDevice)
         } else if self.tutor.tutorStatus == "hot" {
             let par = ["time": dateString as AnyObject,
                        "status":"approved"] as [String : Any]
             
             self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
             self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+            setupPushNotification(fromDevice: request.senderDevice)
         } else if self.tutor.tutorStatus == "off" {
             // a callendar should be shown when cell is clicked on.
+            setupPushNotification(fromDevice: request.senderDevice)
         }
     }
-    
     
     @IBAction func callPrsd(_ sender: Any) {
         
@@ -339,6 +341,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             let dat = dateFormatter.date(from: ts as! String)
             req.timeString = functions.getTimeSince(date: dat ?? Date())
             req.reqID = b["reqId"] as? String
+            req.senderDevice = b["senderDevice"] as? String
+            req.recieverDevice = b["receiverDevice"] as? String
             req.postTite = b["postTitle"] as? String
             req.senderPhone = b["senderPhone"] as? String
             req.senderPicUrl = b["senderPic"] as? String
@@ -362,6 +366,25 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         }
         table.reloadData()
         return tableArr
+    }
+    
+    fileprivate func setupPushNotification(fromDevice:String)
+    {
+        //        guard let message = "text.text" else {return}
+        let title = "tech build dreams"
+        let body = "message"
+        let toDeviceID = fromDevice
+        var headers:HTTPHeaders = HTTPHeaders()
+        
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)"
+            
+        ]
+        let notification = ["to":"\(toDeviceID)","notification":["body":body,"title":title,"badge":1,"sound":"default"]] as [String:Any]
+        
+        Alamofire.request(AppDelegate.NOTIFICATION_URL as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+        }
+        
     }
     
     func notify() {

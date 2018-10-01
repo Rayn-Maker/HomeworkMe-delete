@@ -46,7 +46,8 @@ class Sign_Up: UIViewController {
                                                    "lName": self.lNameTxt.text ?? " ",
                                                    "email": self.emailTxt.text ?? " ",
                                                    "password": self.passwordTxt.text ?? " ",
-                                                   "phoneNumber": self.phoneNumber.text ?? ""]
+                                                   "phoneNumber": self.phoneNumber.text ?? "",
+                                                   "fromDevice":AppDelegate.DEVICEID]
                     
                     self.ref.child("Students").child(user.user.uid).setValue(userInfo)
 //                    StripeClient.shared.creatCustomer(email: self.emailTxt.text!, completion: { (res) in

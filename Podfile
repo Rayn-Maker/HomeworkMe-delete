@@ -11,6 +11,7 @@ target 'HomeworkMe' do
 	pod 'Firebase/Auth'
 	pod 'Firebase/Storage'
 	pod 'Firebase/Functions'
+	pod 'Firebase/Messaging'
 	pod 'Stripe'
    	pod 'SquarePointOfSaleSDK'
 	pod 'Alamofire'
