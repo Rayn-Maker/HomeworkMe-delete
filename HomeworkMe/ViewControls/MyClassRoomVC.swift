@@ -233,7 +233,7 @@ class MyClassRoomVC: UIViewController {
             let postParam = [postKey : parameters2]
             
             
-        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(postParam ?? [:])
+        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
         ref.child("Posts").child(postKey).updateChildValues(parameters!)
         ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
             self.postPresetView.isHidden = true
@@ -260,8 +260,9 @@ class MyClassRoomVC: UIViewController {
     }
     
     func fetchPostInfo(dictCheck: [String:AnyObject]){
-         let postss = Post()
+        
         for (x,b) in dictCheck {
+            let postss = Post()
             if let fname = b["authorName"] as? String {
                 postss.authorName = fname
             } else {
@@ -297,17 +298,13 @@ class MyClassRoomVC: UIViewController {
             
             if postss.category == "Homework" {
                 self.hmwrkArr.append(postss)
-            }
-            if postss.category == "Notes" {
+            } else if postss.category == "Notes" {
                 self.notesArr.append(postss)
-            }
-            if postss.category == "Tutoring" {
+            }else if postss.category == "Tutoring" {
                 self.tutorArr.append(postss)
-            }
-            if postss.category == "Test" {
+            }else  if postss.category == "Test" {
                 self.testArr.append(postss)
-            }
-            if postss.category == "Other" {
+            }else if postss.category == "Other" {
                 self.otherArr.append(postss)
             }
         }

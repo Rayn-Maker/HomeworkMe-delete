@@ -56,7 +56,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
             
             let option : UNAuthorizationOptions = [.alert,.badge,.sound]
             UNUserNotificationCenter.current().requestAuthorization(options: option, completionHandler: { (bool, err) in
-                
+                if err == nil {
+                  //   UIApplication.shared.registerForRemoteNotifications()
+                }
             })
             
         }else{

@@ -32,5 +32,41 @@
             </PersistentString>
          </PersistentStrings>
       </ContextState>
+      <ContextState
+         contextName = "MyClassRoomVC.fetchPostInfo(dictCheck:):MyClassRoomVC.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "hmwrkArr">
+            </PersistentString>
+            <PersistentString
+               value = "tutorArr">
+            </PersistentString>
+            <PersistentString
+               value = "testArr">
+            </PersistentString>
+            <PersistentString
+               value = "notesArr">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "MyRequests.setUpReqArr(tableArr:object:table:):MyRequests.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "tableArr.requestsArrAccepted">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in MyRequests.fetchStudent():MyRequests.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "student.requestsArrAccepted">
+            </PersistentString>
+            <PersistentString
+               value = "student.requestsArrPending">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
    </ContextStates>
 </VariablesViewState>

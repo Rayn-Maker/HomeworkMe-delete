@@ -34,7 +34,6 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     var disLikers = [String](); var likers = [String]()
     var authorFname = "" ; var authorLname = " " 
     let ref = Database.database().reference()
-    lazy var functions2 = Functions.functions()
     let settingsVC = SettingsViewController()
     var meetUpLocation: Place!
     var price: Int?
@@ -49,7 +48,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
         let storage = Storage.storage().reference(forURL: "gs://hmwrkme.appspot.com")
         userStorage = storage.child("Students")
         
-        
+        postTitle.text = postss.title
         editImage()
         fetchTutor()
         fetchPost()
@@ -423,7 +422,7 @@ func downloadImage(url:String) -> Data {
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                self.setupPushNotification(fromDevice: tutor.deviceId)
+                self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName)")
             } else if tutor.tutorStatus == "off" {
                 // send a text message after sending request
                 // decide on time off the app.
@@ -454,7 +453,7 @@ func downloadImage(url:String) -> Data {
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                self.setupPushNotification(fromDevice: tutor.deviceId)
+                self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName)")
             } else if tutor.tutorStatus == "hot" {
                 // display map of where the tutor is.
                 // join session button
@@ -483,7 +482,7 @@ func downloadImage(url:String) -> Data {
                 self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
                 self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                self.setupPushNotification(fromDevice: tutor.deviceId)
+                self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName)")
             }
         } else {
             // you cant send a request to yourself.
@@ -491,11 +490,9 @@ func downloadImage(url:String) -> Data {
         
     }
     
-    fileprivate func setupPushNotification(fromDevice:String)
+    fileprivate func setupPushNotification(fromDevice:String, title:String, body:String)
     {
 //        guard let message = "text.text" else {return}
-        let title = "tech build dreams"
-        let body = "message"
         let toDeviceID = fromDevice
         var headers:HTTPHeaders = HTTPHeaders()
         

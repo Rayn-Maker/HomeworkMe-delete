@@ -88,6 +88,11 @@ class Request {
     var phoneNumber: String!
     var senderDevice: String!
     var recieverDevice: String!
+    var sessionDidStart = Bool()
+    var endTimeStrn: String!
+    var endTimeDte: Date!
+    var endTimeToMeet: String!
+    var endTimeToMeetDate: Date!
 }
 
 class Post {

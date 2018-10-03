@@ -61,8 +61,6 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
             } else {
                 self.ref.child("Students").observeSingleEvent(of: .value, with: { (snapshot) in
                     if snapshot.hasChild(Auth.auth().currentUser?.uid ?? ""){
-                        
-                    } else {
                         let userInfo: [String: Any] = ["uid": Auth.auth().currentUser?.uid ?? "",
                                                        "fName": user.profile.givenName ?? " ",
                                                        "lName": user.profile.familyName ?? " ",
@@ -71,6 +69,15 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                                        "fromDevice":AppDelegate.DEVICEID]
                         
                         self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo)
+                    } else {
+                        let userInfo: [String: Any] = ["uid": Auth.auth().currentUser?.uid ?? "",
+                                                       "fName": user.profile.givenName ?? " ",
+                                                       "lName": user.profile.familyName ?? " ",
+                                                       "full_name": user.profile.name ?? " ",
+                                                       "email": user.profile.email ?? " ",
+                                                       "fromDevice":AppDelegate.DEVICEID]
+                        
+                        
                         self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo, withCompletionBlock: { (err, resp) in
                             if err != nil {
                                 
@@ -78,7 +85,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                 
                             }
                         })
-//                        self.addCustomer(child: Auth.auth().currentUser?.uid ?? "", userEmail: user.profile.email)
+                        self.addCustomer(child: Auth.auth().currentUser?.uid ?? "", userEmail: user.profile.email)
                     }
                 })
 //                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile")

@@ -39,6 +39,10 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     @IBOutlet weak var mapView: GMSMapView!
     @IBOutlet weak var acceptRejView: UIStackView!
     
+    @IBOutlet weak var startSessionBtn: UIButton!
+    
+    @IBOutlet weak var sessionBtnView: UIView!
+    
     
     var tutor = Student()
     var student = Student()
@@ -46,13 +50,14 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     var userStorage: StorageReference!
     var request: Request!
     let ref = Database.database().reference()
-    var displayingTutReqview = true
+    var displayingTutReqview = false
     var handle: DatabaseHandle?
     var handle2: DatabaseHandle?
     var isTutor = true
     var locationGoingTo = Place()
     var notificationRepeats = true
     private var notTimer = Timer()
+    var toMeetUp = "to meet up"
     
 // google map setup
     var place = Place()
@@ -61,7 +66,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     var placesClient: GMSPlacesClient!
     var zoomLevel: Float = 15.0
     // An array to hold the list of likely places.
-    var likelyPlaces: [GMSPlace] = []
+    var isSender = false
+    var timerMessage = "timer message"
     
     // The currently selected place.
     var selectedPlace: GMSPlace?
@@ -69,19 +75,13 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     var seconds = 1200
     var timer = Timer()
     var isTimerRunning = false
+    var timer2 = Timer()
+    var isTimerRunning2 = false
     var isGrantedAccess = false
+    var phoneNumber = String()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        if let istutor = UserDefaults.standard.bool(forKey: "isTutorApproved") as? Bool {
-            isTutor = istutor
-        } else {
-            isTutor = false
-        }
-        if isTutor {
-            displayingTutReqview = true
-            tutorReqView.isHidden = true
-        }
         tutorReqTable.estimatedRowHeight = 45
         tutorReqTable.rowHeight = UITableViewAutomaticDimension
         myRequestsTable.estimatedRowHeight = 45
@@ -91,15 +91,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         googleMapsetup()
         fetchStudent()
         editImage()
-        startTimer()
     }
     
     override func viewDidAppear(_ animated: Bool) {
 //        isTimerRunning = false
 //        stopTimer()
-        let parameter2: [String:AnyObject] = ["newNotice":false as AnyObject]
-        
-        self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(parameter2)
     }
     
     @IBAction func rejectReq(_ sender: Any) {
@@ -134,46 +130,46 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         // check status of tutor
         // start timer for 20 mins
         let dateString = String(describing: Date())
-        
-//        let fdate = Date()/
         var calendar = Calendar.current
-
-//
-//        TimeZone.ReferenceType.default = TimeZone(abbreviation: "CDT")!
+ 
         let formatter = DateFormatter()
-//        formatter.timeZone = TimeZone.ReferenceType.default
         formatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
         formatter.calendar.date(byAdding: .minute, value: 20, to: Date())
         let strDate = formatter.string(from: Date())
         let datesss = calendar.date(byAdding: .minute, value: 20, to: formatter.date(from: strDate)!)
         let y = formatter.string(from: datesss!)
-        let parameter2: [String:String] = ["newNotice":"true" ,
-                                              "endTime": y ?? ""]
+        let parameter2: [String:String] = ["status":"hot"]
         
         if self.tutor.tutorStatus == "live" {
             let par = ["time": dateString as AnyObject,
                        "status":"approved",
                        "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
-                "currLocationName":self.request.place.name] as! [String: Any]
+                       "endTimeToMeet": y ?? "",
+                       "currLocationName":self.request.place.name] as! [String: Any]
             
         self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
         self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter2)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
             
-        let para = ["status":"hot"] as! [String: Any]
+
             
-//            requestersView.isHidden = true
+            requestersView.isHidden = true
 //            drawPath(start: currentLocation!, end: request.place)
 //            mapViewDisplay.isHidden = false
             setupPushNotification(fromDevice: request.senderDevice)
         } else if self.tutor.tutorStatus == "hot" {
             let par = ["time": dateString as AnyObject,
-                       "status":"approved"] as [String : Any]
+                       "status":"approved",
+                       "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
+                       "endTimeToMeet": y ?? "",
+                "currLocationName":self.request.place.name] as [String : Any]
             
             self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
             self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+            self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
             setupPushNotification(fromDevice: request.senderDevice)
+            requestersView.isHidden = true
         } else if self.tutor.tutorStatus == "off" {
             // a callendar should be shown when cell is clicked on.
             setupPushNotification(fromDevice: request.senderDevice)
@@ -182,23 +178,23 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     
     @IBAction func callPrsd(_ sender: Any) {
         
-       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "-", with: "")
-       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: " ", with: "")
-       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: ")", with: "")
-       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "(", with: "")
-       self.request.phoneNumber = self.request.phoneNumber.replacingOccurrences(of: "+", with: "")
+       self.phoneNumber = self.phoneNumber.replacingOccurrences(of: "-", with: "")
+       self.phoneNumber = self.phoneNumber.replacingOccurrences(of: " ", with: "")
+       self.phoneNumber = self.phoneNumber.replacingOccurrences(of: ")", with: "")
+       self.phoneNumber = self.phoneNumber.replacingOccurrences(of: "(", with: "")
+       self.phoneNumber = self.phoneNumber.replacingOccurrences(of: "+", with: "")
         
-        if self.request.phoneNumber.count > 10 {
-            self.request.phoneNumber.remove(at: self.request.phoneNumber.startIndex)
+        if self.phoneNumber.count > 10 {
+            self.phoneNumber.remove(at: self.phoneNumber.startIndex)
         }
-        if self.request.phoneNumber.count > 10 {
-           self.request.phoneNumber.remove(at: self.request.phoneNumber.startIndex)
+        if self.phoneNumber.count > 10 {
+           self.phoneNumber.remove(at: self.phoneNumber.startIndex)
         }
         
-        if self.request.phoneNumber.count > 10 {
-            String(self.request.phoneNumber.characters.dropLast())
+        if self.phoneNumber.count > 10 {
+            String(self.phoneNumber.characters.dropLast())
         }
-        let dd =  (self.request.phoneNumber as NSString).integerValue
+        let dd =  (self.phoneNumber as NSString).integerValue
         
         guard let number = URL(string: "tel://" + "\(dd ?? 8888888888)") else {
             
@@ -211,7 +207,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         if (MFMessageComposeViewController.canSendText()) {
             let controller = MFMessageComposeViewController()
             controller.body = ""
-            controller.recipients = [self.request.phoneNumber]
+            controller.recipients = [self.phoneNumber]
             controller.messageComposeDelegate = self
             self.present(controller, animated: true, completion: nil)
         }
@@ -221,9 +217,44 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         //change the tag with an api call.
     }
     
+    @IBAction func dismissView(_ sender: Any) {
+        requestersView.isHidden = true
+    }
+    
+    @IBAction func startSession(_ sender: Any) {
+        //change the tag with an api call.
+        var calendar = Calendar.current
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+        formatter.calendar.date(byAdding: .minute, value: 30, to: Date())
+        let strDate = formatter.string(from: Date())
+        let datesss = calendar.date(byAdding: .minute, value: 30, to: formatter.date(from: strDate)!)
+        let y = formatter.string(from: datesss!)
+        let par: [String:AnyObject] = ["sessionDidStart":true as AnyObject,
+                                       "endTime": "\(y ?? "")" as AnyObject]
+//        if isSender {
+//            print("is sender")
+//        } else {
+//            // this is the receiever
+//            print("is reciever")
+//        }
+        self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+        self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
+        if self.isTimerRunning2 {
+            self.isTimerRunning2 = false
+            self.timer2.invalidate()
+        } else {
+            
+        }
+        startSessionBtn.isEnabled = false
+    }
+    
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
         //... handle sms screen actions
         self.dismiss(animated: true, completion: nil)
+    }
+    
+    func chargeCard(){
     }
     
     func runTimer() {
@@ -232,9 +263,44 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     }
     
     @objc func updateTimer() {
+        print("")
         if seconds < 1 {
             timer.invalidate()
-            //Send alert to indicate "time's up!"
+            let parameter2: [String:String] = ["newNotice":"true",
+                                               "status":"live"]
+            
+            let alert = UIAlertController(title: "Time's Up", message: self.timerMessage, preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default) { (resp) in
+                self.ref.child("Students").child(self.request.receiverId ?? "").updateChildValues(parameter2)
+                self.ref.child("Students").child(self.request.senderId ?? "").updateChildValues(parameter2)
+            }
+            alert.addAction(ok)
+            present(alert, animated: true, completion: nil)
+        } else {
+            seconds -= 1     //This will decrement(count down)the seconds.
+            timerLabel.text = timeString(time: TimeInterval(seconds))
+        }
+        
+    }
+    
+    func runTimer2() {
+        timer2 = Timer.scheduledTimer(timeInterval: 1, target: self,   selector: (#selector(MyRequests.updateTimer2)), userInfo: nil, repeats: true)
+        isTimerRunning = true
+    }
+    
+    @objc func updateTimer2() {
+        if seconds < 1 {
+            timer2.invalidate()
+            let parameter2: [String:String] = ["newNotice":"true",
+                                               "status":"live"]
+            
+            let alert = UIAlertController(title: "Time's Up", message: self.timerMessage, preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default) { (resp) in
+                self.ref.child("Students").child(self.request.receiverId ?? "").updateChildValues(parameter2)
+                self.ref.child("Students").child(self.request.senderId ?? "").updateChildValues(parameter2)
+            }
+            alert.addAction(ok)
+            present(alert, animated: true, completion: nil)
         } else {
             seconds -= 1     //This will decrement(count down)the seconds.
             timerLabel.text = timeString(time: TimeInterval(seconds))
@@ -246,7 +312,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         let hours = Int(time) / 3600
         let minutes = Int(time) / 60 % 60
         let seconds = Int(time) % 60
-        return String(format:"%02i:%02i:%02i", hours, minutes, seconds)
+        return String(format:"%02i:%02i:%02i \(toMeetUp)", hours, minutes, seconds)
     }
     
     var storageRef: Storage {
@@ -262,11 +328,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
 
                 if let json = tutDict["received"] as? [String:AnyObject] {
 //                    self.tutor.receivedObject = json
-                    self.tutor = self.setUpReqArr(tableArr: self.tutor, object: json, table: self.myRequestsTable)
+                    self.tutor = self.setUpReqArr(tableArr: self.tutor, object: json, table: self.myRequestsTable, isSender: false)
                 }
                 if let json = tutDict["sent"] as? [String:AnyObject] {
 //                    self.student.receivedObject = json
-                    self.student = self.setUpReqArr(tableArr: self.student, object: json, table: self.tutorReqTable)
+                    self.student = self.setUpReqArr(tableArr: self.student, object: json, table: self.tutorReqTable, isSender: true)
                 }
                 if let scdul = tutDict["appointMents"] as? [String] {
                     self.tutor.schedule = scdul
@@ -275,23 +341,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                     self.tutor.posts2 = posts
                 } //endTime:
                 if let tmStmp = tutDict["endTime"] as? String {
-//
-//                    let dateFormatter = DateFormatter()
-//                    var calendar = Calendar.current
-//                    calendar.timeZone = TimeZone.ReferenceType.default
-//                    dateFormatter.timeZone = TimeZone(abbreviation: "CDT")
-//                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//
-//                    let dat = dateFormatter.date(from: tmStmp )
-//                    let x = calendar.dateComponents(in: TimeZone.current, from: dat!)
-//                    let k = self.UTCToLocal(date: tmStmp)
-//                    calendar.date(from: x)
-//                    self.tutor.endTime = dat ?? Date()
-//                    let date = Date()
-//
-//                    print("\(date.timeIntervalSince(dat ?? Date()))")
-                    
                     let dateFormatter = DateFormatter()
                     dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
                     let dat = dateFormatter.date(from: tmStmp as String)
@@ -303,7 +352,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                         let minutes = floor(m/60)
                         self.seconds = Int(round(m))
                         if !self.isTimerRunning {
-                            self.runTimer()
+                            self.timerMessage = "You've let the time run out without starting the session, this session has been cancelled"
+                           // self.runTimer()
                         }
                     } else {
                         print(k); print(dat!)
@@ -311,11 +361,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                         self.timer.invalidate()
                     }
                 }
-                if let newNotice = tutDict["newNotice"] as? Bool {
-                    if newNotice {
-                        self.startTimer()
-                    }
-                }
+//                if let newNotice = tutDict["newNotice"] as? Bool {
+//                    if newNotice {
+//                        self.startTimer()
+//                    }
+//                }
                 self.tutor.customerId = tutDict["customerId"] as? String
                 self.tutor.phoneNumebr = tutDict["phoneNumber"] as? String
                 self.tutor.full_name = tutDict["full_name"] as? String
@@ -326,22 +376,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             }
         })
     }
-//
-//    func UTCToLocal(date:String) -> Date {
-//        let dateFormatter = DateFormatter()
-//        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//        dateFormatter.timeZone = TimeZone(abbreviation: "UTC")
-//
-//        let dt = dateFormatter.date(from: date)
-////        dateFormatter.timeZone = TimeZone.current
-////        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
-//
-//        return  dt!
-//    }
+
     
     func connectProfile(req: Request, tutStat:String, isRequest:Bool, meetUplocationMesg:String) {
         if !isRequest{
-            cancelTutor.isHidden = false
+            
             if tutor.tutorStatus == "hot"{
                 downlaodPic(url: req.receiverPicUrl)
                 postTitle.text = req.postTite
@@ -364,7 +403,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                 meetUpLocation.text = meetUplocationMesg
             }
         } else {
-            cancelTutor.isHidden = true
+            
             if tutor.tutorStatus  == "hot"{
                 downlaodPic(url: req.senderPicUrl)
                 postTitle.text = req.postTite
@@ -395,12 +434,12 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         image.clipsToBounds = true
     }
     
-    func setUpReqArr (tableArr: Student, object:[String : AnyObject], table:UITableView) -> Student {
-        var req = Request()
+    func setUpReqArr (tableArr: Student, object:[String : AnyObject], table:UITableView, isSender:Bool) -> Student {
         tableArr.requestsArrRejected.removeAll()
         tableArr.requestsArrAccepted.removeAll()
         tableArr.requestsArrPending.removeAll()
         for (_,b) in object {
+            var req = Request()
             req.senderName = b["senderName"] as? String
             req.receiverName = b["receiverName"] as? String
             req.senderId = b["senderId"] as? String
@@ -417,6 +456,16 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             req.senderPhone = b["senderPhone"] as? String
             req.senderPicUrl = b["senderPic"] as? String
             req.receiverPicUrl = b["receiverPic"] as? String
+            if let et = b["endTimeToMeet"] as? String {
+                req.endTimeToMeet = et
+//                connectTimer(req: req, timeToMeet: true)
+            }
+            req.sessionDidStart = b["sessionDidStart"] as? Bool ?? false
+            if req.sessionDidStart {
+                req.endTimeStrn = b["endTime"] as! String
+//                connectTimer(req: req, timeToMeet: false)
+            }
+            
             req.reqStatus = b["status"] as? String
             if let place = b["place"] as? [String:AnyObject] {
                  req.place.address = place["address"] as? String
@@ -432,7 +481,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             } else if req.reqStatus == "rejected"{
                 tableArr.requestsArrRejected.append(req)
             }
-            
         }
         table.reloadData()
         return tableArr
@@ -457,28 +505,6 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         
     }
     
-    func notify() {
-        if isGrantedAccess{
-            let content = UNMutableNotificationContent()
-            content.title = "HmwkMe"
-            content.subtitle = ""
-            content.body = ""
-            content.badge = 1
-//            content.sound = UNNotificationSound.default()
-            let trigger = UNTimeIntervalNotificationTrigger(timeInterval: 0.001, repeats: false)
-            
-            let request = UNNotificationRequest(identifier: "timerDone", content: content, trigger: trigger)
-            UNUserNotificationCenter.current().add(request) { (err) in
-                //
-                self.notificationRepeats = false
-//                self.stopTimer()
-            }
-            
-            let systemSoundId: SystemSoundID = 1016
-            AudioServicesPlaySystemSound(systemSoundId)
-            AudioServicesPlayAlertSound(kSystemSoundID_Vibrate)
-        }
-    }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         //
@@ -488,22 +514,50 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         completionHandler([.alert,.sound])
     }
     
-    func startTimer(){
-        let timeInterval = 2.0
-        if isGrantedAccess && !timer.isValid { //allowed notification and timer off
-            timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true, block: { (timer) in
-                self.notify()
-            })
+//    func startTimer(){
+//        let timeInterval = 2.0
+//        if isGrantedAccess && !timer.isValid { //allowed notification and timer off
+//            timer = Timer.scheduledTimer(withTimeInterval: timeInterval, repeats: true, block: { (timer) in
+//
+//            })
+//        }
+//    }
+    
+    func connectTimer(req:Request){
+        timerLabel.text = "00:00:00"
+        timer2.invalidate()
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+        var dat: Date?
+        if req.sessionDidStart {
+            dat = dateFormatter.date(from: req.endTimeStrn as String)
+            toMeetUp = "till session ends"
+        } else {
+            dat = dateFormatter.date(from: req.endTimeToMeet as String)
+            toMeetUp = "to start session"
+        }
+        let k = Date()
+        if k < dat! {
+            // call timer and give it the set minute
+            let m = dat!.timeIntervalSince(k)
+            let minutes = floor(m/60)
+            self.seconds = Int(round(m))
+            self.timerMessage = "session is over"
+            self.runTimer2()
+        } else {
+            print(k); print(dat!)
+            self.isTimerRunning2 = false
+            self.timer2.invalidate()
         }
     }
     
-    func stopTimer(){
-        //shut down timer
-        timer.invalidate()
-        //clear out any pending and delivered notifications
-        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
-        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
-    }
+//    func stopTimer(){
+//        //shut down timer
+//        timer.invalidate()
+//        //clear out any pending and delivered notifications
+//        UNUserNotificationCenter.current().removeAllPendingNotificationRequests()
+//        UNUserNotificationCenter.current().removeAllDeliveredNotifications()
+//    }
     
     func downlaodPic(url:String) {
         self.storageRef.reference(forURL:url).getData(maxSize: 1 * 1024 * 1024, completion: { (imgData, error) in
@@ -587,11 +641,11 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
         if tableView == myRequestsTable {
             let cell = tableView.dequeueReusableCell(withIdentifier: "myRequests", for: indexPath)
             if indexPath.section == 0 {
+                timerLabel.isHidden = true
                 cell.textLabel?.text = "\( tutor.requestsArrPending[indexPath.row].senderName ?? "")\n\(tutor.requestsArrPending[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrPending[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 1 {
-                
                 cell.textLabel?.text = "\( tutor.requestsArrAccepted[indexPath.row].senderName ?? "")\n\(tutor.requestsArrAccepted[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrAccepted[indexPath.row].postTite
                 return cell
@@ -607,6 +661,8 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 cell.detailTextLabel?.text = student.requestsArrPending[indexPath.row].postTite
                 return cell
             } else if indexPath.section == 1 {
+
+
                 cell.textLabel?.text = "\( student.requestsArrAccepted[indexPath.row].receiverName ?? "")\n\(student.requestsArrAccepted[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = student.requestsArrAccepted[indexPath.row].postTite
                 return cell
@@ -673,30 +729,59 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
         activitySpinner.startAnimating()
         requestersView.isHidden = false
         if tableView == tutorReqTable {
+            isSender = true
             if indexPath.section == 0 {
+                self.acceptRejView.isHidden = false
+                self.sessionBtnView.isHidden = true
+                self.timeSincePstLable.isHidden = false
+                timerLabel.isHidden = true
+                if student.requestsArrPending[indexPath.row].receiverPhone != nil {
+                    self.phoneNumber = student.requestsArrPending[indexPath.row].receiverPhone
+                }
                 request = student.requestsArrPending[indexPath.row]
                 connectProfile(req: student.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "Tutor's yet to respond")
                 
             } else if indexPath.section == 1 {
+                if student.requestsArrAccepted[indexPath.row].receiverPhone != nil {
+                    self.phoneNumber = student.requestsArrAccepted[indexPath.row].receiverPhone
+                }
+                self.sessionBtnView.isHidden = true
                 request = student.requestsArrAccepted[indexPath.row]
-                connectProfile(req: student.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg:  request.place.name)
+                connectTimer(req: request)
+                connectProfile(req: student.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "\(request.place.name ?? "")" + "\n" + "\(request.place.address ?? "")")
                 self.place = student.requestsArrAccepted[indexPath.row].place
                 self.acceptRejView.isHidden = true
-                self.cancelTutor.isHidden = false
+                self.sessionBtnView.isHidden = false
+                self.timeSincePstLable.isHidden = true
+                timerLabel.isHidden = false
             } else if indexPath.section == 2 {
+                self.phoneNumber = student.requestsArrRejected[indexPath.row].receiverPhone
+                self.sessionBtnView.isHidden = false
                 request = student.requestsArrRejected[indexPath.row]
                 connectProfile(req: student.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "Tutor request was rejected kinldy find another.")
             }
         } else if tableView == myRequestsTable {
+            isSender = false
             if indexPath.section == 0 {
+                self.acceptRejView.isHidden = false
+                self.sessionBtnView.isHidden = true
+                self.timeSincePstLable.isHidden = false
+                timerLabel.isHidden = true
+                self.phoneNumber = tutor.requestsArrPending[indexPath.row].senderPhone
+                self.sessionBtnView.isHidden = true
                 request = tutor.requestsArrPending[indexPath.row]
                 connectProfile(req: tutor.requestsArrPending[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "\(request.place.name ?? "")" + "\n" + "\(request.place.address ?? "")")
             } else if indexPath.section == 1 {
+                self.phoneNumber = tutor.requestsArrAccepted[indexPath.row].senderPhone
                 request = tutor.requestsArrAccepted[indexPath.row]
+                connectTimer(req: request)
                 connectProfile(req: tutor.requestsArrAccepted[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "\(request.place.name ?? "")" + "\n" + "\(request.place.address ?? "")")
                 self.acceptRejView.isHidden = true
-                self.cancelTutor.isHidden = false
+                self.sessionBtnView.isHidden = false
+                self.timeSincePstLable.isHidden = true
+                timerLabel.isHidden = false
             } else if indexPath.section == 2 {
+                self.phoneNumber = tutor.requestsArrRejected[indexPath.row].senderPhone
                 request = tutor.requestsArrRejected[indexPath.row]
                 connectProfile(req: tutor.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "You rejected the request")
             }

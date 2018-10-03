@@ -253,7 +253,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
          
             let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
                                            "status":"live",
-                                           "phoneNumber": self.phoneNumber.text]
+                                           "phoneNumber": self.phoneNumber.text,
+                                           "fromDevice":AppDelegate.DEVICEID]
             
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
@@ -262,7 +263,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             }
         } else if !placeesDict.isEmpty  {
             let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
-                                           "status":"live"]
+                                           "status":"live",
+                                           "fromDevice":AppDelegate.DEVICEID]
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
                     
@@ -271,7 +273,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         } else if phoneNumber.text != nil {
             
             let userInfo: [String: Any] = ["status":"live",
-                                           "phoneNumber": self.phoneNumber.text]
+                                           "phoneNumber": self.phoneNumber.text,
+                                           "fromDevice":AppDelegate.DEVICEID]
             
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
