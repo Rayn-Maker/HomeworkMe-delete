@@ -50,16 +50,19 @@ final class StripeClient {
     return url
   }()
     
-    func completeCharge(with customer: String, amount: Int, completion: @escaping (Result) -> Void) {
+    func completeCharge(with customer: String, amount: Int, description:String, customerSender:String, payOut:Int, customerReceiver:String, completion: @escaping (DataResponse<String>) -> Void) {
         // 1
         let url = baseURL.appendingPathComponent("charge")
 
         // 2
         let params: [String: Any] = [
-            "customer" : customer,
+//            "customer" : customer,
             "amount": amount,
             "currency": Constants.defaultCurrency,
-            "description": Constants.defaultDescription
+            "description": description,
+            "customerSender": customerSender,
+            "customerReceiver":customerReceiver,
+            "payOut":payOut
         ]
         // 3
         Alamofire.request(url, method: .post, parameters: params)
@@ -67,9 +70,9 @@ final class StripeClient {
             .responseString { response in
                 switch response.result {
                 case .success:
-                    completion(Result.success)
+                    completion(response)
                 case .failure(let error):
-                    completion(Result.failure(error))
+                    completion(response)
                 }
         }
     }

@@ -93,6 +93,9 @@ class Request {
     var endTimeDte: Date!
     var endTimeToMeet: String!
     var endTimeToMeetDate: Date!
+    var senderCustomerId:String!
+    var receiverCustomerId:String!
+    var sessionPrice:Int!
 }
 
 class Post {

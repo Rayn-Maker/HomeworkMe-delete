@@ -158,6 +158,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
 //            drawPath(start: currentLocation!, end: request.place)
 //            mapViewDisplay.isHidden = false
             setupPushNotification(fromDevice: request.senderDevice)
+            chargeCard(customer: request.senderCustomerId, price: 50, description: request.postTite) //**** Need To Convert Money to pennies
         } else if self.tutor.tutorStatus == "hot" {
             let par = ["time": dateString as AnyObject,
                        "status":"approved",
@@ -254,7 +255,10 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         self.dismiss(animated: true, completion: nil)
     }
     
-    func chargeCard(){
+    func chargeCard(customer:String, price:Int, description:String){
+        StripeClient.shared.completeCharge(with: customer, amount: price, description:description) { (result) in
+            //
+        }
     }
     
     func runTimer() {
@@ -455,6 +459,9 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             req.postTite = b["postTitle"] as? String
             req.senderPhone = b["senderPhone"] as? String
             req.senderPicUrl = b["senderPic"] as? String
+            req.receiverCustomerId = b["receiverCustomerId"] as? String
+            req.senderCustomerId = b["senderCustomerId"] as? String
+            req.sessionPrice = b["price"] as? Int
             req.receiverPicUrl = b["receiverPic"] as? String
             if let et = b["endTimeToMeet"] as? String {
                 req.endTimeToMeet = et

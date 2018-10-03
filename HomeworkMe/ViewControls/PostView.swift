@@ -377,6 +377,7 @@ func downloadImage(url:String) -> Data {
         var senderName: String?
         var phoneNumber: String? //phoneNumber
         var picUrl: String? //pictureUrl
+        var senderCustomerId:String?
         if let nam = UserDefaults.standard.string(forKey: "full_name") {
             senderName = nam
         } else {
@@ -391,6 +392,11 @@ func downloadImage(url:String) -> Data {
             picUrl = phon
         } else {
             picUrl = " "
+        }//customerId
+        if let phon = UserDefaults.standard.string(forKey: "customerId") {
+            senderCustomerId = phon
+        } else {
+            
         }
         if tutor.uid != senderId {
             let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
@@ -414,6 +420,8 @@ func downloadImage(url:String) -> Data {
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
+                                                      "senderCustomerId":senderCustomerId,
+                                                      "receiverCustomerId":tutor.customerId,
                                                       "price":self.postss.price as AnyObject,
                                                       "senderDevice":AppDelegate.DEVICEID as AnyObject,
                                                       "receiverDevice":tutor.deviceId as AnyObject]
@@ -445,6 +453,8 @@ func downloadImage(url:String) -> Data {
                                                       "senderPhone":phoneNumber as AnyObject,
                                                       "receiverPhone":self.tutor.phoneNumebr as AnyObject,
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
+                                                      "senderCustomerId":senderCustomerId,
+                                                      "receiverCustomerId":tutor.customerId,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
                                                       "price":self.postss.price as AnyObject]
@@ -474,6 +484,8 @@ func downloadImage(url:String) -> Data {
                                                       "senderPhone":phoneNumber as AnyObject,
                                                       "receiverPhone":self.tutor.phoneNumebr as AnyObject,
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
+                                                      "senderCustomerId":senderCustomerId,
+                                                      "receiverCustomerId":tutor.customerId,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
                                                       "price":self.postss.price as AnyObject]
