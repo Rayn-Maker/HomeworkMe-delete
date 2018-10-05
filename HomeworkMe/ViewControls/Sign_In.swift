@@ -25,7 +25,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
         let ref2 = Database.database().reference()
         GIDSignIn.sharedInstance().uiDelegate = self
         GIDSignIn.sharedInstance().delegate = self
-        
+        dismissKeyboard()
     }
  
     func signIn(signIn: GIDSignIn!,
@@ -100,6 +100,12 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
     
     func sign(_ signIn: GIDSignIn!, didDisconnectWith user: GIDGoogleUser!, withError error: Error!) {
         //
+    }
+    
+    func dismissKeyboard() {
+        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
+        tap.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tap)
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {

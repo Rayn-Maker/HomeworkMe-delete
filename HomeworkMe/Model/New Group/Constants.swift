@@ -31,10 +31,14 @@ import Foundation
 typealias JSON = [String: Any]
 
 enum Constants {
-  static let publishableKey = "pk_live_zElKyvWz0R0pJiEmf42HAcii"
+  static let publishableKey = "pk_test_hIXWAqb9WYIRUKxvST0Dqlnk"
   static let baseURLString = "https://fierce-gorge-75882.herokuapp.com/"
   static let defaultCurrency = "usd"
   static let defaultDescription = "Purchase from Homeworkme iOS"
+//  static let stripOauthUrl = "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_DiiKriN3m4MSCxufEyxmo3GY1Mjm9ex1=read_write"
+    //https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_DiiKx0f3Mun33KUO4P6RJ6evqTHPWWHn&scope=read_write
+    //"https://connect.stripe.com/express/oauth/authorize?redirect_uri=https://fierce-gorge-75882.herokuapp.com&client_id=ca_DiiKx0f3Mun33KUO4P6RJ6evqTHPWWHn&state=Texas"
+  static let stripOauthUrl = "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_DiiKx0f3Mun33KUO4P6RJ6evqTHPWWHn&scope=read_write"
       
 //    let customerId = UserDefaults.standard.string(forKey: "customerId")
 }

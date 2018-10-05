@@ -67,7 +67,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     var chosenLocationsArr = [String]() ; var day = "Sunday"; var hour = "12"; var min = "00"; var am = "Am"
     var place = Place()
     var placeArr = [Place](); var placeesDict = [String:[String]]()
-    var isTutor = false
     var student = Student()
     var phoneNumberString = String()
     
@@ -261,6 +260,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     
                 }
             }
+             tutorEdit.isHidden = true
         } else if !placeesDict.isEmpty  {
             let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
                                            "status":"live",
@@ -270,7 +270,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     
                 }
             }
-        } else if phoneNumber.text != nil {
+             tutorEdit.isHidden = true
+        } else if phoneNumber.text != nil && !student.meetUpLocation.isEmpty {
             
             let userInfo: [String: Any] = ["status":"live",
                                            "phoneNumber": self.phoneNumber.text,
@@ -281,10 +282,14 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     
                 }
             }
+             tutorEdit.isHidden = true
         } else {
             // show warning
+            let alert = UIAlertController(title: "Missing Info", message: "make sure you select at least 2 public places (library or coffee shop) to meet up ", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            alert.addAction(ok)
+            present(alert, animated: true, completion: nil)
         }
-        tutorEdit.isHidden = true
     }
     
     
@@ -350,7 +355,6 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         profilePic.layer.cornerRadius = profilePic.frame.height/2
         profilePic.clipsToBounds = true
     }
-  
     
     func deletValue(indexPathRow:Int) {
         let ref = Database.database().reference()
@@ -464,9 +468,12 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 if let email = myclass["email"] as? String {
                     UserDefaults.standard.set(email, forKey: "email")
                     self.student.email = email
-                } //status
+                } //status meetUpLocations
                 if let status = myclass["status"] as? String {
                     self.student.tutorStatus = status
+                }
+                if let meetUpLocations = myclass["meetUpLocations"] as? [String:[String]] {
+                    self.student.meetUpLocation = meetUpLocations
                 }
                 if let lname = myclass["lName"] as? String {
                     UserDefaults.standard.set(lname, forKey: "lName")
@@ -583,7 +590,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             let vc = segue.destination as? MyClassRoomVC
             let indexPath = myClassesTableView.indexPathForSelectedRow
             vc?.fetchObject = myClassesArr[(indexPath?.row)!]
-            vc?.isTutor = self.isTutor
+            vc?.student = student
         }
     }
 }

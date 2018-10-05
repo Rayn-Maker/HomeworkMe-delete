@@ -24,9 +24,8 @@ class Sign_Up: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-      
+      dismissKeyboard()
     }
- 
 
     @IBAction func registerPrsd(_ sender: Any) {
         ref = Database.database().reference()
@@ -80,6 +79,17 @@ class Sign_Up: UIViewController {
             vc?.phoneNumberString = phoneNumber.text ?? ""
         }
     }
+    
+    func dismissKeyboard() {
+        let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
+        tap.cancelsTouchesInView = false
+        self.view.addGestureRecognizer(tap)
+    }
+    
+    @IBAction func backPrsd(_ sender: Any) {
+        self.dismiss(animated: true, completion: nil)
+    }
+    
 }
 
 

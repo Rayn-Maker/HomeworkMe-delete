@@ -52,7 +52,7 @@ final class StripeClient {
     
     func completeCharge(with customer: String, amount: Int, description:String, customerSender:String, payOut:Int, customerReceiver:String, completion: @escaping (DataResponse<String>) -> Void) {
         // 1
-        let url = baseURL.appendingPathComponent("charge")
+        let url = baseURL.appendingPathComponent("payOut")
 
         // 2
         let params: [String: Any] = [

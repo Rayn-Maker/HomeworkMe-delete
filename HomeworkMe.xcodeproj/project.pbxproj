@@ -25,6 +25,7 @@
 		68226CB2211BB24600277FC5 /* Log_in.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB1211BB24600277FC5 /* Log_in.swift */; };
 		68226CB821226AA600277FC5 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB721226AA600277FC5 /* PostView.swift */; };
 		68226CBA2122867800277FC5 /* MyRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB92122867700277FC5 /* MyRequests.swift */; };
+		683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683C83AB2165C97500BBFAF6 /* WebViewController.swift */; };
 		6844213921228EF50017C9D5 /* EditBio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6844213821228EF50017C9D5 /* EditBio.swift */; };
 		685EB60421124DFB001A7A5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685EB60321124DFB001A7A5C /* AppDelegate.swift */; };
 		685EB60921124DFB001A7A5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 685EB60721124DFB001A7A5C /* Main.storyboard */; };
@@ -69,6 +70,7 @@
 		68226CB721226AA600277FC5 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		68226CB92122867700277FC5 /* MyRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRequests.swift; sourceTree = "<group>"; };
 		6829B6892156322A0052DD75 /* HomeworkMe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeworkMe.entitlements; sourceTree = "<group>"; };
+		683C83AB2165C97500BBFAF6 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		6844213821228EF50017C9D5 /* EditBio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBio.swift; sourceTree = "<group>"; };
 		685EB60021124DFB001A7A5C /* HomeworkMe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeworkMe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		685EB60321124DFB001A7A5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -179,6 +181,7 @@
 				685EB629211A86D3001A7A5C /* MyClassRoomVC.swift */,
 				68226CB721226AA600277FC5 /* PostView.swift */,
 				68226CB92122867700277FC5 /* MyRequests.swift */,
+				683C83AB2165C97500BBFAF6 /* WebViewController.swift */,
 				6844213821228EF50017C9D5 /* EditBio.swift */,
 			);
 			path = ViewControls;
@@ -446,6 +449,7 @@
 				6844213921228EF50017C9D5 /* EditBio.swift in Sources */,
 				68129E182150B73F000F319A /* StripeClient.swift in Sources */,
 				68129E602150DAFE000F319A /* CheckoutPuppyTableViewCell.swift in Sources */,
+				683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */,
 				688EBCA92152121F0011CFA3 /* PaymentContextFooterView.swift in Sources */,
 				685EB61F2112BB5F001A7A5C /* Sign_Up.swift in Sources */,
 				688EBCAB2152129B0011CFA3 /* BrowseProductsViewController.swift in Sources */,

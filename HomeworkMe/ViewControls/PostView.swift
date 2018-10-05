@@ -146,11 +146,11 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
         present(navigationController, animated: true)
     }
     
-    func chargeCard(){
-        StripeClient.shared.completeCharge( with: tutor.customerId ?? "", amount: postObject.price) { result in
-            
-        }
-    }
+//    func chargeCard(){
+//        StripeClient.shared.completeCharge( with: tutor.customerId ?? "", amount: postObject.price, description: "", customerSender: "", payOut: 0, customerReceiver: "") { result in
+//
+//        }
+//    }
  
     
     // end of stripe payment implementation 
@@ -195,9 +195,12 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
+                }//customerId
+                if let posts = tutDict["Posts"] as? [String:AnyObject] {
+                    self.tutor.posts2 = posts
                 }
-                if let did = tutDict["fromDevice"] as? String {
-                    self.tutor.deviceId = did
+                if let did = tutDict["customerId"] as? String {
+                    self.tutor.customerId = did
                 }
                
                 if let status = tutDict["status"] as? String {
@@ -420,8 +423,8 @@ func downloadImage(url:String) -> Data {
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
-                                                      "senderCustomerId":senderCustomerId,
-                                                      "receiverCustomerId":tutor.customerId,
+                                                      "senderCustomerId":senderCustomerId as AnyObject,
+                                                      "receiverCustomerId":tutor.customerId as AnyObject,
                                                       "price":self.postss.price as AnyObject,
                                                       "senderDevice":AppDelegate.DEVICEID as AnyObject,
                                                       "receiverDevice":tutor.deviceId as AnyObject]
@@ -453,8 +456,8 @@ func downloadImage(url:String) -> Data {
                                                       "senderPhone":phoneNumber as AnyObject,
                                                       "receiverPhone":self.tutor.phoneNumebr as AnyObject,
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
-                                                      "senderCustomerId":senderCustomerId,
-                                                      "receiverCustomerId":tutor.customerId,
+                                                      "senderCustomerId":senderCustomerId as AnyObject,
+                                                      "receiverCustomerId":tutor.customerId as AnyObject,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
                                                       "price":self.postss.price as AnyObject]
@@ -484,8 +487,8 @@ func downloadImage(url:String) -> Data {
                                                       "senderPhone":phoneNumber as AnyObject,
                                                       "receiverPhone":self.tutor.phoneNumebr as AnyObject,
                                                       "receiverPic":self.tutor.pictureUrl as AnyObject,
-                                                      "senderCustomerId":senderCustomerId,
-                                                      "receiverCustomerId":tutor.customerId,
+                                                      "senderCustomerId":senderCustomerId as AnyObject,
+                                                      "receiverCustomerId":tutor.customerId as AnyObject,
                                                       "senderPic":picUrl as AnyObject,
                                                       "status":"pending" as AnyObject,
                                                       "price":self.postss.price as AnyObject]

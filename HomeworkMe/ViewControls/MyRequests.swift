@@ -139,6 +139,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         let datesss = calendar.date(byAdding: .minute, value: 20, to: formatter.date(from: strDate)!)
         let y = formatter.string(from: datesss!)
         let parameter2: [String:String] = ["status":"hot"]
+        var payOut: [Int]
         
         if self.tutor.tutorStatus == "live" {
             let par = ["time": dateString as AnyObject,
@@ -158,7 +159,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
 //            drawPath(start: currentLocation!, end: request.place)
 //            mapViewDisplay.isHidden = false
             setupPushNotification(fromDevice: request.senderDevice)
-            chargeCard(customer: request.senderCustomerId, price: 50, description: request.postTite) //**** Need To Convert Money to pennies
+            payOut = convMony(price: request.sessionPrice)
+            chargeCard(customer: request.senderCustomerId, price: payOut[0], description: request.postTite, customerSender: request.senderCustomerId, payOut: payOut[1], customerReciever: request.receiverCustomerId) //**** Need To Convert Money to pennies
         } else if self.tutor.tutorStatus == "hot" {
             let par = ["time": dateString as AnyObject,
                        "status":"approved",
@@ -250,13 +252,20 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         startSessionBtn.isEnabled = false
     }
     
+    func convMony(price:Int) -> [Int] {
+        let total = price * 100
+        let payOut = Int(floor(Double(total) * 0.25))
+        let pay = [total, total - payOut]
+        return pay
+    }
+    
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
         //... handle sms screen actions
         self.dismiss(animated: true, completion: nil)
     }
     
-    func chargeCard(customer:String, price:Int, description:String){
-        StripeClient.shared.completeCharge(with: customer, amount: price, description:description) { (result) in
+    func chargeCard(customer:String, price:Int, description:String, customerSender:String, payOut:Int, customerReciever:String){
+        StripeClient.shared.completeCharge(with: customer, amount: price, description:description, customerSender: customerSender, payOut: payOut, customerReceiver: customerReciever) { (result) in
             //
         }
     }
