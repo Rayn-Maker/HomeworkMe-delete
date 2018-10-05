@@ -464,13 +464,17 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     UserDefaults.standard.set(phone, forKey: "phoneNumber")
                     self.phoneNumber.text = phone
                     self.student.phoneNumebr = phone
-                } //isTutorApproved
+                } //isTutorApproved paymentSource
                 if let email = myclass["email"] as? String {
                     UserDefaults.standard.set(email, forKey: "email")
                     self.student.email = email
                 } //status meetUpLocations
                 if let status = myclass["status"] as? String {
                     self.student.tutorStatus = status
+                }
+                if let status = myclass["paymentSource"] as? [ String] {
+                    self.student.paymentSource = status
+                    
                 }
                 if let meetUpLocations = myclass["meetUpLocations"] as? [String:[String]] {
                     self.student.meetUpLocation = meetUpLocations

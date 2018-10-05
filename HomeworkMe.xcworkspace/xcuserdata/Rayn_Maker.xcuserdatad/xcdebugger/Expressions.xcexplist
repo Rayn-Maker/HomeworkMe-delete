@@ -36,16 +36,24 @@
          contextName = "MyClassRoomVC.fetchPostInfo(dictCheck:):MyClassRoomVC.swift">
          <PersistentStrings>
             <PersistentString
+               value = "testArr">
+            </PersistentString>
+            <PersistentString
                value = "hmwrkArr">
             </PersistentString>
             <PersistentString
                value = "tutorArr">
             </PersistentString>
             <PersistentString
-               value = "testArr">
-            </PersistentString>
-            <PersistentString
                value = "notesArr">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in ProfileVC.fetchMyClassKey():ProfileVC.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "student.paymentSource = status">
             </PersistentString>
          </PersistentStrings>
       </ContextState>

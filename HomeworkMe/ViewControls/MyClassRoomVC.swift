@@ -43,7 +43,7 @@ class MyClassRoomVC: UIViewController {
     var schedule = String()
     var userStorage: StorageReference!
     let ref = Database.database().reference()
-    var isTutor = false
+    var student = Student()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -59,9 +59,82 @@ class MyClassRoomVC: UIViewController {
     }
     
     @IBAction func addPostPrsd(_ sender: Any) {
-        postPresetView.isHidden = false
-        newPostView1.isHidden = false
-        newPostView2.isHidden = true
+        let ref = Database.database().reference()
+        if student.paymentSource != nil {
+            postPresetView.isHidden = false
+            newPostView1.isHidden = false
+            newPostView2.isHidden = true
+        } else {
+            let alert = UIAlertController(title: "Missing Information", message: "Kindly register your account for tutoring by selecting a method in which your students can pay you.", preferredStyle: .alert)
+            let zelle = UIAlertAction(title: "Zelle", style: .default) { (resp) in
+                let alert1 = UIAlertController(title: "Zelle", message: "what's your Zelle email or phone number", preferredStyle: .alert)
+                alert1.addTextField { (textField) in
+                    textField.placeholder = "zelle email or phone"
+                }
+                alert1.addTextField { (textField2) in
+                    textField2.placeholder = "zelle email or phone confirmation"
+                }
+                let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+                let Add = UIAlertAction(title: "Add", style: .default) { _ in
+                    guard let text = alert1.textFields?.first?.text else { return }
+                    guard let text2 = alert1.textFields?.first?.text else { return }
+                    if text != "" && text2 != "" && text2 == text {
+                        let ar = ["Zelle",text]
+                        let par = ["paymentSource":ar] as [String:[String]]
+                        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par)
+                        self.student.paymentSource = ar
+                    }
+                }
+                alert1.addAction(Add); alert1.addAction(cancel)
+                self.present(alert1, animated: true, completion: nil)
+            }
+            let cash = UIAlertAction(title: "Cash App", style: .default) { (resp) in
+                let alert2 = UIAlertController(title: "Cash App", message: "what's your Cash App $cash_tag (e.x. $Raycorp)", preferredStyle: .alert)
+                alert2.addTextField { (textField) in
+                    textField.placeholder = "$cash_tag"
+                }
+                alert2.addTextField { (textField2) in
+                    textField2.placeholder = "Cash App confirmation"
+                }
+                let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+                let Add = UIAlertAction(title: "Add", style: .default) { _ in
+                    guard let text = alert2.textFields?.first?.text else { return }
+                    guard let text2 = alert2.textFields?.first?.text else { return }
+                    if text != "" && text2 != "" && text2 == text {
+                        let ar = ["Zelle",text]
+                        let par = ["paymentSource":ar] as [String:[String]]
+                        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par)
+                        self.student.paymentSource = ar
+                    }
+                }
+                alert2.addAction(Add); alert2.addAction(cancel)
+                self.present(alert2, animated: true, completion: nil)
+            }
+            let venmo = UIAlertAction(title: "Venmo", style: .default) { (resp) in
+                let alert3 = UIAlertController(title: "Cash App", message: "what's your Venmo @username (e.x. @Raycorp)", preferredStyle: .alert)
+                alert3.addTextField { (textField) in
+                    textField.placeholder = "Venmo @username"
+                }
+                alert3.addTextField { (textField2) in
+                    textField2.placeholder = "Venmo @username confirmation"
+                }
+                let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+                let Add = UIAlertAction(title: "Add", style: .default) { _ in
+                    guard let text = alert3.textFields?.first?.text else { return }
+                    guard let text2 = alert3.textFields?.first?.text else { return }
+                    if text != "" && text2 != "" && text2 == text {
+                        let ar = ["Zelle",text]
+                         let par = ["paymentSource":ar] as [String:[String]]
+                        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par)
+                        self.student.paymentSource = ["paymentSource":ar]
+                    }
+                }
+                alert3.addAction(Add); alert3.addAction(cancel)
+                self.present(alert3, animated: true, completion: nil)
+            }
+            alert.addAction(zelle); alert.addAction(cash); alert.addAction(venmo)
+            present(alert, animated: true, completion: nil)
+        }
     }
     
     let step: Float = 5
@@ -207,6 +280,7 @@ class MyClassRoomVC: UIViewController {
         }
         if titleText.text != "" || titleText.text != nil {
             let name = titleLabel.text! + " " + titleText.text! + " " + teacherName.text!
+            
             let parameters = ["uid":postKey,
                               "name": name,
                               "authorID":Auth.auth().currentUser?.uid ?? " ",
@@ -215,27 +289,27 @@ class MyClassRoomVC: UIViewController {
                               "timeStamp":dateString,
                               "category":self.category,
                               "price": self.price,
-                              "schedule": self.schedules,
-                              "studentInClass":self.inClassSwitch.isOn,
-                              "postPic": picUrl,
-                              "classId": self.fetchObject.uid ?? "",
-                              "className":self.fetchObject.title ?? "",
-                              "phoneNumber":phoneNumber as Any] as? [String : Any]
+                              //                              "schedule": self.schedules,
+                "studentInClass":self.inClassSwitch.isOn,
+                "postPic": picUrl,
+                "classId": self.fetchObject.uid ?? "",
+                "className":self.fetchObject.title ?? "",
+                "phoneNumber":phoneNumber as Any] as? [String : Any]
             
             let parameters2 = ["uid":postKey,
-                              "name": name,
-                              "authorID":Auth.auth().currentUser?.uid ?? " ",
-                              "authorName": authorFname + " " + authorLname,
-                              "timeStamp":dateString,
-                              "category":self.category,
-                              "price": self.price ] as? [String : Any]
+                               "name": name,
+                               "authorID":Auth.auth().currentUser?.uid ?? " ",
+                               "authorName": authorFname + " " + authorLname,
+                               "timeStamp":dateString,
+                               "category":self.category,
+                               "price": self.price ] as? [String : Any]
             
             let postParam = [postKey : parameters2]
             
             
-        ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
-        ref.child("Posts").child(postKey).updateChildValues(parameters!)
-        ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
+            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
+            ref.child("Posts").child(postKey).updateChildValues(parameters!)
+            ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
             self.postPresetView.isHidden = true
             categoryBtn.isSelected = false
         } else {
@@ -406,33 +480,33 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
                     data = myPostArr[indexPath.row].data
                 }
             case 1:
-                cellTxt = " " +  hmwrkArr[indexPath.row].title! + "\n~" + hmwrkArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: hmwrkArr[indexPath.row].timeStamp!))"
+                cellTxt = " " +  hmwrkArr[indexPath.row].title! + "\n" + hmwrkArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: hmwrkArr[indexPath.row].timeStamp!))"
                 if hmwrkArr[indexPath.row].postPic != nil {
                     urlString = hmwrkArr[indexPath.row].postPic
                     data = hmwrkArr[indexPath.row].data
                 }
             case 2:
-                cellTxt = " " +  testArr[indexPath.row].title! + "\n~" + testArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: testArr[indexPath.row].timeStamp!))"
+                cellTxt = " " +  testArr[indexPath.row].title! + "\n" + testArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: testArr[indexPath.row].timeStamp!))"
                 
                 if testArr[indexPath.row].postPic != nil {
                     urlString = testArr[indexPath.row].postPic
                     data = testArr[indexPath.row].data
                 }
             case 3:
-                cellTxt = " " +  notesArr[indexPath.row].title! + "\n~" + notesArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: notesArr[indexPath.row].timeStamp!))"
+                cellTxt = " " +  notesArr[indexPath.row].title! + "\n" + notesArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: notesArr[indexPath.row].timeStamp!))"
                 if notesArr[indexPath.row].postPic != nil {
                     urlString = notesArr[indexPath.row].postPic
                     data = notesArr[indexPath.row].data
                 }
             case 4:
-                cellTxt = " " +  tutorArr[indexPath.row].title! + "\n~" + tutorArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: tutorArr[indexPath.row].timeStamp!))"
+                cellTxt = " " +  tutorArr[indexPath.row].title! + "\n" + tutorArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: tutorArr[indexPath.row].timeStamp!))"
                 
                 if tutorArr[indexPath.row].postPic != nil {
                     urlString = tutorArr[indexPath.row].postPic
                     data = tutorArr[indexPath.row].data
                 }
             case 5:
-                cellTxt = otherArr[indexPath.row].title! + "\n~" + otherArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: otherArr[indexPath.row].timeStamp!))"
+                cellTxt = otherArr[indexPath.row].title! + "\n" + otherArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: otherArr[indexPath.row].timeStamp!))"
                 if otherArr[indexPath.row].postPic != nil {
                     data = otherArr[indexPath.row].data
                     urlString = otherArr[indexPath.row].postPic

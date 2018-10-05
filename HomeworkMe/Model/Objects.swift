@@ -53,6 +53,7 @@ class Student {
     var coorLocName = String()
     var deviceId = String()
     var endTime = Date()
+    var paymentSource: [String]?
 }
 
 enum Location {
