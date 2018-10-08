@@ -228,7 +228,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         let datesss = calendar.date(byAdding: .minute, value: 20, to: formatter.date(from: strDate)!)
         let y = formatter.string(from: datesss!)
         var payOut: [Int]
-        let title = "\(request.senderName ?? "") has requested your session for \(request.sessionPrice ?? 0)"
+        let title = "HomeworkMe"
         payOut = convMony(price: request.sessionPrice)
         let desc = "Description: Payment to: \(request.receiverName ?? "") from: \(request.senderName ?? "") for \(request.postTite ?? "") total paid \(payOut[1])"
         let statsParam: [String:String] = ["status":"hot"]
@@ -266,7 +266,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         self.ref.child("Students").child(request.receiverId ?? "").child("receipt").child(request.reqID).updateChildValues(receiptParam)
         requestersView.isHidden = true
         chargeCard( price: payOut[0], description: desc, customerSender: request.senderCustomerId)
-        setupPushNotification(fromDevice: request.senderDevice, title: title)
+        setupPushNotification(fromDevice: request.senderDevice, title: title, body: "\(request.receiverName ?? "") Has accepted your tutor session")
         //            drawPath(start: currentLocation!, end: request.place)
         //            mapViewDisplay.isHidden = false
     }
@@ -472,6 +472,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         if !request.sessionDidStart {
             self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
             self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
+            self.setupPushNotification(fromDevice: request.senderDevice, title: "HomeworkMe" ?? "", body: "\(request.receiverName ?? "") Has started your tutor session")
             if self.isTimerRunning2 {
                 self.isTimerRunning2 = false
                 self.timer2.invalidate()
@@ -497,6 +498,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         
         let par: [String:AnyObject] = ["sessionFinished":true as AnyObject,
                                        "status":"finished" as AnyObject]
+        self.setupPushNotification(fromDevice: request.senderDevice, title: "HomeworkMe", body: "\(request.receiverName ?? "") Has ended your session.")
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
     }
@@ -570,11 +572,9 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         return tableArr
     }
     
-    fileprivate func setupPushNotification(fromDevice:String, title:String)
+    fileprivate func setupPushNotification(fromDevice:String, title:String, body:String)
     {
         //        guard let message = "text.text" else {return}
-        let title = "tech build dreams"
-        let body = "message"
         let toDeviceID = fromDevice
         var headers:HTTPHeaders = HTTPHeaders()
         
@@ -734,7 +734,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
         if tableView == myRequestsTable {
             let cell = tableView.dequeueReusableCell(withIdentifier: "myRequests", for: indexPath)
             if indexPath.section == 0 {
-                timerLabel.isHidden = true
+//                timerLabel.isHidden = true
                 cell.textLabel?.text = "\( tutor.requestsArrPending[indexPath.row].senderName ?? "")\n\(tutor.requestsArrPending[indexPath.row].postTite ?? "")"
                 cell.detailTextLabel?.text = tutor.requestsArrPending[indexPath.row].postTite
                 return cell
@@ -842,7 +842,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 self.sessionBtnView.isHidden = true
                 self.timeSincePstLable.isHidden = false
                 acceptRejView.isHidden = true
-                timerLabel.isHidden = true
+//                timerLabel.isHidden = true
                 if student.requestsArrPending[indexPath.row].receiverPhone != nil {
                     self.phoneNumber = student.requestsArrPending[indexPath.row].receiverPhone
                 }
@@ -868,7 +868,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 self.timeSincePstLable.isHidden = true
                 cancelTutor.setTitleColor(.black, for: .normal); cancelTutor.isEnabled = true
                 startSessionBtn.setTitleColor(.black, for: .normal); startSessionBtn.isEnabled = true
-                timerLabel.isHidden = false
+//                timerLabel.isHidden = false
             } else if indexPath.section == 2 {
                 acceptRejView.isHidden = true
                 cancelTutor.setTitleColor(.gray, for: .normal); cancelTutor.isEnabled = false
@@ -899,7 +899,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 self.acceptRejView.isHidden = false
                 self.sessionBtnView.isHidden = true
                 self.timeSincePstLable.isHidden = false
-                timerLabel.isHidden = true
+//                timerLabel.isHidden = true
                 self.phoneNumber = tutor.requestsArrPending[indexPath.row].senderPhone
                 self.sessionBtnView.isHidden = true
                 request = tutor.requestsArrPending[indexPath.row]
@@ -919,7 +919,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 self.acceptRejView.isHidden = true
                 self.sessionBtnView.isHidden = false
                 self.timeSincePstLable.isHidden = true
-                timerLabel.isHidden = false
+//                timerLabel.isHidden = false
             } else if indexPath.section == 2 {
                 acceptRejView.isHidden = true
                 cancelTutor.setTitleColor(.gray, for: .normal); cancelTutor.isEnabled = false
