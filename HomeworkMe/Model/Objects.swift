@@ -43,6 +43,7 @@ class Student {
     var requestsArrPending = [Request]()
     var requestsArrAccepted = [Request]()
     var requestsArrRejected = [Request]()
+    var requestsArrHistory = [Request]()
     var requestsSentPending = [Request]()
     var requestsSentApprd = [Request]()
     var requestsSentReject = [Request]()
@@ -55,7 +56,7 @@ class Student {
     var endTime = Date()
     var paymentSource: [String]?
     var hasCard = Bool()
-    var currLoc = [String:[String]]()
+    var currLoc = Place()
 }
 
 enum Location {
@@ -91,7 +92,7 @@ class Request {
     var phoneNumber: String!
     var senderDevice: String!
     var recieverDevice: String!
-    var sessionDidStart = Bool()
+    var sessionDidStart = false
     var endTimeStrn: String!
     var endTimeDte: Date!
     var endTimeToMeet: String!

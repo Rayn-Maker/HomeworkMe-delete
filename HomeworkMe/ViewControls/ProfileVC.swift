@@ -70,7 +70,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     var student = Student()
     var phoneNumberString = String()
     static var DEVICEID = String()
-    static var hasCard = true 
+    static var hasCard = true
+    static var senderCustomerId = ""
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -559,9 +560,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     self.Id = id
                     self.student.uid = id
                 } //TutorProfile
-                if let customer = myclass["customer_Id"] as? String {
+                if let customer = myclass["customerId"] as? String {
                     UserDefaults.standard.set(customer, forKey: "customerId")
                     self.student.customerId = customer
+                    ProfileVC.senderCustomerId = customer
                 }
                 self.userName.text = name
                 if let pictureURl = myclass["pictureUrl"] as? String {

@@ -1259,18 +1259,11 @@
                                                 <segue destination="34a-jY-Jsx" kind="show" id="vam-tv-Fox"/>
                                             </connections>
                                         </barButtonItem>
-                                        <rightBarButtonItems>
-                                            <barButtonItem title="View Sent" id="vJ6-nk-opb">
-                                                <connections>
-                                                    <action selector="switchView:" destination="PMH-7S-qC1" id="RO2-Bc-XIF"/>
-                                                </connections>
-                                            </barButtonItem>
-                                            <barButtonItem title="Item" id="zzG-aF-VrN">
-                                                <connections>
-                                                    <segue destination="J2X-N7-IKy" kind="show" id="Swc-TJ-fzu"/>
-                                                </connections>
-                                            </barButtonItem>
-                                        </rightBarButtonItems>
+                                        <barButtonItem key="rightBarButtonItem" title="View Sent" id="vJ6-nk-opb">
+                                            <connections>
+                                                <action selector="switchView:" destination="PMH-7S-qC1" id="RO2-Bc-XIF"/>
+                                            </connections>
+                                        </barButtonItem>
                                     </navigationItem>
                                 </items>
                             </navigationBar>
@@ -2226,7 +2219,7 @@
         <image name="engineering" width="275" height="183"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="2gh-bn-gdF"/>
+        <segue reference="C7k-4i-K4Z"/>
         <segue reference="4q4-jl-RNw"/>
         <segue reference="gPz-g1-dw9"/>
     </inferredMetricsTieBreakers>

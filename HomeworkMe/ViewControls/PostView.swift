@@ -188,15 +188,15 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 if let fromDevice = tutDict["fromDevice"] as? String {
                     self.tutor.deviceId = fromDevice
                 }
-                if let currLoc = tutDict["currLoc"] as? [String:[String]] {
-                    self.tutor.currLoc = currLoc
+                if let currLoc = tutDict["currLoc"] as? [String]{
+                    self.tutor.currLoc.lat = currLoc[0]
+                    self.tutor.currLoc.long = currLoc[1]
+                    self.tutor.currLoc.name = currLoc[2]
+                    self.tutor.currLoc.address = currLoc[3]
                 }
                 if let reqs = tutDict["received"] as? [String:AnyObject] {
                     self.tutor.receivedObject = reqs
                     self.checkIfBookedTutor()
-                }
-                if let posts = tutDict["Posts"] as? [String:AnyObject] {
-                    self.tutor.posts2 = posts
                 }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
@@ -328,13 +328,7 @@ func downloadImage(url:String) -> Data {
                 tutor.places.removeAll()
             }
             if tutor.currLoc != nil {
-                for (_,y) in tutor.currLoc {
-                    places2.lat = y[0]
-                    places2.long = y[1]
-                    places2.name = y[2]
-                    places2.address = y[3]
-                    tutor.places.append(places2)
-                }
+                 tutor.places.append(tutor.currLoc)
                 locationsTableView.reloadData()
             }
         }
@@ -438,7 +432,7 @@ func downloadImage(url:String) -> Data {
                                                   "receiverPic":self.tutor.pictureUrl as AnyObject,
                                                   "senderPic":picUrl as AnyObject,
                                                   "status":"pending" as AnyObject,
-                                                  "senderCustomerId":senderCustomerId as AnyObject,
+                                                  "senderCustomerId":ProfileVC.senderCustomerId as AnyObject,
                                                   "receiverCustomerId":tutor.customerId as AnyObject,
                                                   "price":self.postss.price as AnyObject,
                                                   "senderDevice":ProfileVC.DEVICEID as AnyObject,
@@ -447,6 +441,7 @@ func downloadImage(url:String) -> Data {
             let par = [postKey : parameters] as [String: Any]
             self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
             self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
+            self.ref.child("Students").child(postss.authorID ?? "").child("currentLocation").updateChildValues(place)
             //        self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
             self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName ?? "")")
         } else {
