@@ -36,7 +36,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
     
     //Notificaiton Var
     static let NOTIFICATION_URL = "https://gcm-http.googleapis.com/gcm/send"
-    static var DEVICEID = String()
     
     static let SERVERKEY = "AAAAEwJPepM:APA91bGjsWw0SMNXJZGDeGzDJmqgS8FXK5cYy863_5hNkQLpneX5fW-zOVjoUxgA14Ioc6bm7Fvbkryb6ps-GG-KIIUuVEALqedTOlGXc8CjoXiPoDNZ4lGDaXwaPXMCMlB_cfWgv9mHdagbqLOJAXTqgmfUCav1-Q"
     
@@ -49,25 +48,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         logUser()
         GIDSignIn.sharedInstance().clientID = FirebaseApp.app()?.options.clientID
         GIDSignIn.sharedInstance().delegate = self
-        // Notification implementation
-        if #available(iOS 10.0, *)
-        {
-            UNUserNotificationCenter.current().delegate = self
-            
-            let option : UNAuthorizationOptions = [.alert,.badge,.sound]
-            UNUserNotificationCenter.current().requestAuthorization(options: option, completionHandler: { (bool, err) in
-                if err == nil {
-                  //   UIApplication.shared.registerForRemoteNotifications()
-                }
-            })
-            
-        }else{
-            let settings : UIUserNotificationSettings = UIUserNotificationSettings(types: [.alert,.badge,.sound], categories: nil)
-            application.registerUserNotificationSettings(settings)
-        }
         
-        application.registerForRemoteNotifications()
-        UIApplication.shared.applicationIconBadgeNumber = 0
+       
         
         return FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
     }
@@ -75,28 +57,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
     //notifications configuration
     func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
         guard  let newToken = InstanceID.instanceID().token() else {return}
-        AppDelegate.DEVICEID = newToken
+        ProfileVC.DEVICEID = newToken
         connectToFCM()
-    }
-    
-    
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        
-        let notification =  response.notification.request.content.body
-        
-        print(notification)
-        
-        completionHandler()
-    }
-    
-    @available(iOS 10.0, *)
-    func userNotificationCenter(center: UNUserNotificationCenter, willPresentNotification notification: UNNotification, withCompletionHandler completionHandler: (UNNotificationPresentationOptions) -> Void)
-    {
-        //Handle the notification
-        completionHandler(
-            [UNNotificationPresentationOptions.alert,
-             UNNotificationPresentationOptions.sound,
-             UNNotificationPresentationOptions.badge])
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
@@ -104,12 +66,14 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         completionHandler([.alert, .badge, .sound])
     }
     
-    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        guard let token = InstanceID.instanceID().token() else {return}
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         
-        AppDelegate.DEVICEID = token
-        print(token)
-        connectToFCM()
+        let notification =  response.notification.request.content.body
+        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! MyRequests
+        self.window?.rootViewController = vc
+        print(notification)
+        
+        completionHandler()
     }
     
     
@@ -130,17 +94,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
                 // ...
                 return
             }
-            // User is signed in
-            // ...
         }
     }
     
     func logUser(){
         if Auth.auth().currentUser != nil {
             let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile") as! ProfileVC
-            self.window?.rootViewController = vc
-            
-            
+            self.window?.rootViewController = vc 
         }
         
     }

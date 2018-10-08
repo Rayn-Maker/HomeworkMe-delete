@@ -13,15 +13,15 @@ import FirebaseStorage
 import Stripe
 import GooglePlaces
 import GoogleSignIn
+import UserNotifications
 
-class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GIDSignInUIDelegate  {
+class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GIDSignInUIDelegate, UNUserNotificationCenterDelegate  {
     //// Edit School pluggings
     @IBOutlet weak var universityBtn: UIButton!
     @IBOutlet weak var degreeSubjectBtn: UIButton!
     @IBOutlet weak var cancelBtn: UIButton!
     @IBOutlet weak var classRoomTableView: UITableView!
     @IBOutlet weak var myClassesTableView: UITableView!
-    @IBOutlet weak var addClassBtn: UIButton!
     /// finish edit school pluggins
     
     // edit account pluggins
@@ -69,6 +69,8 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     var placeArr = [Place](); var placeesDict = [String:[String]]()
     var student = Student()
     var phoneNumberString = String()
+    static var DEVICEID = String()
+    static var hasCard = true 
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -77,6 +79,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         picker.delegate = self
         let storage = Storage.storage().reference(forURL: "gs://hmwrkme.appspot.com")
         userStorage = storage.child("Students")
+        cancelBtn.setTitleColor(.gray, for: .normal)
         
         // Show registration completion
         if classView {
@@ -101,6 +104,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         } else {
             goLiveLable.text = "Go Live!!"
         }
+        
+        //notifications
+       registerForPushNotifications()
         
         // setup date picker
         phoneNumber.text = phoneNumberString
@@ -153,28 +159,37 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         // first time pressed
         editIntChecker += 1
         if editIntChecker % 2 == 0 {
-            editViewBtn.setTitle("Edit", for: .normal)
-            changePicBtn.isHidden = true
-            classSearchView.isHidden = true
-            userName.isHidden = false
-            addClassBtn.isHidden = true
-            goliveView.isHidden = false
-            cancelBtn.isHidden = true
-            if imageChangeCheck {
-                saveImage()
+            if self.student.pictureUrl != nil {
+//                if editViewBtn.titleLabel?.text != "Edit" {
+//
+//                }
+                editViewBtn.setTitle("Edit", for: .normal)
+                changePicBtn.isHidden = true
+                classSearchView.isHidden = true
+                
+                
+                cancelBtn.isEnabled = false
+                cancelBtn.setTitleColor(.gray, for: .normal)
+                if imageChangeCheck {
+                    saveImage()
+                }
+            } else {
+                let alert = UIAlertController(title: "Missing Information", message: "Please add a photo", preferredStyle: .alert)
+                let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                alert.addAction(ok)
+                present(alert, animated: true, completion: nil)
+                editIntChecker = 1
             }
             view.endEditing(true)
 //            addClassBtn.isHidden = true
         } else {
             /// second time pressed
+            editView.isHidden = false
             editViewBtn.setTitle("Save", for: .normal)
             changePicBtn.isHidden = false
-            addClassBtn.isHidden = false
             classSearchView.isHidden = false
-            userName.isHidden = true
-            cancelBtn.isHidden = false
-            cancelBtn.isHidden = false
-            goliveView.isHidden = true
+            cancelBtn.isEnabled = true
+            cancelBtn.setTitleColor(.black, for: .normal)
 //            addClassBtn.isHidden = true
         }
     }
@@ -195,17 +210,11 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBAction func cancelSavePrsd(_ sender: Any) {
         editViewBtn.setTitle("Edit", for: .normal)
         changePicBtn.isHidden = true
-        addClassBtn.isHidden = true
         classSearchView.isHidden = true
-        userName.isHidden = false
-        cancelBtn.isHidden = true
-        goliveView.isHidden = false
+        cancelBtn.isEnabled = false
+        cancelBtn.setTitleColor(.gray, for: .normal)
         view.endEditing(true)
         editIntChecker = 0
-    }
-    
-    @IBAction func addClassPrsd(_ sender: Any) {
-        editView.isHidden = false
     }
     
     @IBAction func goLivePrsed(_ sender: Any) {
@@ -252,8 +261,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
          
             let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
                                            "status":"live",
-                                           "phoneNumber": self.phoneNumber.text,
-                                           "fromDevice":AppDelegate.DEVICEID]
+                                           "phoneNumber": self.phoneNumber.text]
             
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
@@ -263,8 +271,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
              tutorEdit.isHidden = true
         } else if !placeesDict.isEmpty  {
             let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
-                                           "status":"live",
-                                           "fromDevice":AppDelegate.DEVICEID]
+                                           "status":"live"]
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
                     
@@ -274,8 +281,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         } else if phoneNumber.text != nil && !student.meetUpLocation.isEmpty {
             
             let userInfo: [String: Any] = ["status":"live",
-                                           "phoneNumber": self.phoneNumber.text,
-                                           "fromDevice":AppDelegate.DEVICEID]
+                                           "phoneNumber": self.phoneNumber.text]
             
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
@@ -314,6 +320,60 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
+    //notifications configuration
+    func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
+        guard  let newToken = InstanceID.instanceID().token() else {return}
+        ProfileVC.DEVICEID = newToken
+        connectToFCM()
+    }
+    
+    func registerForPushNotifications() {
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) {
+            (granted, error) in
+            print("Permission granted: \(granted)")
+            guard let token = InstanceID.instanceID().token() else {return}
+            var ref: DatabaseReference!
+            ref = Database.database().reference()
+            let userInfo: [String: Any] = ["fromDevice":token]
+            
+            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo)
+            // 1. Check if permission granted
+            guard granted else { return }
+            // 2. Attempt registration for remote notifications on the main thread
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+    }
+    
+    
+    @available(iOS 10.0, *)
+    func userNotificationCenter(center: UNUserNotificationCenter, willPresentNotification notification: UNNotification, withCompletionHandler completionHandler: (UNNotificationPresentationOptions) -> Void)
+    {
+        //Handle the notification
+        completionHandler(
+            [UNNotificationPresentationOptions.alert,
+             UNNotificationPresentationOptions.sound,
+             UNNotificationPresentationOptions.badge])
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void)
+    {
+        completionHandler([.alert, .badge, .sound])
+    }
+    
+    func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        
+        connectToFCM()
+    }
+    
+    
+    func connectToFCM()
+    {
+        Messaging.messaging().shouldEstablishDirectChannel = true
+    }
+    
     func setUpSchdArr(){
         schedule = "Sundays 12:00 am"
         dayArray = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
@@ -331,6 +391,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [String : Any]) {
         if let image = info[UIImagePickerControllerEditedImage] as? UIImage {
             self.profilePic.image = image
+            self.student.pictureUrl = "url"
         }
         self.dismiss(animated: true, completion: nil)
     }
@@ -384,6 +445,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     print(er!.localizedDescription)
                 }
                 if let url = url {
+                    self.student.pictureUrl = url.absoluteString
                     self.ref.child("Students").child(user!.uid).child("pictureUrl").setValue(url.absoluteString)
 
                     
@@ -475,6 +537,14 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 if let status = myclass["paymentSource"] as? [ String] {
                     self.student.paymentSource = status
                     
+                } //fromDevice
+                if let fromDevice = myclass["fromDevice"] as? String {
+                    self.student.deviceId = fromDevice
+                    ProfileVC.DEVICEID = fromDevice
+                }
+                if let hasCard = myclass["hasCard"] as? Bool {
+                    self.student.hasCard = hasCard
+                    ProfileVC.hasCard = hasCard
                 }
                 if let meetUpLocations = myclass["meetUpLocations"] as? [String:[String]] {
                     self.student.meetUpLocation = meetUpLocations
@@ -739,11 +809,17 @@ extension ProfileVC: STPAddCardViewControllerDelegate {
         
         
         StripeClient.shared.addCard(with: token, amount: 000) { result in
-            switch result {
+            switch result.result {
             // 1
             case .success:
                 completion(nil)
                 
+                let userInfo: [String: Any] = ["hasCard": true]
+                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
+                    if err != nil {
+                        ProfileVC.hasCard = true 
+                    }
+                }
                 self.dismiss(animated: true)
             // 2
             case .failure(let error):

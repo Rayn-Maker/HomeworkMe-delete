@@ -50,7 +50,7 @@ final class StripeClient {
     return url
   }()
     
-    func completeCharge(with customer: String, amount: Int, description:String, customerSender:String, completion: @escaping (DataResponse<String>) -> Void) {
+    func completeCharge(amount: Int, description:String, customerSender:String, completion: @escaping (DataResponse<String>) -> Void) {
         // 1
         let url = baseURL.appendingPathComponent("charge")
 
@@ -75,7 +75,7 @@ final class StripeClient {
         }
     }
     
-    func addCard(with token: STPToken, amount: Int, completion: @escaping (Result) -> Void) {
+    func addCard(with token: STPToken, amount: Int, completion: @escaping (DataResponse<String>) -> Void) {
         // 1
         let url = baseURL.appendingPathComponent("addCard")
         let customer =  UserDefaults.standard.string(forKey: "customerId")
@@ -95,9 +95,9 @@ final class StripeClient {
             .responseString { response in
                 switch response.result {
                 case .success:
-                    completion(Result.success)
+                    completion(response)
                 case .failure(let error):
-                    completion(Result.failure(error))
+                    completion(response)
                 }
         }
     }

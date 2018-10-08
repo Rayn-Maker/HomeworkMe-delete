@@ -33,6 +33,20 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "MyRequests.acceptRequest():MyRequests.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "request.senderCustomerId">
+            </PersistentString>
+            <PersistentString
+               value = "receiptParam">
+            </PersistentString>
+            <PersistentString
+               value = "request.senderPhone">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "MyClassRoomVC.fetchPostInfo(dictCheck:):MyClassRoomVC.swift">
          <PersistentStrings>
             <PersistentString

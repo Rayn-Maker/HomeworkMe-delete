@@ -126,7 +126,7 @@ class MyClassRoomVC: UIViewController {
                         let ar = ["Zelle",text]
                          let par = ["paymentSource":ar] as [String:[String]]
                         ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par)
-                        self.student.paymentSource = ["paymentSource":ar]
+                        self.student.paymentSource = ar
                     }
                 }
                 alert3.addAction(Add); alert3.addAction(cancel)

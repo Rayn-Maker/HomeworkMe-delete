@@ -47,9 +47,9 @@ class Log_in: UIViewController {
             
             
             if let user = user {
-                let userInfo: [String: Any] = ["fromDevice":AppDelegate.DEVICEID]
                 
-                self.ref.child("Students").child(user.user.uid).updateChildValues(userInfo)
+                
+                
                 let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile")
                 
                // self.present(vc, animated: true, completion: nil)

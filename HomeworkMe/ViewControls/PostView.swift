@@ -48,7 +48,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
         let storage = Storage.storage().reference(forURL: "gs://hmwrkme.appspot.com")
         userStorage = storage.child("Students")
         
-        postTitle.text = postss.title
+        postTitle.text = postObject.title
         editImage()
         fetchTutor()
         fetchPost()
@@ -146,13 +146,6 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
         present(navigationController, animated: true)
     }
     
-//    func chargeCard(){
-//        StripeClient.shared.completeCharge( with: tutor.customerId ?? "", amount: postObject.price, description: "", customerSender: "", payOut: 0, customerReceiver: "") { result in
-//
-//        }
-//    }
- 
-    
     // end of stripe payment implementation 
     func editImage(){
         profilePic.layer.borderWidth = 1
@@ -171,17 +164,20 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 
                 if let mtuplcatns = tutDict["meetUpLocations"] as? [String:[String]] {
                     self.tutor.meetUpLocation = mtuplcatns
-                    self.getLocations()
-                } //full_name
+                    
+                }
                 if let fullname = tutDict["full_name"] as? String {
                     self.tutor.full_name = fullname
+                }
+                if let paymentSource = tutDict["paymentSource"] as? [String] {
+                    self.tutor.paymentSource = paymentSource
                 }
                 if let email = tutDict["email"] as? String {
                     self.tutor.email = email
                 }
                 if let phn = tutDict["phoneNumber"] as? String {
                     self.tutor.phoneNumebr = phn
-                } //pictureUrl
+                }
                 if let phn = tutDict["pictureUrl"] as? String {
                     self.tutor.pictureUrl = phn
                     self.tutor.profilepic = self.downloadImage(url: phn as! String)
@@ -189,13 +185,19 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 if let phn = tutDict["uid"] as? String {
                     self.tutor.uid = phn
                 }
+                if let fromDevice = tutDict["fromDevice"] as? String {
+                    self.tutor.deviceId = fromDevice
+                }
+                if let currLoc = tutDict["currLoc"] as? [String:[String]] {
+                    self.tutor.currLoc = currLoc
+                }
                 if let reqs = tutDict["received"] as? [String:AnyObject] {
                     self.tutor.receivedObject = reqs
                     self.checkIfBookedTutor()
                 }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
-                }//customerId
+                }
                 if let posts = tutDict["Posts"] as? [String:AnyObject] {
                     self.tutor.posts2 = posts
                 }
@@ -205,6 +207,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                
                 if let status = tutDict["status"] as? String {
                     self.tutor.tutorStatus = status
+                    self.getLocations()
                     if self.sentReq {
                         self.statusLbl.text = status + " :Request Pending"
                     } else {
@@ -230,7 +233,6 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
             if response.value is NSNull {
                 /// dont do anything \\\
             } else {
-
                 let posts = response.value as! [String:AnyObject]
                 if let fname = posts["authorName"] as? String {
                     self.postss.authorName = fname
@@ -263,7 +265,6 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 if let postic = posts["postPic"] {
                     if postic != nil {
                         self.postss.postPic = postic as? String
-                        
                     }
                 }
                 if let stIn = posts["studentInClass"] {
@@ -274,7 +275,6 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                         self.classAndRatingsLable.text = "Tutor of class"
                     }
                 }
-                
                 if let comments = posts["comments"] as? [String:Any] {
                     
                 }
@@ -312,15 +312,32 @@ func downloadImage(url:String) -> Data {
 }
     
     func getLocations() {
-        var places = Place()
-        for (x,y) in tutor.meetUpLocation {
-            places.lat = y[0]
-            places.long = y[1]
-            places.name = y[2]
-            places.address = y[3]
-            tutor.places.append(places)
+        if tutor.tutorStatus == "live" {
+            var places = Place()
+            for (_,y) in tutor.meetUpLocation {
+                places.lat = y[0]
+                places.long = y[1]
+                places.name = y[2]
+                places.address = y[3]
+                tutor.places.append(places)
+            }
+            locationsTableView.reloadData()
+        } else if tutor.tutorStatus == "hot" {
+            var places2 = Place()
+            if tutor.places.count > 0 {
+                tutor.places.removeAll()
+            }
+            if tutor.currLoc != nil {
+                for (_,y) in tutor.currLoc {
+                    places2.lat = y[0]
+                    places2.long = y[1]
+                    places2.name = y[2]
+                    places2.address = y[3]
+                    tutor.places.append(places2)
+                }
+                locationsTableView.reloadData()
+            }
         }
-        locationsTableView.reloadData()
     }
     
     func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
@@ -401,106 +418,44 @@ func downloadImage(url:String) -> Data {
         } else {
             
         }
-        if tutor.uid != senderId {
-            let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
-            
-            if tutor.tutorStatus == "live" {
-                let place: [String:String] = ["address":meetUpLocation.address ?? "",
-                                              "long":meetUpLocation.long ?? "",
-                                              "lat":meetUpLocation.lat ?? "",
-                                              "name":meetUpLocation.name ?? ""]
-                
-                let parameters: [String:AnyObject] = ["senderId":senderId as AnyObject,
-                                                      "receiverId":self.tutor.uid as AnyObject,
-                                                      "time":dateString as AnyObject,
-                                                      "senderName":senderName as AnyObject,
-                                                      "receiverName":postss.authorName as AnyObject,
-                                                      "reqId":postKey as AnyObject,
-                                                      "place":place as AnyObject,
-                                                      "postTitle":self.postss.title as AnyObject,
-                                                      "senderPhone":phoneNumber as AnyObject,
-                                                      "receiverPhone":self.tutor.phoneNumebr as AnyObject,
-                                                      "receiverPic":self.tutor.pictureUrl as AnyObject,
-                                                      "senderPic":picUrl as AnyObject,
-                                                      "status":"pending" as AnyObject,
-                                                      "senderCustomerId":senderCustomerId as AnyObject,
-                                                      "receiverCustomerId":tutor.customerId as AnyObject,
-                                                      "price":self.postss.price as AnyObject,
-                                                      "senderDevice":AppDelegate.DEVICEID as AnyObject,
-                                                      "receiverDevice":tutor.deviceId as AnyObject]
         
-                let par = [postKey : parameters] as [String: Any]
-                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
-                self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
-                self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName)")
-            } else if tutor.tutorStatus == "off" {
-                // send a text message after sending request
-                // decide on time off the app.
-                // tutor approve off requests only after putting them in a timed slot
-                // prompt user to send text message.
-                
-                let place: [String:String] = ["address":meetUpLocation.address ?? "",
-                                              "long":meetUpLocation.long ?? "",
-                                              "lat":meetUpLocation.lat ?? "",
-                                              "name":meetUpLocation.name ?? ""]
-                
-                let parameters: [String:AnyObject] = ["senderId":senderId as AnyObject,
-                                                      "receiverId":self.tutor.uid as AnyObject,
-                                                      "time":dateString as AnyObject,
-                                                      "senderName":senderName as AnyObject,
-                                                      "receiverName":postss.authorName as AnyObject,
-                                                      "reqId":postKey as AnyObject,
-                                                      "place":place as AnyObject,
-                                                      "postTitle":self.postss.title as AnyObject,
-                                                      "senderPhone":phoneNumber as AnyObject,
-                                                      "receiverPhone":self.tutor.phoneNumebr as AnyObject,
-                                                      "receiverPic":self.tutor.pictureUrl as AnyObject,
-                                                      "senderCustomerId":senderCustomerId as AnyObject,
-                                                      "receiverCustomerId":tutor.customerId as AnyObject,
-                                                      "senderPic":picUrl as AnyObject,
-                                                      "status":"pending" as AnyObject,
-                                                      "price":self.postss.price as AnyObject]
-                
-                let par = [postKey : parameters] as [String: Any]
-                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
-                self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
-                self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName)")
-            } else if tutor.tutorStatus == "hot" {
-                // display map of where the tutor is.
-                // join session button
-                
-                let place: [String:String] = ["address":meetUpLocation.address ?? "",
-                                              "long":meetUpLocation.long ?? "",
-                                              "lat":meetUpLocation.lat ?? "",
-                                              "name":meetUpLocation.name ?? ""]
-                
-                let parameters: [String:AnyObject] = ["senderId":senderId as AnyObject,
-                                                      "receiverId":self.tutor.uid as AnyObject,
-                                                      "time":dateString as AnyObject,
-                                                      "senderName":senderName as AnyObject,
-                                                      "receiverName":postss.authorName as AnyObject,
-                                                      "reqId":postKey as AnyObject,
-                                                      "place":place as AnyObject,
-                                                      "postTitle":self.postss.title as AnyObject,
-                                                      "senderPhone":phoneNumber as AnyObject,
-                                                      "receiverPhone":self.tutor.phoneNumebr as AnyObject,
-                                                      "receiverPic":self.tutor.pictureUrl as AnyObject,
-                                                      "senderCustomerId":senderCustomerId as AnyObject,
-                                                      "receiverCustomerId":tutor.customerId as AnyObject,
-                                                      "senderPic":picUrl as AnyObject,
-                                                      "status":"pending" as AnyObject,
-                                                      "price":self.postss.price as AnyObject]
-                
-                let par = [postKey : parameters] as [String: Any]
-                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
-                self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
-                self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-                self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName)")
-            }
+        if tutor.uid != senderId {
+            let place: [String:String] = ["address":meetUpLocation.address ?? "",
+                                          "long":meetUpLocation.long ?? "",
+                                          "lat":meetUpLocation.lat ?? "",
+                                          "name":meetUpLocation.name ?? ""]
+            
+            let parameters: [String:AnyObject] = ["senderId":senderId as AnyObject,
+                                                  "receiverId":self.tutor.uid as AnyObject,
+                                                  "time":dateString as AnyObject,
+                                                  "senderName":senderName as AnyObject,
+                                                  "receiverName":postss.authorName as AnyObject,
+                                                  "reqId":postKey as AnyObject,
+                                                  "place":place as AnyObject,
+                                                  "postTitle":self.postss.title as AnyObject,
+                                                  "senderPhone":phoneNumber as AnyObject,
+                                                  "receiverPhone":self.tutor.phoneNumebr as AnyObject,
+                                                  "receiverPic":self.tutor.pictureUrl as AnyObject,
+                                                  "senderPic":picUrl as AnyObject,
+                                                  "status":"pending" as AnyObject,
+                                                  "senderCustomerId":senderCustomerId as AnyObject,
+                                                  "receiverCustomerId":tutor.customerId as AnyObject,
+                                                  "price":self.postss.price as AnyObject,
+                                                  "senderDevice":ProfileVC.DEVICEID as AnyObject,
+                                                  "receiverDevice":tutor.deviceId as AnyObject,
+                                                  "receiverPayment":tutor.paymentSource as AnyObject]
+            let par = [postKey : parameters] as [String: Any]
+            self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("sent").updateChildValues(par)
+            self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
+            //        self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
+            self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName ?? "")")
         } else {
             // you cant send a request to yourself.
+            let alert = UIAlertController(title: "This is your session", message: "You can't book a session with yourself.", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            alert.addAction(ok)
+            self.present(alert, animated: true, completion: nil)
+            
         }
         
     }
@@ -529,24 +484,8 @@ extension PostView: UITableViewDataSource, UITableViewDelegate {
         // check to make sure this post id is not in my sent posts or else say you already requested this
         if indexPath.section == 0 {
             if !sentReq {
-                if tutor.tutorStatus == "hot" {
-                    let alert = UIAlertController(title: "This Tutor is Hot", message: "They are currently in a session so you would have to meet them where they are", preferredStyle: .alert)
-                    let ok = UIAlertAction(title: "Request", style: .default) { (res) in
-                        //
-                        self.sendRequest()
-                    }
-                    let cancel = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
-                    alert.addAction(ok); alert.addAction(cancel)
-                    present(alert, animated: true, completion: nil)
-                } else if tutor.tutorStatus == "live" {
-                    meetUpLocation = tutor.places[indexPath.row]
-                    sendRequest()
-                    let alert = UIAlertController(title: "Tutor request sent", message: "", preferredStyle: .alert)
-                    let cancel = UIAlertAction(title: "Ok", style: .destructive, handler: nil)
-                    alert.addAction(cancel)
-                    present(alert, animated: true, completion: nil)
-                    // show alert to make purchase
-                }
+                meetUpLocation = tutor.places[indexPath.row]
+               sendRequest()
             } else {
                 let alert = UIAlertController(title: "Request Previously Sent", message: "This tutor is yet to respond to your request try texting or calling.", preferredStyle: .alert)
                 let text = UIAlertAction(title: "Text", style: .default) { (res) in
@@ -628,11 +567,17 @@ extension PostView: STPAddCardViewControllerDelegate {
         
         
         StripeClient.shared.addCard(with: token, amount: 000) { result in
-            switch result {
+            switch result.result {
             // 1
             case .success:
                 completion(nil)
                 
+                let userInfo: [String: Any] = ["hasCard": true]
+                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
+                    if err != nil {
+                        ProfileVC.hasCard = true
+                    }
+                }
                 self.dismiss(animated: true)
             // 2
             case .failure(let error):

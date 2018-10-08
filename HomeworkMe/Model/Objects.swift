@@ -35,7 +35,7 @@ class Student {
     var comments: Note?
     var pictureUrl: String!
     var classification: String!
-    var meetUpLocation: [String:[String]]!
+    var meetUpLocation = [String:[String]]()
     var schedule: [String]!
     var major: String!
     var schoolEmail:String!
@@ -54,6 +54,8 @@ class Student {
     var deviceId = String()
     var endTime = Date()
     var paymentSource: [String]?
+    var hasCard = Bool()
+    var currLoc = [String:[String]]()
 }
 
 enum Location {
@@ -97,6 +99,7 @@ class Request {
     var senderCustomerId:String!
     var receiverCustomerId:String!
     var sessionPrice:Int!
+    var receiverPayment: [String]!
 }
 
 class Post {

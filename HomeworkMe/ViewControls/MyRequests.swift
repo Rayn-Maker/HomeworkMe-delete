@@ -37,11 +37,11 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     @IBOutlet weak var mapViewDisplay: UIView!
     @IBOutlet weak var cancelTutor: UIButton!
     @IBOutlet weak var mapView: GMSMapView!
-    @IBOutlet weak var acceptRejView: UIStackView!
+    @IBOutlet weak var acceptRejView: UIStackView! 
     
     @IBOutlet weak var startSessionBtn: UIButton!
     
-    @IBOutlet weak var sessionBtnView: UIView!
+    @IBOutlet weak var sessionBtnView: UIStackView!
     
     
     var tutor = Student()
@@ -58,6 +58,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     var notificationRepeats = true
     private var notTimer = Timer()
     var toMeetUp = "to meet up"
+    var window: UIWindow?
     
 // google map setup
     var place = Place()
@@ -79,6 +80,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     var isTimerRunning2 = false
     var isGrantedAccess = false
     var phoneNumber = String()
+    var placeesDict = [String:[String]]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -126,57 +128,32 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     }
     
     @IBAction func acceptReq(_ sender: Any) {
-        // remove profile from request cup and put it in jobs cup
-        // check status of tutor
-        // start timer for 20 mins
-        let dateString = String(describing: Date())
-        var calendar = Calendar.current
- 
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
-        formatter.calendar.date(byAdding: .minute, value: 20, to: Date())
-        let strDate = formatter.string(from: Date())
-        let datesss = calendar.date(byAdding: .minute, value: 20, to: formatter.date(from: strDate)!)
-        let y = formatter.string(from: datesss!)
-        let parameter2: [String:String] = ["status":"hot"]
-        var payOut: [Int]
+        
+        
         
         if self.tutor.tutorStatus == "live" {
-            let par = ["time": dateString as AnyObject,
-                       "status":"approved",
-                       "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
-                       "endTimeToMeet": y ?? "",
-                       "currLocationName":self.request.place.name] as! [String: Any]
-            
-        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
-        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(parameter2)
-        self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
-        self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
-        
-        payOut = convMony(price: request.sessionPrice)
-        let desc = "Description: Payment to: \(request.receiverName) from: \(request.senderName) for \(request.postTite) total paid \(payOut)"
-        chargeCard(customer: request.senderCustomerId, price: payOut[0], description: desc, customerSender: request.senderCustomerId)
-
-            
-            requestersView.isHidden = true
-//            drawPath(start: currentLocation!, end: request.place)
-//            mapViewDisplay.isHidden = false
-            setupPushNotification(fromDevice: request.senderDevice)
+            let alert1 = UIAlertController(title: "Congratulations", message: "You have 20 minutes to meet at the location to start the session", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default) { (_) in
+                self.acceptRequest()
+            }
+            alert1.addAction(ok)
+            present(alert1, animated: true, completion: nil)
         } else if self.tutor.tutorStatus == "hot" {
-            let par = ["time": dateString as AnyObject,
-                       "status":"approved",
-                       "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
-                       "endTimeToMeet": y ?? "",
-                "currLocationName":self.request.place.name] as [String : Any]
-            
-            self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
-            self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
-            self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
-            setupPushNotification(fromDevice: request.senderDevice)
-            requestersView.isHidden = true
+            let alert1 = UIAlertController(title: "Congratulations", message: "Student has 20 minutes to meet you at the location to start the session", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default) { (_) in
+                self.acceptRequest()
+            }
+            alert1.addAction(ok)
+            present(alert1, animated: true, completion: nil)
+     
         } else if self.tutor.tutorStatus == "off" {
-            // a callendar should be shown when cell is clicked on.
-            setupPushNotification(fromDevice: request.senderDevice)
+            let alert = UIAlertController(title: "You are Off", message: "1) Make sure to communicate with the student on what time and location to meet. 2) When you have the location and time from the student turn on your live switch on you profile page and tap this session again.", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "ok", style: .default) { (_) in
+                let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile") as! ProfileVC
+                self.window?.rootViewController = vc
+            }
+            alert.addAction(ok)
+            present(alert, animated: true, completion: nil)
         }
     }
     
@@ -253,6 +230,55 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         startSessionBtn.isEnabled = false
     }
     
+    func acceptRequest() {
+        let dateString = String(describing: Date())
+        var calendar = Calendar.current
+        
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+        formatter.calendar.date(byAdding: .minute, value: 20, to: Date())
+        let strDate = formatter.string(from: Date())
+        let datesss = calendar.date(byAdding: .minute, value: 20, to: formatter.date(from: strDate)!)
+        let y = formatter.string(from: datesss!)
+        var payOut: [Int]
+        let title = "\(request.senderName ?? "") has requested your session for \(request.sessionPrice ?? 0)"
+        payOut = convMony(price: request.sessionPrice)
+        let desc = "Description: Payment to: \(request.receiverName ?? "") from: \(request.senderName ?? "") for \(request.postTite ?? "") total paid \(payOut[1])"
+        let statsParam: [String:String] = ["status":"hot"]
+        let receiptParam = ["tutor":request.receiverName,
+                            "tutorPhone":request.receiverPhone,
+                            "tutorPay":request.receiverPayment,
+                            "studentPhon":request.senderPhone,
+                            "studentCust":request.senderCustomerId,
+                            "student":request.senderName,
+                            "price":request.sessionPrice,
+                            "date":dateString,
+                            "description":desc] as! [String:AnyObject]
+        
+        let locParam = ["time": dateString as AnyObject,
+                        "status":"approved",
+                        "currLocationCoord": "\(self.request.place.lat ?? "") \(self.request.place.long ?? "")",
+            "endTimeToMeet": y ?? "",
+            "currLocationName":self.request.place.name] as! [String: Any]
+        
+        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(statsParam)
+        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(statsParam)
+        
+        self.ref.child("Students").child(request.receiverId ?? "").updateChildValues(placeesDict)
+        
+        self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(locParam)
+        self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(locParam)
+        
+        self.ref.child("Receipt").child(request.reqID).updateChildValues(receiptParam)
+        self.ref.child("Students").child(request.senderId ?? "").child("receipt").child(request.reqID).updateChildValues(receiptParam)
+        self.ref.child("Students").child(request.receiverId ?? "").child("receipt").child(request.reqID).updateChildValues(receiptParam)
+        requestersView.isHidden = true
+        chargeCard( price: payOut[0], description: desc, customerSender: request.senderCustomerId)
+        setupPushNotification(fromDevice: request.senderDevice, title: title)
+        //            drawPath(start: currentLocation!, end: request.place)
+        //            mapViewDisplay.isHidden = false
+    }
+    
     func convMony(price:Int) -> [Int] {
         let total = price * 100
         let payOut = Int(floor(Double(total) * 0.25))
@@ -265,9 +291,9 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         self.dismiss(animated: true, completion: nil)
     }
     
-    func chargeCard(customer:String, price:Int, description:String, customerSender:String){
-        StripeClient.shared.completeCharge(with: customer, amount: price, description:description, customerSender: customerSender) { (result) in
-            print(result)
+    func chargeCard( price:Int, description:String, customerSender:String){
+        StripeClient.shared.completeCharge(amount:price, description: description, customerSender: customerSender) { (result) in
+            //
         }
     }
     
@@ -473,6 +499,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             req.senderCustomerId = b["senderCustomerId"] as? String
             req.sessionPrice = b["price"] as? Int
             req.receiverPicUrl = b["receiverPic"] as? String
+            req.receiverPayment = b["receiverPayment"] as? [String]
             if let et = b["endTimeToMeet"] as? String {
                 req.endTimeToMeet = et
 //                connectTimer(req: req, timeToMeet: true)
@@ -489,6 +516,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
                 req.place.lat = place["lat"] as? String
                 req.place.long = place["long"] as? String
                 req.place.name = place["name"] as? String
+                let arr = ["\(req.place.lat)", "\(req.place.long)", req.place.name , "\(req.place.address ?? "")"]
+                placeesDict["currLoc"] = arr as! [String]
             }
             if req.reqStatus == "pending" {
                 tableArr.requestsArrPending.append(req)
@@ -503,7 +532,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         return tableArr
     }
     
-    fileprivate func setupPushNotification(fromDevice:String)
+    fileprivate func setupPushNotification(fromDevice:String, title:String)
     {
         //        guard let message = "text.text" else {return}
         let title = "tech build dreams"
@@ -577,18 +606,22 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
 //    }
     
     func downlaodPic(url:String) {
-        self.storageRef.reference(forURL:url).getData(maxSize: 1 * 1024 * 1024, completion: { (imgData, error) in
-            if error == nil {
-                if let data = imgData{
-                    self.image.image = UIImage(data: data)
+        if url != nil && url != "" && url != " " {
+            self.storageRef.reference(forURL:url).getData(maxSize: 1 * 1024 * 1024, completion: { (imgData, error) in
+                if error == nil {
+                    if let data = imgData{
+                        self.image.image = UIImage(data: data)
+                        self.activitySpinner.stopAnimating()
+                    }
+                }
+                else {
+                    print(error?.localizedDescription)
                     self.activitySpinner.stopAnimating()
                 }
-            }
-            else {
-                print(error?.localizedDescription)
-                self.activitySpinner.stopAnimating()
-            }
-        })
+            })
+        } else {
+            self.image.image = UIImage(named: "engineering")
+        }
     }
     
     func drawPath(start:CLLocation, end:Place){

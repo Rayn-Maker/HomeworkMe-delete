@@ -65,8 +65,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                                        "fName": user.profile.givenName ?? " ",
                                                        "lName": user.profile.familyName ?? " ",
                                                        "full_name": user.profile.name ?? " ",
-                                                       "email": user.profile.email ?? " ",
-                                                       "fromDevice":AppDelegate.DEVICEID]
+                                                       "email": user.profile.email ?? " "]
                         
                         self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo)
                     } else {
@@ -74,8 +73,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                                        "fName": user.profile.givenName ?? " ",
                                                        "lName": user.profile.familyName ?? " ",
                                                        "full_name": user.profile.name ?? " ",
-                                                       "email": user.profile.email ?? " ",
-                                                       "fromDevice":AppDelegate.DEVICEID]
+                                                       "email": user.profile.email ?? " "]
                         
                         
                         self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo, withCompletionBlock: { (err, resp) in
