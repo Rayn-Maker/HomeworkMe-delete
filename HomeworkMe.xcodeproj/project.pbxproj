@@ -25,6 +25,7 @@
 		68226CB2211BB24600277FC5 /* Log_in.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB1211BB24600277FC5 /* Log_in.swift */; };
 		68226CB821226AA600277FC5 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB721226AA600277FC5 /* PostView.swift */; };
 		68226CBA2122867800277FC5 /* MyRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB92122867700277FC5 /* MyRequests.swift */; };
+		68281821216DF47200D51568 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68281820216DF47200D51568 /* OnboardingView.swift */; };
 		683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683C83AB2165C97500BBFAF6 /* WebViewController.swift */; };
 		6844213921228EF50017C9D5 /* EditBio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6844213821228EF50017C9D5 /* EditBio.swift */; };
 		685EB60421124DFB001A7A5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685EB60321124DFB001A7A5C /* AppDelegate.swift */; };
@@ -69,6 +70,7 @@
 		68226CB1211BB24600277FC5 /* Log_in.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log_in.swift; sourceTree = "<group>"; };
 		68226CB721226AA600277FC5 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		68226CB92122867700277FC5 /* MyRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRequests.swift; sourceTree = "<group>"; };
+		68281820216DF47200D51568 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6829B6892156322A0052DD75 /* HomeworkMe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeworkMe.entitlements; sourceTree = "<group>"; };
 		683C83AB2165C97500BBFAF6 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
 		6844213821228EF50017C9D5 /* EditBio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBio.swift; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 				68226CB92122867700277FC5 /* MyRequests.swift */,
 				683C83AB2165C97500BBFAF6 /* WebViewController.swift */,
 				6844213821228EF50017C9D5 /* EditBio.swift */,
+				68281820216DF47200D51568 /* OnboardingView.swift */,
 			);
 			path = ViewControls;
 			sourceTree = "<group>";
@@ -346,6 +349,7 @@
 				"${BUILT_PRODUCTS_DIR}/Stripe/Stripe.framework",
 				"${BUILT_PRODUCTS_DIR}/leveldb-library/leveldb.framework",
 				"${BUILT_PRODUCTS_DIR}/nanopb/nanopb.framework",
+				"${BUILT_PRODUCTS_DIR}/paper-onboarding/paper_onboarding.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
 			outputPaths = (
@@ -365,6 +369,7 @@
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/Stripe.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/leveldb.framework",
 				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/nanopb.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/paper_onboarding.framework",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -433,6 +438,7 @@
 				688EBCA62152121F0011CFA3 /* CheckoutViewController.swift in Sources */,
 				685EB61A21124EB6001A7A5C /* Objects.swift in Sources */,
 				68129E5B2150DAFE000F319A /* InventoryPuppyTableViewCell.swift in Sources */,
+				68281821216DF47200D51568 /* OnboardingView.swift in Sources */,
 				685EB60421124DFB001A7A5C /* AppDelegate.swift in Sources */,
 				688EBCA42152121F0011CFA3 /* Buttons.swift in Sources */,
 				68129E5F2150DAFE000F319A /* DetailViewController.swift in Sources */,

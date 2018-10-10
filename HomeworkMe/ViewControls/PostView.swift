@@ -40,6 +40,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     var tutor = Student()
     var sentReq = false
     let postss = Post()
+    var phoneNumber = ""
     // stripe payment setup
      
 
@@ -91,12 +92,40 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     
     @IBAction func call(_ sender: Any) {
         
+        self.phoneNumber = self.phoneNumber.replacingOccurrences(of: "-", with: "")
+        self.phoneNumber = self.phoneNumber.replacingOccurrences(of: " ", with: "")
+        self.phoneNumber = self.phoneNumber.replacingOccurrences(of: ")", with: "")
+        self.phoneNumber = self.phoneNumber.replacingOccurrences(of: "(", with: "")
+        self.phoneNumber = self.phoneNumber.replacingOccurrences(of: "+", with: "")
+        
+        if self.phoneNumber.count > 10 {
+            self.phoneNumber.remove(at: self.phoneNumber.startIndex)
+        }
+        if self.phoneNumber.count > 10 {
+            self.phoneNumber.remove(at: self.phoneNumber.startIndex)
+        }
+        
+        if self.phoneNumber.count > 10 {
+            String(self.phoneNumber.characters.dropLast())
+        }
+        let dd =  (self.phoneNumber as NSString).integerValue
+        
+        guard let number = URL(string: "tel://" + "\(dd ?? 8888888888)") else {
+            
+            
+            return }
+        UIApplication.shared.open(number)
     }
     
     
     @IBAction func text(_ sender: Any) {
-        
-        
+        if (MFMessageComposeViewController.canSendText()) {
+            let controller = MFMessageComposeViewController()
+            controller.body = ""
+            controller.recipients = [self.phoneNumber]
+            controller.messageComposeDelegate = self
+            self.present(controller, animated: true, completion: nil)
+        } 
     }
     
     @IBAction func purchesPrsd(_ sender: Any) {
@@ -121,6 +150,11 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
             present(alert, animated: true , completion: nil)
         }
     }
+    
+//    func messageComposeViewController(_ controller: MFMessageComposeViewController, didFinishWith result: MessageComposeResult) {
+//        //... handle sms screen actions
+//        self.dismiss(animated: true, completion: nil)
+//    }
     
     func tutorStatus(){
         if tutor.tutorStatus == "hot" {
@@ -168,15 +202,18 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 }
                 if let fullname = tutDict["full_name"] as? String {
                     self.tutor.full_name = fullname
+                    self.firstAndLastName.text = fullname
                 }
                 if let paymentSource = tutDict["paymentSource"] as? [String] {
                     self.tutor.paymentSource = paymentSource
                 }
                 if let email = tutDict["email"] as? String {
                     self.tutor.email = email
+                    self.email.text = email
                 }
                 if let phn = tutDict["phoneNumber"] as? String {
                     self.tutor.phoneNumebr = phn
+                    self.phoneNumber = phn 
                 }
                 if let phn = tutDict["pictureUrl"] as? String {
                     self.tutor.pictureUrl = phn
@@ -236,7 +273,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 let posts = response.value as! [String:AnyObject]
                 if let fname = posts["authorName"] as? String {
                     self.postss.authorName = fname
-                    self.firstAndLastName.text = fname
+//                    self.firstAndLastName.text = fname
                 } else {
                     self.postss.authorName = " "
                 }
@@ -286,7 +323,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
                 } else {
                     self.postss.price = 0
                 }
-                }
+             }
                 self.activitySpinner.stopAnimating()
                 self.activitySpinner.isHidden = true
             })

@@ -61,6 +61,9 @@
             <PersistentString
                value = "notesArr">
             </PersistentString>
+            <PersistentString
+               value = "for (t,y) in b {}">
+            </PersistentString>
          </PersistentStrings>
       </ContextState>
       <ContextState

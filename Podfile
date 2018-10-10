@@ -24,4 +24,5 @@ target 'HomeworkMe' do
 	pod 'FacebookLogin'
 	pod 'FacebookCore' 
 	pod 'FBSDKLoginKit' 
+	pod 'paper-onboarding'
 end

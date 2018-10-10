@@ -10,6 +10,8 @@ import UIKit
 import Firebase
 import FirebaseAuth
 import FirebaseDatabase
+import Alamofire
+import MessageUI
 
 
 class MyClassRoomVC: UIViewController {
@@ -19,6 +21,7 @@ class MyClassRoomVC: UIViewController {
     @IBOutlet weak var popupView: UIView!
     @IBOutlet weak var categoryBtn: UISegmentedControl!
     @IBOutlet weak var postsTableView: UITableView!
+    @IBOutlet weak var requestsTableView: UITableView!
     @IBOutlet weak var priceSlider: UISlider!
     @IBOutlet weak var priceLbl: UILabel!
     @IBOutlet weak var postPresetView: UIView!
@@ -30,11 +33,14 @@ class MyClassRoomVC: UIViewController {
     @IBOutlet weak var inClassSwitch: UISwitch!
     @IBOutlet weak var activitySpinner: UIActivityIndicatorView!
     @IBOutlet weak var homeWorkTitleLbl: UILabel!
+    @IBOutlet weak var switchView: UIBarButtonItem!
     
     var fetchObject = FetchObject()
     var postTitle:String?; var price:Int = 5; var category:String!
     var handle: DatabaseHandle?; var handle2: DatabaseHandle?
     var myPostArr = [Post](); var hmwrkArr = [Post](); var testArr = [Post](); var notesArr = [Post](); var otherArr = [Post](); var tutorArr = [Post](); var allPostHolder = [Post]()
+    
+    var myPostArrReq = [Post](); var hmwrkArrReq = [Post](); var testArrReq = [Post](); var notesArrReq = [Post](); var otherArrReq = [Post](); var tutorArrReq = [Post](); var allPostHolderReq = [Post]()
     var tableViewSections = ["All","Homework", "Test","Notes","Tutoring","Other"]
     let seg = "classRoomToPostSegue" //classroom to post view
     var postObject = Post() // variable to hold transfered data to PostView
@@ -44,6 +50,8 @@ class MyClassRoomVC: UIViewController {
     var userStorage: StorageReference!
     let ref = Database.database().reference()
     var student = Student()
+    var isGiveHelp = false
+    var isRequest = false
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -52,6 +60,8 @@ class MyClassRoomVC: UIViewController {
         dismissKeyboard()
         postsTableView.estimatedRowHeight = 45
         postsTableView.rowHeight = UITableViewAutomaticDimension
+        requestsTableView.estimatedRowHeight = 45
+        requestsTableView.rowHeight = UITableViewAutomaticDimension
         classRoomLbl.text = fetchObject.title
         fetchMyPostsKey()
         priceLbl.text = "$5"
@@ -61,9 +71,23 @@ class MyClassRoomVC: UIViewController {
     @IBAction func addPostPrsd(_ sender: Any) {
         let ref = Database.database().reference()
         if student.paymentSource != nil {
-            postPresetView.isHidden = false
-            newPostView1.isHidden = false
-            newPostView2.isHidden = true
+            let alert4 = UIAlertController(title: "Give or Get help", message: "", preferredStyle: .alert)
+            let giveHelp = UIAlertAction(title: "Give Help", style: .default) { (_) in
+                self.isGiveHelp = true
+                self.postPresetView.isHidden = false
+                self.newPostView1.isHidden = false
+                self.newPostView2.isHidden = true
+               
+            }
+            let getHelp = UIAlertAction(title: "Get Help", style: .default) { (_) in
+                self.isGiveHelp = false
+                self.postPresetView.isHidden = false
+                self.newPostView1.isHidden = false
+                self.newPostView2.isHidden = true
+                
+            }
+            alert4.addAction(giveHelp); alert4.addAction(getHelp)
+            present(alert4, animated: true, completion: nil)
         } else {
             let alert = UIAlertController(title: "Missing Information", message: "Kindly register your account for tutoring by selecting a method in which your students can pay you.", preferredStyle: .alert)
             let zelle = UIAlertAction(title: "Zelle", style: .default) { (resp) in
@@ -161,31 +185,84 @@ class MyClassRoomVC: UIViewController {
         newPostView2.isHidden = true
     }
     
+    @IBAction func switchView(_ sender: Any) {
+        if requestsTableView.isHidden {
+            requestsTableView.isHidden = false
+            switchView.title = "Offers"
+            isRequest = true
+        } else {
+             requestsTableView.isHidden = true
+            switchView.title = "Requests"
+            isRequest = true
+        }
+    }
+    
     @IBAction func filterOptions(_ sender: UISegmentedControl) {
-        if sender.selectedSegmentIndex == 0 {
-            let indexPath = IndexPath(item: 0, section: 1)
-            self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+        if isRequest {
+            if sender.selectedSegmentIndex == 0 {
+                if !hmwrkArrReq.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 1)
+                    self.requestsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 1 {
+                if !testArrReq.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 2)
+                    self.requestsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 2 {
+                if !notesArrReq.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 3)
+                    self.requestsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 3 {
+                if !tutorArrReq.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 4)
+                    self.requestsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+
+                }
+            }
+            if sender.selectedSegmentIndex == 4 {
+                if !otherArrReq.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 5)
+                    self.requestsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+        } else {
+            if sender.selectedSegmentIndex == 0 {
+                if !hmwrkArr.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 1)
+                    self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 1 {
+                if !testArr.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 2)
+                    self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 2 {
+                if !notesArr.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 3)
+                    self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 3 {
+                if !tutorArr.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 4)
+                    self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
+            if sender.selectedSegmentIndex == 4 {
+                if !otherArr.isEmpty {
+                    let indexPath = IndexPath(item: 0, section: 5)
+                    self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
+                }
+            }
         }
-        if sender.selectedSegmentIndex == 1 {
- 
-            let indexPath = IndexPath(item: 0, section: 2)
-            self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
-        }
-        if sender.selectedSegmentIndex == 2 {
- 
-            let indexPath = IndexPath(item: 0, section: 3)
-            self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
-        }
-        if sender.selectedSegmentIndex == 3 {
- 
-            let indexPath = IndexPath(item: 0, section: 4)
-            self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
-        }
-        if sender.selectedSegmentIndex == 4 {
- 
-            let indexPath = IndexPath(item: 0, section: 5)
-            self.postsTableView.scrollToRow(at: indexPath, at: .top, animated: true)
-        }
+        
     }
     
     @IBAction func categoryPrsd(_ sender: UISegmentedControl) {
@@ -306,10 +383,16 @@ class MyClassRoomVC: UIViewController {
             
             let postParam = [postKey : parameters2]
             
-            
-            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
-            ref.child("Posts").child(postKey).updateChildValues(parameters!)
-            ref.child("Classes").child(self.fetchObject.uid!).child("Posts").updateChildValues(postParam)
+            if isGiveHelp {
+                ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
+                ref.child("Posts").child(postKey).updateChildValues(parameters!)
+                ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GiveHelp").updateChildValues(postParam)
+                setupPushNotification(fromDevice: "", title: "Material Request", body: "\(authorFname) Needs resources for \(fetchObject.title)")
+            } else {
+                ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
+                ref.child("Posts").child(postKey).updateChildValues(parameters!)
+                ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GetHelp").updateChildValues(postParam)
+            }
             self.postPresetView.isHidden = true
             categoryBtn.isSelected = false
         } else {
@@ -334,57 +417,80 @@ class MyClassRoomVC: UIViewController {
     }
     
     func fetchPostInfo(dictCheck: [String:AnyObject]){
-        
-        for (x,b) in dictCheck {
-            let postss = Post()
-            if let fname = b["authorName"] as? String {
-                postss.authorName = fname
-            } else {
-                postss.authorName = " "
+        hmwrkArr.removeAll(); hmwrkArrReq.removeAll(); notesArr.removeAll(); notesArrReq.removeAll(); tutorArr.removeAll(); tutorArrReq.removeAll(); testArrReq.removeAll(); testArr.removeAll(); otherArr.removeAll(); otherArrReq.removeAll(); myPostArrReq.removeAll(); myPostArr.removeAll()
+        for (x,d) in dictCheck {
+            for (_,b) in d as! [String:AnyObject] {
+                let postss = Post()
+                if let fname = b["authorName"] as? String {
+                    postss.authorName = fname
+                } else {
+                    postss.authorName = " "
+                }
+                if let uid = b["uid"] {
+                    postss.uid = uid as? String
+                }
+                if let title = b["name"] {
+                    postss.title = title as? String
+                }
+                if let authId = b["authorID"] {
+                    postss.authorID = authId as? String
+                }
+                if let authEmal = b["authorEmail"] {
+                    postss.authorEmail = authEmal as? String
+                }
+                if let tmStmp = b["timeStamp"] {
+                    let dateFormatter = DateFormatter()
+                    dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
+                    guard let dat = dateFormatter.date(from: tmStmp as! String) else {break}
+                    postss.timeStamp = dat
+                }
+                if let catgry = b["category"] {
+                    postss.category = catgry as? String
+                }
+                if let price = b["price"] {
+                    postss.price = price as! Int
+                } else {
+                    postss.price = 0
+                }
+                if x == "GetHelp" {
+                    self.myPostArrReq.append(postss)
+                    if postss.category == "Homework" {
+                        self.hmwrkArrReq.append(postss)
+                    } else if postss.category == "Notes" {
+                        self.notesArrReq.append(postss)
+                    }else if postss.category == "Tutoring" {
+                        self.tutorArrReq.append(postss)
+                    }else  if postss.category == "Test" {
+                        self.testArrReq.append(postss)
+                    }else if postss.category == "Other" {
+                        self.otherArrReq.append(postss)
+                    }
+                } else {
+                    self.myPostArr.append(postss)
+                    if postss.category == "Homework" {
+                        self.hmwrkArr.append(postss)
+                    } else if postss.category == "Notes" {
+                        self.notesArr.append(postss)
+                    }else if postss.category == "Tutoring" {
+                        self.tutorArr.append(postss)
+                    }else  if postss.category == "Test" {
+                        self.testArr.append(postss)
+                    }else if postss.category == "Other" {
+                        self.otherArr.append(postss)
+                    }
+                }
             }
-            if let uid = b["uid"] {
-                postss.uid = uid as? String
-            }
-            if let title = b["name"] {
-                postss.title = title as? String
-            }
-            if let authId = b["authorID"] {
-                postss.authorID = authId as? String
-            }
-            if let authEmal = b["authorEmail"] {
-                postss.authorEmail = authEmal as? String
-            }
-            if let tmStmp = b["timeStamp"] {
-                let dateFormatter = DateFormatter()
-                dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss +zzzz"
-                let dat = dateFormatter.date(from: tmStmp as! String)
-                postss.timeStamp = dat
-            }
-            if let catgry = b["category"] {
-                postss.category = catgry as? String
-            }
-            if let price = b["price"] {
-                postss.price = price as! Int
-            } else {
-                postss.price = 0
-            }
-            self.myPostArr.append(postss)
             
-            if postss.category == "Homework" {
-                self.hmwrkArr.append(postss)
-            } else if postss.category == "Notes" {
-                self.notesArr.append(postss)
-            }else if postss.category == "Tutoring" {
-                self.tutorArr.append(postss)
-            }else  if postss.category == "Test" {
-                self.testArr.append(postss)
-            }else if postss.category == "Other" {
-                self.otherArr.append(postss)
-            }
         }
-        self.myPostArr.sort(by: { $0.timeStamp?.compare(($1.timeStamp)!) == ComparisonResult.orderedDescending})
+        if !self.myPostArr.isEmpty {
+            self.myPostArr.sort(by: { $0.timeStamp?.compare(($1.timeStamp)!) == ComparisonResult.orderedDescending})
+        }
+        if !self.myPostArrReq.isEmpty {
+            self.myPostArrReq.sort(by: { $0.timeStamp?.compare(($1.timeStamp)!) == ComparisonResult.orderedDescending})
+        }
         self.allPostHolder = self.myPostArr
         self.postsTableView.reloadData()
+        self.requestsTableView.reloadData()
         self.activitySpinner.stopAnimating()
         self.activitySpinner.isHidden = true
 
@@ -424,6 +530,23 @@ class MyClassRoomVC: UIViewController {
              vc?.postObject = self.postObject
         }
     }
+    
+    fileprivate func setupPushNotification(fromDevice:String, title:String, body:String)
+    {
+        //        guard let message = "text.text" else {return}
+        
+        var headers:HTTPHeaders = HTTPHeaders()
+        
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)"
+            
+        ]
+        let notification = ["to":"/topics/\(self.fetchObject.uniName ?? "")\(self.fetchObject.subName ?? "")\(self.fetchObject.title ?? "")","notification":["body":body,"title":title,"badge":1,"sound":"default"]] as [String:Any]
+        
+        Alamofire.request(AppDelegate.NOTIFICATION_URL as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+        }
+        
+    }
 }
 
 extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
@@ -445,14 +568,31 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
             default:
                 return 0
             }
-        } else{
-            return 0
+        } else if tableView == requestsTableView {
+            switch (section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
+            case 0:
+                return myPostArrReq.count
+            case 1:
+                return hmwrkArrReq.count
+            case 2:
+                return testArrReq.count
+            case 3:
+                return notesArrReq.count
+            case 4:
+                return tutorArrReq.count
+            case 5:
+                return otherArrReq.count
+            default:
+                return 0
+            }
         }
        return 0
     }
     func numberOfSections(in tableView: UITableView) -> Int {
         if tableView == postsTableView {
              return tableViewSections.count
+        } else if tableView == requestsTableView {
+            return tableViewSections.count
         } else {
             return 0
         }
@@ -461,8 +601,8 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
         if tableView == postsTableView {
             return self.tableViewSections[section]
         
-        } else {
-            return ""
+        } else if tableView == requestsTableView {
+            return self.tableViewSections[section]
         }
         return ""
     }
@@ -472,7 +612,7 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
             var cellTxt = " "
             var urlString = ""
             var data = Data()
-            switch (indexPath.section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
+            switch (indexPath.section) {
             case 0:
                 cellTxt = " " +  myPostArr[indexPath.row].title! + "\n" + myPostArr[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: myPostArr[indexPath.row].timeStamp!))"
                 if myPostArr[indexPath.row].postPic != nil {
@@ -521,9 +661,59 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
             cell.imageView?.image = imageWithImage(image: UIImage(named: "manInWater")!, scaledToSize: CGSize(width: 30, height: 30))
             return cell
       
-        } else {
-            let cell = tableView.dequeueReusableCell(withIdentifier: "postsCell", for: indexPath)
+        } else if tableView == requestsTableView {
+            let cell = tableView.dequeueReusableCell(withIdentifier: "requestCell", for: indexPath)
             
+            var cellTxt = " "
+            var urlString = ""
+            var data = Data()
+            switch (indexPath.section) {
+            case 0:
+                cellTxt = " " +  myPostArrReq[indexPath.row].title! + "\n" + myPostArrReq[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: myPostArrReq[indexPath.row].timeStamp!))"
+                if myPostArrReq[indexPath.row].postPic != nil {
+                    urlString = myPostArrReq[indexPath.row].postPic
+                    data = myPostArrReq[indexPath.row].data
+                }
+            case 1:
+                cellTxt = " " +  hmwrkArrReq[indexPath.row].title! + "\n" + hmwrkArrReq[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: hmwrkArrReq[indexPath.row].timeStamp!))"
+                if hmwrkArrReq[indexPath.row].postPic != nil {
+                    urlString = hmwrkArrReq[indexPath.row].postPic
+                    data = hmwrkArrReq[indexPath.row].data
+                }
+            case 2:
+                cellTxt = " " +  testArrReq[indexPath.row].title! + "\n" + testArrReq[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: testArrReq[indexPath.row].timeStamp!))"
+                
+                if testArrReq[indexPath.row].postPic != nil {
+                    urlString = testArrReq[indexPath.row].postPic
+                    data = testArrReq[indexPath.row].data
+                }
+            case 3:
+                cellTxt = " " +  notesArrReq[indexPath.row].title! + "\n" + notesArrReq[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: notesArrReq[indexPath.row].timeStamp!))"
+                if notesArrReq[indexPath.row].postPic != nil {
+                    urlString = notesArrReq[indexPath.row].postPic
+                    data = notesArrReq[indexPath.row].data
+                }
+            case 4:
+                cellTxt = " " +  tutorArrReq[indexPath.row].title! + "\n" + tutorArrReq[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: tutorArrReq[indexPath.row].timeStamp!))"
+                
+                if tutorArrReq[indexPath.row].postPic != nil {
+                    urlString = tutorArrReq[indexPath.row].postPic
+                    data = tutorArrReq[indexPath.row].data
+                }
+            case 5:
+                cellTxt = otherArrReq[indexPath.row].title! + "\n" + otherArrReq[indexPath.row].authorName! + "\n \(functions.getTimeSince(date: otherArrReq[indexPath.row].timeStamp!))"
+                if otherArrReq[indexPath.row].postPic != nil {
+                    data = otherArrReq[indexPath.row].data
+                    urlString = otherArrReq[indexPath.row].postPic
+                }
+            default:
+                cellTxt = " "
+            }
+            cell.textLabel?.numberOfLines = 0
+            cell.textLabel?.text = cellTxt
+            //                    cell.imageView?.image = #imageLiteral(resourceName: "manInWater")
+            
+            cell.imageView?.image = imageWithImage(image: UIImage(named: "manInWater")!, scaledToSize: CGSize(width: 30, height: 30))
             return cell
         }
         let cell = tableView.dequeueReusableCell(withIdentifier: "postsCell", for: indexPath)
@@ -550,6 +740,29 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
                 self.performSegue(withIdentifier: seg, sender: self)
             case 5:
                 postObject = otherArr[indexPath.row]
+                self.performSegue(withIdentifier: seg, sender: self)
+            default:
+                print(seg)
+            }
+        } else if tableView == requestsTableView {
+            switch (indexPath.section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
+            case 0:
+                postObject = myPostArrReq[indexPath.row]
+                self.performSegue(withIdentifier: seg, sender: self)
+            case 1:
+                postObject = hmwrkArrReq[indexPath.row]
+                self.performSegue(withIdentifier: seg, sender: self)
+            case 2:
+                postObject = testArrReq[indexPath.row]
+                self.performSegue(withIdentifier: seg, sender: self)
+            case 3:
+                postObject = notesArrReq[indexPath.row]
+                self.performSegue(withIdentifier: seg, sender: self)
+            case 4:
+                postObject = tutorArrReq[indexPath.row]
+                self.performSegue(withIdentifier: seg, sender: self)
+            case 5:
+                postObject = otherArrReq[indexPath.row]
                 self.performSegue(withIdentifier: seg, sender: self)
             default:
                 print(seg)

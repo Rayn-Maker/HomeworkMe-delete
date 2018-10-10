@@ -14,6 +14,8 @@ import Stripe
 import GooglePlaces
 import GoogleSignIn
 import UserNotifications
+import paper_onboarding
+
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GIDSignInUIDelegate, UNUserNotificationCenterDelegate  {
     //// Edit School pluggings
@@ -24,8 +26,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     @IBOutlet weak var myClassesTableView: UITableView!
     /// finish edit school pluggins
     
-    // edit account pluggins
-
+    // Onboarding stuff
+    @IBOutlet weak var onBoardingView: OnboardingView!
+    @IBOutlet weak var getStarted: UIButton!
+    
     @IBOutlet weak var profilePic: UIImageView!
     @IBOutlet weak var editViewBtn: UIButton!
     @IBOutlet weak var changePicBtn: UIButton!
@@ -70,7 +74,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     var student = Student()
     var phoneNumberString = String()
     static var DEVICEID = String()
-    static var hasCard = true
+    static var hasCard = false
     static var senderCustomerId = ""
     
     override func viewDidLoad() {
@@ -81,7 +85,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let storage = Storage.storage().reference(forURL: "gs://hmwrkme.appspot.com")
         userStorage = storage.child("Students")
         cancelBtn.setTitleColor(.gray, for: .normal)
-        
+        // on boarding stuff
+        onBoardingView.dataSource = self
+        onBoardingView.delegate = self
         // Show registration completion
         if classView {
             editView.isHidden = false
@@ -104,6 +110,14 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             goLiveLable.text = "I'm Live!!!"
         } else {
             goLiveLable.text = "Go Live!!"
+        }
+        
+        // check to display on baording screen
+        
+        if let ob = UserDefaults.standard.object(forKey: "hasSeenOS1") as? Bool {
+            if ob {
+                onBoardingView.isHidden = true
+            }
         }
         
         //notifications
@@ -257,6 +271,14 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     
     @IBAction func saveTutor(_ sender: Any) {
+        if changePicBtn.isHidden {
+            editView.isHidden = false
+            editViewBtn.setTitle("Save", for: .normal)
+            changePicBtn.isHidden = false
+            classSearchView.isHidden = false
+            cancelBtn.isEnabled = true
+            cancelBtn.setTitleColor(.black, for: .normal)
+        }
         
         if phoneNumber.text != nil && !placeesDict.isEmpty {
          
@@ -302,6 +324,14 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     @IBAction func addPaymentMethod(_ sender: Any) {
         addCard()
+    }
+    
+    @IBAction func getStarted(_ sender: Any) {
+        UIView.animate(withDuration: 0.3) {
+            self.onBoardingView.isHidden = true
+            self.getStarted.isHidden = true
+            UserDefaults.standard.set(true, forKey: "hasSeenOS1")
+        }
     }
     
     
@@ -425,6 +455,13 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             // delete class from student and student from class
         ref.child("Students").child(uid!).child("Classes").child(key!).removeValue()
         ref.child("Classes").child(key!).child("Students").child(uid!).removeValue()
+        Messaging.messaging().subscribe(toTopic: "\(myClassesArr[indexPathRow].uniName ?? "")\(myClassesArr[indexPathRow].subName ?? "")\(myClassesArr[indexPathRow].title ?? "")") { error in
+            if error  == nil {
+                print("Subscribed to news topic")
+            } else {
+                
+            }
+        }
     }
     
     func saveImage() {
@@ -692,6 +729,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             self.fetchClass(subKey: subjectID!)
         } else if classBtnOn {
             // here add classes to the user and user to the class
+            let cell = classRoomTableView.cellForRow(at: indexPath)
             classArray = uni_sub_array
             let ref = Database.database().reference()
             let key = uni_sub_array[indexPath.row].uid
@@ -702,8 +740,19 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             let parameters2: [String:String] = ["uid" : uid!,
                                                 "studentName":self.student.full_name ?? ""]
             if myClassesArr.contains(where: { $0.uid == key }) {
-                
+                cell?.accessoryType = .checkmark
             } else {
+                cell?.accessoryType = .checkmark
+                DispatchQueue.main.async {
+                    Messaging.messaging().subscribe(toTopic: "\(self.uni_sub_array[indexPath.row].uniName ?? "")\(self.uni_sub_array[indexPath.row].subName ?? "")\(self.uni_sub_array[indexPath.row].title ?? "")") { error in
+                        if error  == nil {
+                            print("********I did not got in ********")
+                        } else {
+                            print("********I got in ********")
+                        }
+                        print("********I got in ********")
+                    }
+                }
                 ref.child("Students").child(uid!).child("Classes").child(key!).updateChildValues(parameters)
                 ref.child("Classes").child(key!).child("Students").child(uid!).updateChildValues(parameters2)
             }
@@ -718,6 +767,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         if tableView == myClassesTableView {
             if (editingStyle == UITableViewCellEditingStyle.delete) {
                 deletValue(indexPathRow: indexPath.row)
+                
                 myClassesArr.remove(at: indexPath.row)
                 myClassesTableView.deleteRows(at: [indexPath], with: .fade)
             }
@@ -865,4 +915,52 @@ extension ProfileVC: GMSAutocompleteViewControllerDelegate {
         UIApplication.shared.isNetworkActivityIndicatorVisible = false
     }
 
+}
+
+extension ProfileVC: PaperOnboardingDataSource, PaperOnboardingDelegate {
+    func onboardingItem(at index: Int) -> OnboardingItemInfo {
+        let bkGroundColor1 = UIColor(red: 217/255, green: 17/258, blue: 89/255, alpha: 1)
+        let bkGroundColor2 = UIColor(red: 106/255, green: 166/258, blue: 211/255, alpha: 1)
+        let bkGroundColor3 = UIColor(red: 168/255, green: 200/258, blue: 78/255, alpha: 1)
+        
+        let title = UIFont(name: "AvenirNext-Bold", size: 24)
+        let description = UIFont(name: "AvenirNext-Regular", size: 14) // iOS fonts .com
+        let obod = OnboardingItemInfo(informationImage: UIImage(named: "selectUni")!, title: "University", description: "First, select your University", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod2 = OnboardingItemInfo(informationImage: UIImage(named: "selectSub")!, title: "Subject/Degree", description: "Next, select your subject or degree", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod3 = OnboardingItemInfo(informationImage: UIImage(named: "selectClass")!, title: "Classes", description: "Then add the classes you are taking in that Subject or Degree", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod4 = OnboardingItemInfo(informationImage: UIImage(named: "selectSubBtn")!, title: "Subject/Degree", description: "To select another subject or School press Subjects when the buttons are highlighted", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod5 = OnboardingItemInfo(informationImage: UIImage(named: "addPlaces")!, title: "Places To Meet", description: "Add public places you wouldn't mind meeting up with a tutor or student to have a session.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod6 = OnboardingItemInfo(informationImage: UIImage(named: "add_save")!, title: "Save", description: "Lastly, add a picture and tap save", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        return [obod, obod2, obod3, obod4, obod5, obod6][index]
+    }
+    
+    func onboardingConfigurationItem(_: OnboardingContentViewItem, index _: Int) {
+        //
+    }
+    
+    func onboardingWillTransitonToIndex(_ index: Int) {
+        if index == 4 {
+            UIView.animate(withDuration: 0.2) {
+                self.getStarted.alpha = 0
+            }
+        }
+    }
+    
+    func onboardingDidTransitonToIndex(_ index: Int) {
+        if index == 5 {
+            UIView.animate(withDuration: 0.4) {
+                self.getStarted.alpha = 1
+            }
+        }
+    }
+    
+    func onboardingItemsCount() -> Int {
+        return 6
+    }
 }

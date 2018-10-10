@@ -133,6 +133,7 @@ PODS:
     - nanopb/encode (= 0.3.8)
   - nanopb/decode (0.3.8)
   - nanopb/encode (0.3.8)
+  - paper-onboarding (4.1.0)
   - PayPal-iOS-SDK (2.18.1):
     - PayPal-iOS-SDK/CardIO (= 2.18.1)
     - PayPal-iOS-SDK/Core (= 2.18.1)
@@ -159,6 +160,7 @@ DEPENDENCIES:
   - GooglePlacePicker
   - GooglePlaces
   - GoogleSignIn
+  - paper-onboarding
   - PayPal-iOS-SDK
   - SquarePointOfSaleSDK
   - Stripe
@@ -194,6 +196,7 @@ SPEC REPOS:
     - GTMSessionFetcher
     - leveldb-library
     - nanopb
+    - paper-onboarding
     - PayPal-iOS-SDK
     - Protobuf
     - SquarePointOfSaleSDK
@@ -229,11 +232,12 @@ SPEC CHECKSUMS:
   GTMSessionFetcher: 0c4baf0a73acd0041bf9f71ea018deedab5ea84e
   leveldb-library: 08cba283675b7ed2d99629a4bc5fd052cd2bb6a5
   nanopb: 5601e6bca2dbf1ed831b519092ec110f66982ca3
+  paper-onboarding: 344780cbb0bfc229cd1862f5b9bba446b23c5185
   PayPal-iOS-SDK: 10654cd111e911a9807bddb96fae81aacb8e9915
   Protobuf: 1eb9700044745f00181c136ef21b8ff3ad5a0fd5
   SquarePointOfSaleSDK: f1640fd16fe44083cd715157a5031efebc693454
   Stripe: 2c69e216061d54d9c538204bb4f58bd597ddfc5b
 
-PODFILE CHECKSUM: 021e59d257091395fe30758aefc8bd8f4ca9a1ab
+PODFILE CHECKSUM: fe208210449f07616910461ae039bdbc3b22706d
 
 COCOAPODS: 1.5.3

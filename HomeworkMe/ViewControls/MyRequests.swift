@@ -44,6 +44,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     
     @IBOutlet weak var sessionBtnView: UIStackView!
     
+    @IBOutlet weak var onBoardingView: OnboardingView!
     
     var tutor = Student()
     var student = Student()
@@ -515,6 +516,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         tableArr.requestsArrRejected.removeAll()
         tableArr.requestsArrAccepted.removeAll()
         tableArr.requestsArrPending.removeAll()
+        self.earnings = 0
         for (_,b) in object {
             var req = Request()
             req.senderName = b["senderName"] as? String
