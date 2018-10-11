@@ -12,6 +12,7 @@ import FirebaseAuth
 import FirebaseDatabase
 import Alamofire
 import MessageUI
+import paper_onboarding
 
 
 class MyClassRoomVC: UIViewController {
@@ -34,6 +35,8 @@ class MyClassRoomVC: UIViewController {
     @IBOutlet weak var activitySpinner: UIActivityIndicatorView!
     @IBOutlet weak var homeWorkTitleLbl: UILabel!
     @IBOutlet weak var switchView: UIBarButtonItem!
+    @IBOutlet weak var onBoardingView: OnboardingView!
+    @IBOutlet weak var getStarted: UIButton!
     
     var fetchObject = FetchObject()
     var postTitle:String?; var price:Int = 5; var category:String!
@@ -65,6 +68,14 @@ class MyClassRoomVC: UIViewController {
         classRoomLbl.text = fetchObject.title
         fetchMyPostsKey()
         priceLbl.text = "$5"
+        onBoardingView.dataSource = self
+        onBoardingView.delegate = self
+        
+        if let ob = UserDefaults.standard.object(forKey: "hasSeenOS2") as? Bool {
+            if ob {
+                onBoardingView.isHidden = true
+            }
+        }
 
     }
     
@@ -177,6 +188,14 @@ class MyClassRoomVC: UIViewController {
     
     @IBAction func creatPostPrsd(_ sender: Any) {
         creatPost()
+    }
+    
+    @IBAction func getStarted(_ sender: Any) {
+        UIView.animate(withDuration: 0.3) {
+            self.onBoardingView.isHidden = true
+            self.getStarted.isHidden = true
+            UserDefaults.standard.set(true, forKey: "hasSeenOS2")
+        }
     }
     
     @IBAction func cancelPrsd(_ sender: Any) {
@@ -771,4 +790,48 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
        
     }
     
+}
+
+
+extension MyClassRoomVC: PaperOnboardingDataSource, PaperOnboardingDelegate {
+    func onboardingItem(at index: Int) -> OnboardingItemInfo {
+        let bkGroundColor1 = UIColor(red: 217/255, green: 17/258, blue: 89/255, alpha: 1)
+        let bkGroundColor2 = UIColor(red: 106/255, green: 166/258, blue: 211/255, alpha: 1)
+        let bkGroundColor3 = UIColor(red: 168/255, green: 200/258, blue: 78/255, alpha: 1)
+        
+        let title = UIFont(name: "AvenirNext-Bold", size: 24)
+        let description = UIFont(name: "AvenirNext-Regular", size: 14) // iOS fonts .com
+        let obod = OnboardingItemInfo(informationImage: UIImage(named: "addHelpSess")!, title: "Add Session", description: "Click  ➕ to give or get help.", pageIcon:  UIImage(named: "addSessFull")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod2 = OnboardingItemInfo(informationImage: UIImage(named: "const")!, title: "Set Price and Select Category", description: "Slide to set your price, then select a category. If you are in the class, leave the green button on, otherwise, switch it off.", pageIcon:  UIImage(named: "defineHelpCOnstFUll")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod3 = OnboardingItemInfo(informationImage: UIImage(named: "postIt")!, title: "Post it!", description: "Add resource number or description and professor's name, then tap Post.", pageIcon:  UIImage(named: "defineHelpCOnstFUll")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        
+        return [obod, obod2, obod3 ][index]
+    }
+    
+    func onboardingConfigurationItem(_: OnboardingContentViewItem, index _: Int) {
+        //
+    }
+    
+    func onboardingWillTransitonToIndex(_ index: Int) {
+        if index == 1 {
+            UIView.animate(withDuration: 0.2) {
+                self.getStarted.alpha = 0
+            }
+        }
+    }
+    
+    func onboardingDidTransitonToIndex(_ index: Int) {
+        if index == 2 {
+            UIView.animate(withDuration: 0.4) {
+                self.getStarted.alpha = 1
+            }
+        }
+    }
+    
+    func onboardingItemsCount() -> Int {
+        return 3
+    }
 }

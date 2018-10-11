@@ -14,7 +14,7 @@ import Stripe
 import SquarePointOfSaleSDK
 import MessageUI
 import Alamofire
-
+import paper_onboarding
 
 class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     @IBOutlet weak var postTitle: UILabel!
@@ -26,6 +26,9 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     @IBOutlet weak var statusLbl: UILabel!
     @IBOutlet weak var activitySpinner: UIActivityIndicatorView!
     
+    @IBOutlet weak var onBoardingView: OnboardingView!
+    @IBOutlet weak var getStarted: UIButton!
+    
     var postObject = Post() 
     var functions = CommonFunctions() 
     var userStorage: StorageReference!
@@ -33,7 +36,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     var schedules = [String](); var locationsArray = [String]()
     var disLikers = [String](); var likers = [String]()
     var authorFname = "" ; var authorLname = " " 
-    let ref = Database.database().reference()
+    var ref = Database.database().reference()
     let settingsVC = SettingsViewController()
     var meetUpLocation: Place!
     var price: Int?
@@ -41,6 +44,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     var sentReq = false
     let postss = Post()
     var phoneNumber = ""
+    var handle: DatabaseHandle?
     // stripe payment setup
      
 
@@ -53,6 +57,16 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
         editImage()
         fetchTutor()
         fetchPost()
+        if let ob = UserDefaults.standard.object(forKey: "hasSeenOS3") as? Bool {
+            if ob {
+                onBoardingView.isHidden = true
+                getStarted.isHidden = true
+            }
+        }
+        onBoardingView.dataSource = self
+        onBoardingView.delegate = self
+        checkCard()
+        
     }
  
     @IBAction func backPrsd(_ sender: Any) {
@@ -126,6 +140,14 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
             controller.messageComposeDelegate = self
             self.present(controller, animated: true, completion: nil)
         } 
+    }
+    
+    @IBAction func getStarted(_ sender: Any) {
+        UIView.animate(withDuration: 0.3) {
+            self.onBoardingView.isHidden = true
+            self.getStarted.isHidden = true
+            UserDefaults.standard.set(true, forKey: "hasSeenOS3")
+        }
     }
     
     @IBAction func purchesPrsd(_ sender: Any) {
@@ -492,6 +514,19 @@ func downloadImage(url:String) -> Data {
         
     }
     
+    func checkCard() {
+        let user = Auth.auth().currentUser
+        
+        ref = Database.database().reference()
+        
+        handle = ref.child("Students").child((user?.uid)!).child("hasCard").observe(.value, with: { (snapshot) in
+            
+             if let value = snapshot.value as? Bool {
+                print(value)
+            }
+        })
+    }
+    
     fileprivate func setupPushNotification(fromDevice:String, title:String, body:String)
     {
 //        guard let message = "text.text" else {return}
@@ -515,23 +550,39 @@ extension PostView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // check to make sure this post id is not in my sent posts or else say you already requested this
         if indexPath.section == 0 {
-            if !sentReq {
-                meetUpLocation = tutor.places[indexPath.row]
-               sendRequest()
+            if ProfileVC.hasCard {
+                if !sentReq {
+                    meetUpLocation = tutor.places[indexPath.row]
+                    sendRequest()
+                    let alert3 = UIAlertController(title: "Request Sent", message: "Look out for a notification from your classmate, you can also text or call if they dont respond in due time.", preferredStyle: .alert)
+                    let ok = UIAlertAction(title: "Ok", style: .destructive, handler: nil)
+                    alert3.addAction(ok)
+                    present(alert3, animated: true, completion: nil)
+                } else {
+                    let alert = UIAlertController(title: "Request Previously Sent", message: "This tutor is yet to respond to your request try texting or calling.", preferredStyle: .alert)
+                    let text = UIAlertAction(title: "Text", style: .default) { (res) in
+                        //
+                        self.sendTextMesg()
+                    }
+                    let call = UIAlertAction(title: "call", style: .default) { (res) in
+                        //
+                        self.call()
+                    }
+                    let cancel = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
+                    alert.addAction(call); alert.addAction(call); alert.addAction(cancel)
+                    present(alert, animated: true, completion: nil)
+                }
             } else {
-                let alert = UIAlertController(title: "Request Previously Sent", message: "This tutor is yet to respond to your request try texting or calling.", preferredStyle: .alert)
-                let text = UIAlertAction(title: "Text", style: .default) { (res) in
+                let alert2 = UIAlertController(title: "Missing Information", message: "You must add a payment source before requesting a tutor's materail", preferredStyle: .alert)
+                let add = UIAlertAction(title: "Add", style: .default) { (res) in
                     //
-                    self.sendTextMesg()
+                    self.addCard()
                 }
-                let call = UIAlertAction(title: "call", style: .default) { (res) in
-                    //
-                    self.call()
-                }
-                let cancel = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
-                alert.addAction(call); alert.addAction(call); alert.addAction(cancel)
-                present(alert, animated: true, completion: nil)
+                alert2.addAction(add)
+                self.present(alert2, animated: true, completion: nil)
+                
             }
+            
         } else if indexPath.section == 1 {
             
         }
@@ -623,3 +674,38 @@ extension PostView: STPAddCardViewControllerDelegate {
 
 
 
+extension PostView: PaperOnboardingDataSource, PaperOnboardingDelegate {
+    func onboardingItem(at index: Int) -> OnboardingItemInfo {
+        let bkGroundColor1 = UIColor(red: 217/255, green: 17/258, blue: 89/255, alpha: 1)
+        let bkGroundColor2 = UIColor(red: 106/255, green: 166/258, blue: 211/255, alpha: 1)
+        let bkGroundColor3 = UIColor(red: 168/255, green: 200/258, blue: 78/255, alpha: 1)
+        
+        let title = UIFont(name: "AvenirNext-Bold", size: 24)
+        let description = UIFont(name: "AvenirNext-Regular", size: 14) // iOS fonts .com
+      
+        
+        let obod6 = OnboardingItemInfo(informationImage: UIImage(named: "purchaseSess")!, title: "Request a Session", description: "Tap on a location that you would like to meet up with your classmate.", pageIcon:  UIImage(named: "fullPurchaseView")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        return [ obod6][index]
+    }
+    
+    func onboardingConfigurationItem(_: OnboardingContentViewItem, index _: Int) {
+        //
+    }
+    
+    func onboardingWillTransitonToIndex(_ index: Int) {
+       
+    }
+    
+    func onboardingDidTransitonToIndex(_ index: Int) {
+        if index == 0 {
+            UIView.animate(withDuration: 0.4) {
+                self.getStarted.alpha = 1
+            }
+        }
+    }
+    
+    func onboardingItemsCount() -> Int {
+        return 1
+    }
+}

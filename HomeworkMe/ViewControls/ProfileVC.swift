@@ -272,10 +272,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     @IBAction func saveTutor(_ sender: Any) {
         if changePicBtn.isHidden {
-            editView.isHidden = false
+            editIntChecker = 1
             editViewBtn.setTitle("Save", for: .normal)
             changePicBtn.isHidden = false
-            classSearchView.isHidden = false
+            
             cancelBtn.isEnabled = true
             cancelBtn.setTitleColor(.black, for: .normal)
         }
@@ -580,9 +580,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     self.student.deviceId = fromDevice
                     ProfileVC.DEVICEID = fromDevice
                 }
-                if let hasCard = myclass["hasCard"] as? Bool {
-                    self.student.hasCard = hasCard
-                    ProfileVC.hasCard = hasCard
+                if let hasCard = myclass["hasCard"] {
+                    print(hasCard)
+                    self.student.hasCard = hasCard as! Bool
+                    ProfileVC.hasCard = hasCard as! Bool
                 }
                 if let meetUpLocations = myclass["meetUpLocations"] as? [String:[String]] {
                     self.student.meetUpLocation = meetUpLocations
@@ -796,8 +797,10 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             return cell
         } else if tableView == myClassesTableView {
             let cell = tableView.dequeueReusableCell(withIdentifier: "myClasses", for: indexPath)
-            cell.textLabel!.text = myClassesArr[indexPath.row].title
-            cell.textLabel?.numberOfLines = 0
+            if !myClassesArr.isEmpty {
+                cell.textLabel?.text = myClassesArr[indexPath.row].title
+                cell.textLabel?.numberOfLines = 0 
+            }
             return cell
         } else if tableView == meetUpLocationsTable {
             let cell = tableView.dequeueReusableCell(withIdentifier: "meetUpLocation", for: indexPath)
@@ -925,17 +928,17 @@ extension ProfileVC: PaperOnboardingDataSource, PaperOnboardingDelegate {
         
         let title = UIFont(name: "AvenirNext-Bold", size: 24)
         let description = UIFont(name: "AvenirNext-Regular", size: 14) // iOS fonts .com
-        let obod = OnboardingItemInfo(informationImage: UIImage(named: "selectUni")!, title: "University", description: "First, select your University", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        let obod = OnboardingItemInfo(informationImage: UIImage(named: "selectUni")!, title: "University", description: "First, select your university.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
         
-        let obod2 = OnboardingItemInfo(informationImage: UIImage(named: "selectSub")!, title: "Subject/Degree", description: "Next, select your subject or degree", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        let obod2 = OnboardingItemInfo(informationImage: UIImage(named: "selectSub")!, title: "Subject", description: "Next, select your subject or degree.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
         
-        let obod3 = OnboardingItemInfo(informationImage: UIImage(named: "selectClass")!, title: "Classes", description: "Then add the classes you are taking in that Subject or Degree", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        let obod3 = OnboardingItemInfo(informationImage: UIImage(named: "selectClass")!, title: "Classes", description: "Then, add the classes you are taking in that subject or degree.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
         
-        let obod4 = OnboardingItemInfo(informationImage: UIImage(named: "selectSubBtn")!, title: "Subject/Degree", description: "To select another subject or School press Subjects when the buttons are highlighted", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        let obod4 = OnboardingItemInfo(informationImage: UIImage(named: "selectSubBtn")!, title: "Subject", description: "To select another subject or school, press the Subject button.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
         
-        let obod5 = OnboardingItemInfo(informationImage: UIImage(named: "addPlaces")!, title: "Places To Meet", description: "Add public places you wouldn't mind meeting up with a tutor or student to have a session.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        let obod5 = OnboardingItemInfo(informationImage: UIImage(named: "addPlaces")!, title: "Places To Meet", description: "Add public places you wouldn't mind meeting up with a classmate for your session.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
         
-        let obod6 = OnboardingItemInfo(informationImage: UIImage(named: "add_save")!, title: "Save", description: "Lastly, add a picture and tap save", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        let obod6 = OnboardingItemInfo(informationImage: UIImage(named: "add_save")!, title: "Save", description: "Lastly, add a picture and tap save.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
         
         return [obod, obod2, obod3, obod4, obod5, obod6][index]
     }

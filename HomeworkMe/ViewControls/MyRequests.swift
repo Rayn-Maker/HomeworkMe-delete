@@ -16,7 +16,7 @@ import GooglePlaces
 import Alamofire
 import UserNotifications
 import AudioToolbox
-
+import paper_onboarding
 
 class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUserNotificationCenterDelegate  {
 
@@ -45,6 +45,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     @IBOutlet weak var sessionBtnView: UIStackView!
     
     @IBOutlet weak var onBoardingView: OnboardingView!
+    @IBOutlet weak var getStarted: UIButton!
     
     var tutor = Student()
     var student = Student()
@@ -97,6 +98,13 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         googleMapsetup()
         fetchStudent()
         editImage()
+        onBoardingView.dataSource = self
+        onBoardingView.delegate = self
+        if let ob = UserDefaults.standard.object(forKey: "hasSeenOS4") as? Bool {
+            if ob {
+                onBoardingView.isHidden = true
+            }
+        }
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -128,6 +136,14 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             tutorReqView.isHidden = false
             displayingTutReqview = true
             switchView.title = "View Received"
+        }
+    }
+    
+    @IBAction func getStarted(_ sender: Any) {
+        UIView.animate(withDuration: 0.3) {
+            self.onBoardingView.isHidden = true
+            self.getStarted.isHidden = true
+            UserDefaults.standard.set(true, forKey: "hasSeenOS4")
         }
     }
     
@@ -1022,5 +1038,55 @@ extension MyRequests: CLLocationManagerDelegate, GMSMapViewDelegate {
         self.mapView.isMyLocationEnabled = true
         self.mapView.selectedMarker = nil
         return false
+    }
+}
+
+extension MyRequests: PaperOnboardingDataSource, PaperOnboardingDelegate {
+    func onboardingItem(at index: Int) -> OnboardingItemInfo {
+        let bkGroundColor1 = UIColor(red: 217/255, green: 17/258, blue: 89/255, alpha: 1)
+        let bkGroundColor2 = UIColor(red: 106/255, green: 166/258, blue: 211/255, alpha: 1)
+        let bkGroundColor3 = UIColor(red: 168/255, green: 200/258, blue: 78/255, alpha: 1)
+        
+        let title = UIFont(name: "AvenirNext-Bold", size: 24)
+        let description = UIFont(name: "AvenirNext-Regular", size: 14) // iOS fonts .com
+        
+        let obod = OnboardingItemInfo(informationImage: UIImage(named: "accptReq")!, title: "Accept or Reject Request", description: "Your clasmates' requests will be shown here. Tap to accept or reject the request.", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod2 = OnboardingItemInfo(informationImage: UIImage(named: "acceptPic")!, title: "Accept or Reject Request", description: "Tap accept to activate the session.", pageIcon:  UIImage(named: "fullView")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+//        let obod6 = OnboardingItemInfo(informationImage: UIImage(named: "tapAccptView")!, title: "", description: "", pageIcon:  UIImage(named: "homeworkMeLogo")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod3 = OnboardingItemInfo(informationImage: UIImage(named: "timeToMeetCount")!, title: "Meet Up", description: "After accepting a session, you have 20 minutes to meet your classmate.", pageIcon:  UIImage(named: "fullView")!, color: bkGroundColor3, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod4 = OnboardingItemInfo(informationImage: UIImage(named: "startSess")!, title: "Start the Session", description: "When you start the session, you will have 30 minutes till the session is up.", pageIcon:  UIImage(named: "fullView")!, color: bkGroundColor1, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        let obod5 = OnboardingItemInfo(informationImage: UIImage(named: "finishSession")!, title: "Finish Session", description: "When the session is up or the timer runs out, tap Finish Session.", pageIcon:  UIImage(named: "fullView")!, color: bkGroundColor2, titleColor: UIColor.white, descriptionColor: UIColor.white, titleFont: title!, descriptionFont: description!)
+        
+        
+        return [obod, obod2, obod3, obod4, obod5][index]
+    }
+    
+    func onboardingConfigurationItem(_: OnboardingContentViewItem, index _: Int) {
+        //
+    }
+    
+    func onboardingWillTransitonToIndex(_ index: Int) {
+        if index == 3 {
+            UIView.animate(withDuration: 0.2) {
+                self.getStarted.alpha = 0
+            }
+        }
+    }
+    
+    func onboardingDidTransitonToIndex(_ index: Int) {
+        if index == 4 {
+            UIView.animate(withDuration: 0.4) {
+                self.getStarted.alpha = 1
+            }
+        }
+    }
+    
+    func onboardingItemsCount() -> Int {
+        return 5
     }
 }

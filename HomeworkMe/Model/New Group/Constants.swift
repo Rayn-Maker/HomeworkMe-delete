@@ -31,7 +31,7 @@ import Foundation
 typealias JSON = [String: Any]
 
 enum Constants {
-  static let publishableKey = "pk_test_hIXWAqb9WYIRUKxvST0Dqlnk"
+  static let publishableKey = "pk_live_zElKyvWz0R0pJiEmf42HAcii"
   static let baseURLString = "https://fierce-gorge-75882.herokuapp.com/"
   static let defaultCurrency = "usd"
   static let defaultDescription = "Purchase from Homeworkme iOS"

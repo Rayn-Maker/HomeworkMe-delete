@@ -66,14 +66,25 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         completionHandler([.alert, .badge, .sound])
     }
     
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+//    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+//
+//        let notification =  response.notification.request.content.body
+//        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! MyRequests
+//        self.window?.rootViewController = vc
+//        print(notification)
+//
+//        completionHandler()
+//    }
+    
+    func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         
-        let notification =  response.notification.request.content.body
-        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! MyRequests
-        self.window?.rootViewController = vc
-        print(notification)
         
-        completionHandler()
+        if ( application.applicationState == .inactive || application.applicationState == .background){
+            
+//            let notification =  response.notification.request.content.body
+            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! MyRequests
+            self.window?.rootViewController = vc
+        }
     }
     
     

@@ -68,7 +68,7 @@
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>1.11</string>
 	<key>FacebookAppID</key>
 	<string>976414455879848</string>
 	<key>FacebookDisplayName</key>
@@ -96,6 +96,8 @@
 		<key>NSAllowsArbitraryLoads</key>
 		<true/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>HomeworkMe wants access to your photos for the purpose of adding a profile picture to your account</string>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>We need permission to use your current address to help find you tutors and navigate you to them.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
@@ -117,8 +119,6 @@
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
-		<string>UIInterfaceOrientationLandscapeLeft</string>
-		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
