@@ -197,6 +197,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             }
             view.endEditing(true)
 //            addClassBtn.isHidden = true
+            
         } else {
             /// second time pressed
             editView.isHidden = false
@@ -280,11 +281,11 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             cancelBtn.setTitleColor(.black, for: .normal)
         }
         
-        if phoneNumber.text != nil && !placeesDict.isEmpty {
+        if phoneNumber.text != nil && phoneNumber.text != "" && !placeesDict.isEmpty {
          
             let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
                                            "status":"live",
-                                           "phoneNumber": self.phoneNumber.text]
+                                           "phoneNumber": self.phoneNumber.text ?? ""]
             
             ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
                 if err != nil {
@@ -292,16 +293,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 }
             }
              tutorEdit.isHidden = true
-        } else if !placeesDict.isEmpty  {
-            let userInfo: [String: Any] = ["meetUpLocations":placeesDict,
-                                           "status":"live"]
-            ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
-                if err != nil {
-                    
-                }
-            }
-             tutorEdit.isHidden = true
-        } else if phoneNumber.text != nil && !student.meetUpLocation.isEmpty {
+        } else if phoneNumber.text != nil && phoneNumber.text != "" && !student.meetUpLocation.isEmpty {
             
             let userInfo: [String: Any] = ["status":"live",
                                            "phoneNumber": self.phoneNumber.text]
@@ -314,7 +306,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
              tutorEdit.isHidden = true
         } else {
             // show warning
-            let alert = UIAlertController(title: "Missing Info", message: "make sure you select at least 2 public places (library or coffee shop) to meet up ", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Missing Info", message: "make sure you select at least 2 public places (library or coffee shop) to meet up and your phone number is filled", preferredStyle: .alert)
             let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
             alert.addAction(ok)
             present(alert, animated: true, completion: nil)
@@ -512,9 +504,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                     if let subDict = b["Subjects"]  {
                         university.dict = subDict as? [String : AnyObject]
                        
-                    }
+                    } 
                     self.uni_sub_array.append(university)
                 }
+                self.uni_sub_array.sort(by:{ $0.title! < $1.title! } )
                 self.classRoomTableView.reloadData()
             }
         })
@@ -659,6 +652,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                         }
                     }
                 }
+                self.uni_sub_array.sort(by:{ $0.title! < $1.title! } )
                 self.classRoomTableView.reloadData()
             }
         })
@@ -689,6 +683,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                             }
                         }
                     }
+                    self.uni_sub_array.sort(by:{ $0.title! < $1.title! } )
                     self.uniBtnOn = false; self.subBtnOn = false; self.classBtnOn = true
                     self.classRoomTableView.reloadData()
                 }
@@ -720,6 +715,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             uniBtnOn = false ; subBtnOn = true; classBtnOn = false
             headerTitle = uni_sub_array[indexPath.row].title!
             universityBtn.isEnabled = true ; universityBtn.setTitleColor(UIColor.black, for: .normal)
+            
         } else if subBtnOn {
             tableViewTitleCounter = 2
             subjectID = uni_sub_array[indexPath.row].uid
@@ -728,6 +724,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             degreeSubjectBtn.isEnabled = true
             degreeSubjectBtn.setTitleColor(UIColor.black, for: .normal)
             self.fetchClass(subKey: subjectID!)
+            
         } else if classBtnOn {
             // here add classes to the user and user to the class
             let cell = classRoomTableView.cellForRow(at: indexPath)

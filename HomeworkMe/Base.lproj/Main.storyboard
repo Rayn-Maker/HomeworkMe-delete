@@ -659,6 +659,9 @@
                                                 <state key="normal" title="Admin">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </state>
+                                                <connections>
+                                                    <segue destination="iJt-vQ-Yqi" kind="show" id="bqa-nK-WmJ"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                     </stackView>
@@ -1664,6 +1667,7 @@
                         <constraints>
                             <constraint firstItem="Yn0-6r-x2a" firstAttribute="top" secondItem="Y9r-kT-Q3T" secondAttribute="bottom" id="0kr-xF-dFA"/>
                             <constraint firstItem="52w-pH-DWM" firstAttribute="leading" secondItem="vRi-o6-hC3" secondAttribute="leading" id="14Q-Ul-WnC"/>
+                            <constraint firstItem="KY2-XY-XSS" firstAttribute="top" secondItem="LQQ-i1-0me" secondAttribute="bottom" constant="23" id="38t-x6-IBD"/>
                             <constraint firstItem="U21-LY-2Sx" firstAttribute="leading" secondItem="vRi-o6-hC3" secondAttribute="leading" id="9ja-bD-Idb"/>
                             <constraint firstItem="52w-pH-DWM" firstAttribute="trailing" secondItem="vRi-o6-hC3" secondAttribute="trailing" id="9qX-ip-eNF"/>
                             <constraint firstItem="vRi-o6-hC3" firstAttribute="bottom" secondItem="U21-LY-2Sx" secondAttribute="bottom" id="Cad-i3-PU0"/>
@@ -1672,6 +1676,7 @@
                             <constraint firstItem="Y9r-kT-Q3T" firstAttribute="leading" secondItem="vRi-o6-hC3" secondAttribute="leading" id="Q4I-a9-8VA"/>
                             <constraint firstItem="ZHv-9k-e4l" firstAttribute="trailing" secondItem="vRi-o6-hC3" secondAttribute="trailing" id="TCu-si-wlb"/>
                             <constraint firstItem="Yn0-6r-x2a" firstAttribute="leading" secondItem="vRi-o6-hC3" secondAttribute="leading" id="ZYi-7h-hOL"/>
+                            <constraint firstItem="LQQ-i1-0me" firstAttribute="top" secondItem="vRi-o6-hC3" secondAttribute="top" constant="8" id="aw9-uW-95c"/>
                             <constraint firstItem="Yn0-6r-x2a" firstAttribute="top" secondItem="ZHv-9k-e4l" secondAttribute="bottom" id="bZG-aQ-TBr"/>
                             <constraint firstItem="Y9r-kT-Q3T" firstAttribute="trailing" secondItem="vRi-o6-hC3" secondAttribute="trailing" id="bwo-Sn-LLK"/>
                             <constraint firstItem="vRi-o6-hC3" firstAttribute="bottom" secondItem="KY2-XY-XSS" secondAttribute="bottom" constant="80" id="kXz-GT-2W6"/>
@@ -1689,11 +1694,6 @@
                             <constraint firstItem="Yn0-6r-x2a" firstAttribute="trailing" secondItem="vRi-o6-hC3" secondAttribute="trailing" id="ziJ-tT-u9B"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="vRi-o6-hC3"/>
-                        <variation key="default">
-                            <mask key="subviews">
-                                <exclude reference="LQQ-i1-0me"/>
-                            </mask>
-                        </variation>
                     </view>
                     <connections>
                         <outlet property="acceptRejView" destination="TrJ-Ik-Zq3" id="Cs3-Ou-KSy"/>
@@ -2379,8 +2379,8 @@
         <image name="engineering" width="275" height="183"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="C7k-4i-K4Z"/>
-        <segue reference="T9O-lD-VG9"/>
+        <segue reference="2gh-bn-gdF"/>
+        <segue reference="0dN-Rq-Ded"/>
         <segue reference="gPz-g1-dw9"/>
     </inferredMetricsTieBreakers>
 </document>

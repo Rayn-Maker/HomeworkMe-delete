@@ -67,7 +67,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
                                                        "full_name": user.profile.name ?? " ",
                                                        "email": user.profile.email ?? " "]
                         
-                        self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo)
+//                        self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo)
                     } else {
                         let userInfo: [String: Any] = ["uid": Auth.auth().currentUser?.uid ?? "",
                                                        "fName": user.profile.givenName ?? " ",

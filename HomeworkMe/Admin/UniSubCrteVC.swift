@@ -32,15 +32,57 @@ class UniSubCrteVC: UIViewController {
         let ref = Database.database().reference()
         let key = ref.child("Universities").childByAutoId().key
         
-        present(commonFunctions.addToDirecotory(key: key, title: "Add Uni", message: "add new University", subKey: self.subId, uniName: self.universityName, foldername: "Universities", universityKey: ""), animated: true, completion: nil)
+        let alert = UIAlertController(title: "Add Uni", message: "", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "Enter name here"
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let post = UIAlertAction(title: "Create", style: .default) { _ in
+            guard let text = alert.textFields?.first?.text else { return }
+            if text != "" {
+                print(text)
+                let parameters = ["uid" : key,
+                                  "name" : text]
+                
+                let university = ["\(key)" : parameters]
+                ref.child("Universities").updateChildValues(university)
+            }
+        }
+        alert.addAction(cancel)
+        alert.addAction(post)
+        
+        present(alert, animated: true, completion: nil)
         fetchUni()
     }
     
     @IBAction func addSubBtn(_ sender: Any) {
         let ref = Database.database().reference()
-        let key = ref.child("Subjects").childByAutoId().key
-       
-        present(commonFunctions.addToDirecotory(key: key, title: "Add Subject/Degree", message: "add new Subjecct/Degree", subKey: "uid", uniName: universityName, foldername: "Subjects", universityKey: self.universityID), animated: true, completion: nil)
+        let key = ref.child("Universities").childByAutoId().key
+        
+        let alert = UIAlertController(title: "Add Sub", message: "", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "Enter name here"
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+        let post = UIAlertAction(title: "Create", style: .default) { _ in
+            guard let text = alert.textFields?.first?.text else { return }
+            if text != "" {
+                print(text)
+                let parameters = ["uid": key,
+                                  "name" : text,
+                                  "uniName":self.universityName,
+                                  "uniId":self.universityID]
+                let subject = ["\(key)": parameters]
+                let uniSection = [key:key]
+                ref.child("Subjects").updateChildValues(subject)
+            ref.child("Universities").child(self.universityID).child("Subjects").updateChildValues(uniSection)
+            }
+        }
+        alert.addAction(cancel)
+        alert.addAction(post)
+        
+        present(alert, animated: true, completion: nil)
+        fetchUni()
     }
     
     @IBAction func addClassPrsd(_ sender: Any) {
@@ -64,7 +106,7 @@ class UniSubCrteVC: UIViewController {
             
             ref.child("Classes").updateChildValues(classs)
             ref.child("Subjects").child(self.subId).child("Classes").updateChildValues(subFldr)
-            ref.child("Universities").child(self.universityID).child("Classes").updateChildValues(subFldr)
+         ref.child("Universities").child(self.universityID).child("Classes").updateChildValues(subFldr)
             
         }
         
