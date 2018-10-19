@@ -182,6 +182,7 @@ struct FetchObject {
     var uniName: String?
     var notificationKey: String!
     var notificationKeyName: String!
+    var Notification_Devices = [String]()
 }
 
 struct Reciept {

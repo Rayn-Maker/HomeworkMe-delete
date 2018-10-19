@@ -45,6 +45,8 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
     let postss = Post()
     var phoneNumber = ""
     var handle: DatabaseHandle?
+    var isOffering: Bool!
+    var classObject: FetchObject!
     // stripe payment setup
      
 
@@ -52,7 +54,7 @@ class PostView: UIViewController,  MFMessageComposeViewControllerDelegate  {
         super.viewDidLoad()
         let storage = Storage.storage().reference(forURL: "gs://hmwrkme.appspot.com")
         userStorage = storage.child("Students")
-        
+        ref = Database.database().reference()
         postTitle.text = postObject.title
         editImage()
         fetchTutor()
@@ -398,10 +400,10 @@ func downloadImage(url:String) -> Data {
         self.dismiss(animated: true, completion: nil)
     }
     
-    func sendTextMesg() {
+    func sendTextMesg(body:String = "") {
         if (MFMessageComposeViewController.canSendText()) {
             let controller = MFMessageComposeViewController()
-            controller.body = ""
+            controller.body = body
             controller.recipients = [self.tutor.phoneNumebr] as! [String]
             controller.messageComposeDelegate = self
             self.present(controller, animated: true, completion: nil)
@@ -502,7 +504,7 @@ func downloadImage(url:String) -> Data {
             self.ref.child("Students").child(postss.authorID ?? "").child("received").updateChildValues(par)
             self.ref.child("Students").child(postss.authorID ?? "").child("currentLocation").updateChildValues(place)
             //        self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
-            self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "Tutor request from \(senderName ?? "")")
+            self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "peer help request from \(senderName ?? "")")
         } else {
             // you cant send a request to yourself.
             let alert = UIAlertController(title: "This is your session", message: "You can't book a session with yourself.", preferredStyle: .alert)
@@ -513,6 +515,86 @@ func downloadImage(url:String) -> Data {
         }
         
     }
+    
+    func sendAccpt(){
+        // send a request to the author of the post, under his tutor tree in a request bucket
+        // post should have time stamp, sender id, chosen location if live
+        // post should have time stamp, sender id, and preset location if tutor is hot, request id
+        // post should have time stamp, sender id, and chosen appointment sent.
+        // put the request in a bucket under student who sent the request.
+        // one new screen. show pending requests, show sent requests.
+        // show waiting for response after they send a request on the post page
+        let ref = Database.database().reference()
+        let postKey = ref.child("Requests").childByAutoId().key
+        let dateString = String(describing: Date())
+        let senderId = Auth.auth().currentUser!.uid
+        var senderName: String?
+        var phoneNumber: String? //phoneNumber
+        var picUrl: String? //pictureUrl
+        var senderCustomerId:String?
+        if let nam = UserDefaults.standard.string(forKey: "full_name") {
+            senderName = nam
+        } else {
+            senderName = "Full name missing"
+        }
+        if let phon = UserDefaults.standard.string(forKey: "phoneNumber") {
+            phoneNumber = phon
+        } else {
+            phoneNumber = "0000000000"
+        }
+        if let phon = UserDefaults.standard.string(forKey: "pictureUrl") {
+            picUrl = phon
+        } else {
+            picUrl = " "
+        }//customerId
+        if let phon = UserDefaults.standard.string(forKey: "customerId") {
+            senderCustomerId = phon
+        } else {
+            
+        }
+        
+        if tutor.uid != senderId {
+            let place: [String:String] = ["address":meetUpLocation.address ?? "",
+                                          "long":meetUpLocation.long ?? "",
+                                          "lat":meetUpLocation.lat ?? "",
+                                          "name":meetUpLocation.name ?? ""]
+            
+            let parameters: [String:AnyObject] = ["senderId":self.tutor.uid  as AnyObject,
+                                                  "receiverId":senderId as AnyObject,
+                                                  "time":dateString as AnyObject,
+                                                  "senderName":postss.authorName as AnyObject,
+                                                  "receiverName":senderName as AnyObject,
+                                                  "reqId":postKey as AnyObject,
+                                                  "place":place as AnyObject,
+                                                  "postTitle":self.postss.title as AnyObject,
+                                                  "senderPhone":self.tutor.phoneNumebr as AnyObject,
+                                                  "receiverPhone":phoneNumber as AnyObject,
+                                                  "receiverPic":picUrl as AnyObject,
+                                                  "senderPic":self.tutor.pictureUrl  as AnyObject,
+                                                  "status":"pending" as AnyObject,
+                                                  "senderCustomerId":tutor.customerId as AnyObject,
+                                                  "receiverCustomerId": ProfileVC.senderCustomerId   as AnyObject,
+                                                  "price":self.postss.price as AnyObject,
+                                                  "senderDevice":tutor.deviceId  as AnyObject,
+                                                  "receiverDevice":ProfileVC.DEVICEID as AnyObject,
+                                                  "receiverPayment":ProfileVC.paymentSurce as AnyObject]
+            let par = [postKey : parameters] as [String: Any]
+            self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("received").updateChildValues(par)
+            self.ref.child("Students").child(postss.authorID ?? "").child("sent").updateChildValues(par)
+            self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("currentLocation").updateChildValues(place)
+            //        self.ref.child("Students").child(postss.authorID ?? "").updateChildValues(parameter2)
+            self.setupPushNotification(fromDevice: tutor.deviceId, title: "HomeworkMe", body: "\(ProfileVC.full_name) has accepted your request and is headed to \(meetUpLocation.name!) to help you.")
+        } else {
+            // you cant send a request to yourself.
+            let alert = UIAlertController(title: "This is your session", message: "You can't book a session with yourself.", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            alert.addAction(ok)
+            self.present(alert, animated: true, completion: nil)
+            
+        }
+        
+    }
+    
     
     func checkCard() {
         let user = Auth.auth().currentUser
@@ -552,14 +634,39 @@ extension PostView: UITableViewDataSource, UITableViewDelegate {
         if indexPath.section == 0 {
             if ProfileVC.hasCard {
                 if !sentReq {
-                    meetUpLocation = tutor.places[indexPath.row]
-                    sendRequest()
-                    let alert3 = UIAlertController(title: "Request Sent", message: "Look out for a notification from your classmate, you can also text or call if they dont respond in due time.", preferredStyle: .alert)
-                    let ok = UIAlertAction(title: "Ok", style: .destructive, handler: nil)
-                    alert3.addAction(ok)
-                    present(alert3, animated: true, completion: nil)
+                    if isOffering {
+                        // if this is an offering
+                        meetUpLocation = tutor.places[indexPath.row]
+                        sendRequest()
+                        let alert3 = UIAlertController(title: "Request Sent", message: "Look out for a notification from your classmate, you can also text or call if they dont respond in due time.", preferredStyle: .alert)
+                        let ok = UIAlertAction(title: "Ok", style: .destructive, handler: nil)
+                        alert3.addAction(ok)
+                        present(alert3, animated: true, completion: nil)
+                    } else {
+                        // do you want to meet up with x and help them with y
+                        meetUpLocation = tutor.places[indexPath.row]
+                        let alert4 =  UIAlertController(title: "Accept assignment help", message: "Do you want to meet up with \(self.postss.authorName!) and help with \(self.postss.title!)?", preferredStyle: .alert)
+                        let yes = UIAlertAction(title: "Yes", style: .default) { (_) in
+                            // delete post from get help
+                            // put post under pending for both parties
+                            self.sendAccpt()
+                            self.ref.child("Students").child(self.postss.authorID ?? "").child("Myposts").child(self.postss.uid!).removeValue()
+                            self.ref.child("Posts").child(self.postss.uid!).removeValue()
+                         self.ref.child("Classes").child(self.classObject.uid!).child("Posts").child("GetHelp").child(self.postss.uid!).removeValue()
+                            let alert5 = UIAlertController(title: "Request Sent", message: "Great your request has been sent. Text \(self.postss.authorName!) you are on your way.", preferredStyle: .alert)
+                            let ok1 = UIAlertAction(title: "Ok", style: .destructive) { (_) in
+                                self.sendTextMesg(body: "HomeworkMe Acceptance \nHowdy!!! I've accepted your assignment request on HomeworkMe and heading over to \(self.meetUpLocation.name!) to help you... see you soon!")
+                            }
+                            alert5.addAction(ok1)
+                            self.present(alert5, animated: true, completion: nil)
+                        }
+                        let cancel = UIAlertAction(title: "Cancel", style: .destructive, handler: nil)
+                        alert4.addAction(yes); alert4.addAction(cancel)
+                        present(alert4, animated: true, completion: nil)
+                        
+                    }
                 } else {
-                    let alert = UIAlertController(title: "Request Previously Sent", message: "This tutor is yet to respond to your request try texting or calling.", preferredStyle: .alert)
+                    let alert = UIAlertController(title: "Request Previously Sent", message: "your peer is yet to respond to your request try texting or calling.", preferredStyle: .alert)
                     let text = UIAlertAction(title: "Text", style: .default) { (res) in
                         //
                         self.sendTextMesg()
@@ -573,7 +680,7 @@ extension PostView: UITableViewDataSource, UITableViewDelegate {
                     present(alert, animated: true, completion: nil)
                 }
             } else {
-                let alert2 = UIAlertController(title: "Missing Information", message: "You must add a payment source before requesting a tutor's materail", preferredStyle: .alert)
+                let alert2 = UIAlertController(title: "Missing Information", message: "You must add a payment source before requesting your peers help... Tap location again after adding your card info", preferredStyle: .alert)
                 let add = UIAlertAction(title: "Add", style: .default) { (res) in
                     //
                     self.addCard()

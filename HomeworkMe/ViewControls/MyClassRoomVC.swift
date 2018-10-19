@@ -57,6 +57,8 @@ class MyClassRoomVC: UIViewController {
     var isRequest = false
     var notificationKey: String!
     var notificationKeyName: String!
+    var devicNotes = [String]()
+    var isOffering: Bool!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -102,7 +104,7 @@ class MyClassRoomVC: UIViewController {
             alert4.addAction(giveHelp); alert4.addAction(getHelp)
             present(alert4, animated: true, completion: nil)
         } else {
-            let alert = UIAlertController(title: "Missing Information", message: "Kindly register your account for tutoring by selecting a method in which your students can pay you.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Missing Information", message: "Kindly register your account for tutoring by selecting a method in which your students can pay you. Then tap to add an assignment again.", preferredStyle: .alert)
             let zelle = UIAlertAction(title: "Zelle", style: .default) { (resp) in
                 let alert1 = UIAlertController(title: "Zelle", message: "what's your Zelle email or phone number", preferredStyle: .alert)
                 alert1.addTextField { (textField) in
@@ -209,11 +211,11 @@ class MyClassRoomVC: UIViewController {
     @IBAction func switchView(_ sender: Any) {
         if requestsTableView.isHidden {
             requestsTableView.isHidden = false
-            switchView.title = "Offers"
+            switchView.title = "View Offers"
             isRequest = true
         } else {
              requestsTableView.isHidden = true
-            switchView.title = "Requests"
+            switchView.title = " View Requests"
             isRequest = true
         }
     }
@@ -408,15 +410,16 @@ class MyClassRoomVC: UIViewController {
                 ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
                 ref.child("Posts").child(postKey).updateChildValues(parameters!)
                 ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GiveHelp").updateChildValues(postParam)
-                
+                self.callForHelp(title: "HomeworkMe Assignement Offer", body: "Your classmate in \(self.fetchObject.title ?? ""), under Offers posted: \(name ?? "")")
             } else {
                 ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
                 ref.child("Posts").child(postKey).updateChildValues(parameters!)
                 ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GetHelp").updateChildValues(postParam)
+                self.callForHelp(title: "HomeworkMe Help Request", body: "Your classmate in \(self.fetchObject.title ?? ""), under Requests posted: \(name )")
             }
             self.postPresetView.isHidden = true
             categoryBtn.isSelected = false
-            setupPushNotification()
+            
         } else {
             // shake text
         }
@@ -439,6 +442,9 @@ class MyClassRoomVC: UIViewController {
                 }
                 if let notificationKeyName = posts["notificationKeyName"] as? String {
                     self.notificationKeyName = notificationKeyName
+                }
+                if let Notification_Devices = posts["Notification_Devices"] as? [String] {
+                    self.devicNotes = Notification_Devices
                 }
             }
         })
@@ -556,21 +562,52 @@ class MyClassRoomVC: UIViewController {
         if segue.identifier == seg {
             let vc = segue.destination as? PostView
              vc?.postObject = self.postObject
+            vc?.isOffering = self.isOffering
+            vc?.classObject = self.fetchObject
         }
     }
     
-    fileprivate func setupPushNotification()
+   
+    func callForHelp(title:String, body:String){
+        for x in 0...devicNotes.count - 1 {
+            checkNotif(fromDevice: devicNotes[x], title: title, body: body)
+//            print("call for help ran \(x) times")
+        }
+    }
+    
+    fileprivate func checkNotif(fromDevice:String, title:String, body:String)
     {
         //        guard let message = "text.text" else {return}
+        let toDeviceID = fromDevice
+        var headers:HTTPHeaders = HTTPHeaders()
         
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)" ]
+        
+        let notification = ["to": fromDevice,
+                            "notification":[
+                                "body":body,
+                                "title":title,
+                                "badge":1,
+                                "sound":"default"]
+            ] as [String:Any]
+        
+        Alamofire.request("https://fcm.googleapis.com/fcm/send" as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+        }
+    }
+    
+    fileprivate func setupPushNotification(fromDevice:String, title:String, body:String)
+    {
+        //        guard let message = "text.text" else {return}
+        let toDeviceID = fromDevice
         var headers:HTTPHeaders = HTTPHeaders()
         
         headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)"
             
         ]
-        let notification = ["to":self.notificationKey,"data":["hello": "This is a Firebase Cloud Messaging Device Group Message!"]] as [String:Any]
+        let notification = ["to":"cXerwI8NeS4:APA91bE8AyQGyvQ3UAg4OpIpLrjlNFE6iV39dXWoq3EknYeHwtTTDbdEvhldhRX6SVCQqOktADc2tciBe46QrHQF_dtnMMt4wqBM-Xg4erVAE3j1DnkLvVwn5JaJneT8fjsLNkxNHJfb","notification":["body":body,"title":title,"badge":1,"sound":"default"]] as [String:Any]
         
-        Alamofire.request("https://fcm.googleapis.com/fcm/send" as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+        Alamofire.request(AppDelegate.NOTIFICATION_URL as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
             print(response)
         }
         
@@ -750,6 +787,7 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
     }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         if tableView == postsTableView {
+            self.isOffering = true 
             switch (indexPath.section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
             case 0:
                 postObject = myPostArr[indexPath.row]
@@ -773,6 +811,7 @@ extension MyClassRoomVC: UITableViewDataSource, UITableViewDelegate {
                 print(seg)
             }
         } else if tableView == requestsTableView {
+            self.isOffering = false
             switch (indexPath.section) { //["All","Homework", "Test","Notes","Tutoring","Other"]
             case 0:
                 postObject = myPostArrReq[indexPath.row]

@@ -114,16 +114,28 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     
     @IBAction func rejectReq(_ sender: Any) {
         let dateString = String(describing: Date())
-        let parameter2: [String:AnyObject] = ["newNotice":true as AnyObject]
+        
         
         let par = ["time": dateString as AnyObject,
                    "status":"rejected"] as! [String: Any]
         
+        let statsParam: [String:String] = ["status":"live"]
+        
+        self.ref.child("Students").child(self.request.senderId ?? "").updateChildValues(statsParam)
+        self.ref.child("Students").child(self.request.receiverId ?? "").updateChildValues(statsParam)
+        
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
-        self.ref.child("Students").child(request.senderId ?? "").updateChildValues(parameter2)
+        
         
         requestersView.isHidden = true
+        if Auth.auth().currentUser?.uid == self.request.senderId {
+            
+            self.setupPushNotification(fromDevice: self.request.receiverId, title: "Session Cancellation", body: "\(self.request.senderName!) canceld the session, based on the case you might get some compensaton")
+        } else {
+            
+            self.setupPushNotification(fromDevice: self.request.senderDevice, title: "Session Cancellation", body: "\(self.request.receiverName!) canceld the session, kindly send out another request.")
+        }
     }
     
     @IBAction func switchView(_ sender: Any) {
@@ -213,6 +225,35 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
     
      @IBAction func cancelTutor(_ sender: Any) {
         //change the tag with an api call.
+         let dateString = String(describing: Date())
+        var body = ""
+        let alert = UIAlertController(title: "Warning", message: body, preferredStyle: .alert)
+        let yes = UIAlertAction(title: "Yes cancel", style: .destructive) { (_) in
+            let par = ["time": dateString as AnyObject,
+                       "sessionDidStart":false as AnyObject,
+                       "status":"rejected"] as! [String: Any]
+            
+            let statsParam: [String:String] = ["status":"live"]
+            
+            self.ref.child("Students").child(self.request.senderId ?? "").updateChildValues(statsParam)
+            self.ref.child("Students").child(self.request.receiverId ?? "").updateChildValues(statsParam)
+            
+            self.ref.child("Students").child(self.request.senderId ?? "").child("sent").child(self.request.reqID).updateChildValues(par)
+            self.ref.child("Students").child(self.request.receiverId ?? "").child("received").child(self.request.reqID).updateChildValues(par)
+            
+            self.ref.child("Students").child(self.request.receiverId ?? "").child("received").child(self.request.reqID).updateChildValues(par)
+            self.ref.child("Students").child(self.request.senderId ?? "").child("sent").child(self.request.reqID).updateChildValues(par)
+            if Auth.auth().currentUser?.uid == self.request.senderId {
+                body = "If you cancel this session you wont be able to start it and you may be charged a penalty. Are you sure you want to cancel the session?"
+                self.setupPushNotification(fromDevice: self.request.receiverId, title: "Session Cancellation", body: "\(self.request.senderName!) canceld the session, based on the case you might get some compensaton")
+            } else {
+                body = "If you cancel this session you wont be able to start it and you may be penalized. Are you sure you want to cancel the session?"
+                self.setupPushNotification(fromDevice: self.request.senderDevice, title: "Session Cancellation", body: "\(self.request.receiverName!) canceld the session, kindly send out another request.")
+            }
+        }
+        let no = UIAlertAction(title: "No continue", style: .default, handler: nil)
+        alert.addAction(yes); alert.addAction(no)
+        present(alert, animated: true, completion: nil)
     }
     
     @IBAction func dismissView(_ sender: Any) {
@@ -282,8 +323,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         self.ref.child("Students").child(request.senderId ?? "").child("receipt").child(request.reqID).updateChildValues(receiptParam)
         self.ref.child("Students").child(request.receiverId ?? "").child("receipt").child(request.reqID).updateChildValues(receiptParam)
         requestersView.isHidden = true
-        chargeCard( price: payOut[0], description: desc, customerSender: request.senderCustomerId)
-        setupPushNotification(fromDevice: request.senderDevice, title: title, body: "\(request.receiverName ?? "") Has accepted your tutor session")
+       
+        setupPushNotification(fromDevice: request.senderDevice, title: title, body: "\(request.receiverName ?? "") Has accepted your assignment help session and is on his way to \(request.place.name!)")
         //            drawPath(start: currentLocation!, end: request.place)
         //            mapViewDisplay.isHidden = false
     }
@@ -498,6 +539,13 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             }
             connectTimer(req: self.request, startSess: true)
             
+           //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+            // make payment to auth by checking if current user is sender of request then make payment.
+            var payOut: [Int]
+            payOut = convMony(price: request.sessionPrice)
+            let desc = "Description: Payment to: \(request.receiverName ?? "") from: \(request.senderName ?? "") for \(request.postTite ?? "") total paid \(payOut[1])"
+            self.chargeCard( price: payOut[0], description: desc, customerSender: request.senderCustomerId)
+            //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
         } else {
             let alert = UIAlertController(title: "Session already started", message: "This session has already been started.", preferredStyle: .alert)
             let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
@@ -518,6 +566,8 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
         self.setupPushNotification(fromDevice: request.senderDevice, title: "HomeworkMe", body: "\(request.receiverName ?? "") Has ended your session.")
         self.ref.child("Students").child(request.receiverId ?? "").child("received").child(request.reqID).updateChildValues(par)
         self.ref.child("Students").child(request.senderId ?? "").child("sent").child(request.reqID).updateChildValues(par)
+        
+    
     }
     
     func editImage(){
@@ -553,7 +603,7 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             req.receiverCustomerId = b["receiverCustomerId"] as? String
             req.senderCustomerId = b["senderCustomerId"] as? String
             req.sessionPrice = b["price"] as? Int
-            self.earnings += req.sessionPrice
+//            self.earnings += req.sessionPrice
             req.receiverPicUrl = b["receiverPic"] as? String
             req.receiverPayment = b["receiverPayment"] as? [String]
             if let et = b["endTimeToMeet"] as? String {
@@ -562,8 +612,10 @@ class MyRequests: UIViewController, MFMessageComposeViewControllerDelegate, UNUs
             }
             req.sessionDidStart = b["sessionDidStart"] as? Bool ?? false
             if req.sessionDidStart {
-                req.endTimeStrn = b["endTime"] as! String
-//                connectTimer(req: req, timeToMeet: false)
+                if let xx =  b["endTime"] as? String {
+                    req.endTimeStrn = b["endTime"] as! String
+                    //                connectTimer(req: req, timeToMeet: false)
+                }
             }
             
             req.reqStatus = b["status"] as? String
@@ -903,7 +955,11 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 acceptRejView.isHidden = true
                 cancelTutor.setTitleColor(.gray, for: .normal); cancelTutor.isEnabled = false
                 startSessionBtn.setTitleColor(.gray, for: .normal); startSessionBtn.isEnabled = false
-                self.phoneNumber = student.requestsArrRejected[indexPath.row].receiverPhone
+                if student.requestsArrRejected[indexPath.row].receiverPhone != nil {
+                    self.phoneNumber = student.requestsArrRejected[indexPath.row].receiverPhone
+                } else {
+                     self.phoneNumber = "0000000000"
+                }
                 self.sessionBtnView.isHidden = false
                 request = student.requestsArrRejected[indexPath.row]
                 connectProfile(req: student.requestsArrRejected[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: false, meetUplocationMesg: "Tutor request was rejected kinldy find another. or session is over")
@@ -944,7 +1000,7 @@ extension MyRequests: UITableViewDelegate, UITableViewDataSource {
                 startSessionBtn.setTitleColor(.gray, for: .normal); startSessionBtn.isEnabled = false
                 self.phoneNumber = tutor.requestsArrHistory[indexPath.row].senderPhone
                 request = tutor.requestsArrHistory[indexPath.row]
-                connectProfile(req: tutor.requestsArrHistory[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "Session over hope you had a great time with this Student. you've made $\(String(format: "%.2f", Double(self.earnings) - Double(self.earnings) * 0.25)) so far.")
+                connectProfile(req: tutor.requestsArrHistory[indexPath.row], tutStat: tutor.tutorStatus ?? "", isRequest: true, meetUplocationMesg: "")//"Session over hope you had a great time with this Student. you've made $\(String(format: "%.2f", Double(self.earnings) - Double(self.earnings) * 0.25)) so far.")
                 self.isTimerRunning2 = false
                 self.timer2.invalidate()
                 timerLabel.text = "00:00:00"

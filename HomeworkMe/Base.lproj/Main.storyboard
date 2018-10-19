@@ -272,7 +272,7 @@
         <!--Uni Sub CrteVC-->
         <scene sceneID="Qap-EC-iVn">
             <objects>
-                <viewController id="iJt-vQ-Yqi" customClass="UniSubCrteVC" customModule="HomeworkMe" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="UniSubCrteVC" id="iJt-vQ-Yqi" customClass="UniSubCrteVC" customModule="HomeworkMe" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="TzY-lF-V8z">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -399,7 +399,7 @@
         <!--Classes EditVC-->
         <scene sceneID="Xo2-IS-Ai7">
             <objects>
-                <viewController id="l9H-0j-LgM" customClass="ClassesEditVC" customModule="HomeworkMe" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ClassesEditVC" id="l9H-0j-LgM" customClass="ClassesEditVC" customModule="HomeworkMe" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="doW-4i-MlB">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -708,7 +708,7 @@
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </state>
                                                 <connections>
-                                                    <segue destination="l9H-0j-LgM" kind="show" id="j68-mw-xEm"/>
+                                                    <action selector="showEditCls:" destination="34a-jY-Jsx" eventType="touchUpInside" id="vUh-FF-Fbt"/>
                                                 </connections>
                                             </button>
                                             <button opaque="NO" alpha="0.20000000000000001" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P5u-yq-You">
@@ -720,7 +720,7 @@
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </state>
                                                 <connections>
-                                                    <segue destination="iJt-vQ-Yqi" kind="show" id="bqa-nK-WmJ"/>
+                                                    <action selector="showCreateClass:" destination="34a-jY-Jsx" eventType="touchUpInside" id="2dd-0e-VE7"/>
                                                 </connections>
                                             </button>
                                         </subviews>
@@ -1855,7 +1855,7 @@
                                                 <action selector="backPrsd:" destination="KMp-Ch-Q0J" id="2Fo-BO-qah"/>
                                             </connections>
                                         </barButtonItem>
-                                        <barButtonItem key="rightBarButtonItem" title="Requests" id="jfT-zu-yt9">
+                                        <barButtonItem key="rightBarButtonItem" title="View Requests" id="jfT-zu-yt9">
                                             <color key="tintColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                             <connections>
                                                 <action selector="switchView:" destination="KMp-Ch-Q0J" id="ixD-B0-1oX"/>
@@ -2440,7 +2440,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="2gh-bn-gdF"/>
-        <segue reference="vam-tv-Fox"/>
+        <segue reference="Hek-pp-D9f"/>
         <segue reference="gPz-g1-dw9"/>
     </inferredMetricsTieBreakers>
 </document>

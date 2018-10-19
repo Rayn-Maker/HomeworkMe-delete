@@ -77,6 +77,10 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     static var DEVICEID = String()
     static var hasCard = false
     static var senderCustomerId = ""
+    static var full_name = ""
+    static var paymentSurce = [String]()
+    var devicNotes = [String]()
+    var window: UIWindow?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -319,6 +323,42 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         addCard()
     }
     
+    @IBAction func showEditCls(_ sender: Any) {
+        let alert = UIAlertController(title: "Admin Support", message: "You must be an admin support, or confirmed ambassador to have access to this page, contact HomeworkMeInfo@gmail.com to get access.", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "Hi Nicole, Sevanna, Joshua, Harrison & Radiance"
+        }
+        let ok = UIAlertAction(title: "Ok", style: .default) { (_) in
+            guard let text = alert.textFields?.first?.text else { return }
+            
+            if text == "addMySchool100" {
+                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                let newViewController = storyBoard.instantiateViewController(withIdentifier: "ClassesEditVC") as! ClassesEditVC
+                self.present(newViewController, animated: true, completion: nil)
+            }
+        }
+        alert.addAction(ok)
+        present(alert, animated: true, completion: nil)
+    }
+    
+    @IBAction func showCreateClass(_ sender: Any) {
+        let alert = UIAlertController(title: "Admin Support", message: "You must be an admin support, or confirmed ambassador to have access to this page, contact HomeworkMeInfo@gmail.com to get access.", preferredStyle: .alert)
+        alert.addTextField { (textField) in
+            textField.placeholder = "Hi Nicole, Sevanna, Joshua, Harrison & Radiance"
+        }
+        let ok = UIAlertAction(title: "Ok", style: .default) { (_) in
+            guard let text = alert.textFields?.first?.text else { return }
+            
+            if text == "addMySchool100" { 
+                let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
+                let newViewController = storyBoard.instantiateViewController(withIdentifier: "UniSubCrteVC") as! UniSubCrteVC
+                self.present(newViewController, animated: true, completion: nil)
+            }
+        }
+        alert.addAction(ok)
+        present(alert, animated: true, completion: nil)
+    }
+    
     @IBAction func getStarted(_ sender: Any) {
         UIView.animate(withDuration: 0.3) {
             self.onBoardingView.isHidden = true
@@ -345,11 +385,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     }
     
     //notifications configuration
-    func messaging(_ messaging: Messaging, didRefreshRegistrationToken fcmToken: String) {
-        guard  let newToken = InstanceID.instanceID().token() else {return}
-        ProfileVC.DEVICEID = newToken
-        connectToFCM()
-    }
+    
     
     func registerForPushNotifications() {
         UNUserNotificationCenter.current().delegate = self
@@ -463,6 +499,11 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             // delete class from student and student from class
         ref.child("Students").child(uid!).child("Classes").child(key!).removeValue()
         ref.child("Classes").child(key!).child("Students").child(uid!).removeValue()
+        ref.child("Classes").child(uid!).child("Notification_Devices").child(ProfileVC.DEVICEID).removeValue { (err, ref) in
+            if err != nil {
+                print("errero is not nil")
+            }
+        }
         Messaging.messaging().subscribe(toTopic: "\(myClassesArr[indexPathRow].uniName ?? "")\(myClassesArr[indexPathRow].subName ?? "")\(myClassesArr[indexPathRow].title ?? "")") { error in
             if error  == nil {
                 print("Subscribed to news topic")
@@ -562,6 +603,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 if let fname = myclass["full_name"] as? String {
                     UserDefaults.standard.set(fname, forKey: "full_name")
                     self.student.full_name = fname
+                    ProfileVC.full_name = fname 
                 }
                 if let fname = myclass["fName"] as? String {
                     UserDefaults.standard.set(fname, forKey: "fName")
@@ -583,6 +625,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                 }
                 if let status = myclass["paymentSource"] as? [ String] {
                     self.student.paymentSource = status
+                    ProfileVC.paymentSurce = status 
                     
                 } //fromDevice
                 if let fromDevice = myclass["fromDevice"] as? String {
@@ -703,6 +746,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                                 }
                                 if let notificationName = b["notificationKeyName"] {
                                     subject.notificationKeyName = notificationName as? String
+                                }//Notification_Devices
+                                if let notificationName = b["Notification_Devices"] {
+                                    subject.Notification_Devices = notificationName as? [String] ?? []
                                 }
                                 self.uni_sub_array.append(subject)
                             }
@@ -806,9 +852,18 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 cell?.accessoryType = .checkmark
                 ref.child("Students").child(uid!).child("Classes").child(key!).updateChildValues(parameters)
                 ref.child("Classes").child(key!).child("Students").child(uid!).updateChildValues(parameters2)
+                
+                devicNotes = uni_sub_array[indexPath.row].Notification_Devices
+                if devicNotes.contains(ProfileVC.DEVICEID) {
+                    
+                } else {
+                    devicNotes.append(ProfileVC.DEVICEID)
+                }
+                ref.child("Classes").child(key!).child("Notification_Devices").setValue(devicNotes)
                 self.addToGrpMessg(keyName: uni_sub_array[indexPath.row].title!, notificationKey: uni_sub_array[indexPath.row].notificationKey)
+
             }
-            // delete it from the class array
+            
          }
         } else if tableView == myClassesTableView{
                 self.performSegue(withIdentifier: "profileToClasses", sender: self)
@@ -822,7 +877,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 
                 myClassesArr.remove(at: indexPath.row)
                 myClassesTableView.deleteRows(at: [indexPath], with: .fade)
-//                rmFrmGrpMessg(keyName: myClassesArr[indexPath.row].title!, notificationKey: myClassesArr[indexPath.row].notificationKey)
+
             }
         }
        
