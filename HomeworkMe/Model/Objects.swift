@@ -180,6 +180,8 @@ struct FetchObject {
     var subName:String!
     var uniID: String?
     var uniName: String?
+    var notificationKey: String!
+    var notificationKeyName: String!
 }
 
 struct Reciept {

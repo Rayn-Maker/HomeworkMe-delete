@@ -15,6 +15,7 @@ import GooglePlaces
 import GoogleSignIn
 import UserNotifications
 import paper_onboarding
+import Alamofire
 
 
 class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, GIDSignInUIDelegate, UNUserNotificationCenterDelegate  {
@@ -388,7 +389,22 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     func application(_ application: UIApplication, didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
         
-        connectToFCM()
+        connectToFCM() 
+    }
+    
+    fileprivate func setUpGroupMessages(fromDevice:String, groupName:String, body:String)
+    {
+        //        guard let message = "text.text" else {return}
+        let toDeviceID = fromDevice
+        var headers:HTTPHeaders = HTTPHeaders()
+        
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)","project_id":fromDevice]
+        let notification = ["operation": "create","notification_key_name":groupName,"registration_ids":["4", "8", "15", "16", "23", "42"]] as [String:Any]
+        
+        Alamofire.request("https://fcm.googleapis.com/fcm/notification" as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+        }
+        
     }
     
     
@@ -618,9 +634,12 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     func fetchMyClass(dictCheck: [String:AnyObject]){
         var fetchObject = FetchObject()
-        for (x,y) in dictCheck {
-            fetchObject.title = y["className"] as! String
-            fetchObject.uid = y["uid"] as! String
+        for (_,y) in dictCheck {
+            fetchObject.title = y["className"] as? String
+            fetchObject.uid = y["uid"] as? String
+            if let notificationKey  = y["notificationKey"] as? String {
+                fetchObject.notificationKey = notificationKey
+            }
             self.myClassesArr.append(fetchObject)
         }
         self.activitySpinner.stopAnimating()
@@ -679,6 +698,12 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                                 if let title = b["uniId"] {
                                     subject.uniID = title as? String
                                 }
+                                if let notificationKey = b["notificationKey"] {
+                                    subject.notificationKey = notificationKey as? String
+                                }
+                                if let notificationName = b["notificationKeyName"] {
+                                    subject.notificationKeyName = notificationName as? String
+                                }
                                 self.uni_sub_array.append(subject)
                             }
                         }
@@ -691,8 +716,45 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         }
     }
     
-    ///////////////////////////////////////// edit Account \\\\\\\\\\\\\\\\\\\\\\
-
+    fileprivate func addToGrpMessg( keyName:String, notificationKey:String)
+    {
+        let newString = keyName.replacingOccurrences(of: " ", with: "_")
+        ref = Database.database().reference()
+        var headers:HTTPHeaders = HTTPHeaders()
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)","project_id":"81643141779"]
+        let notification = ["operation": "add","notification_key":notificationKey,"notification_key_name": newString,"registration_ids":[ProfileVC.DEVICEID]] as [String:Any]
+        
+        Alamofire.request("https://fcm.googleapis.com/fcm/notification" as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: response.data!, options: .mutableContainers) as? JSON else {return}
+                let par = ["notification_key\(json["notification_key"] ?? "")": json["notification_key"] ?? ""] as [String: Any]
+                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(par)
+            } catch {
+                
+            }
+        }
+    }
+    
+    fileprivate func rmFrmGrpMessg( keyName:String, notificationKey:String)
+    {
+        let newString = keyName.replacingOccurrences(of: " ", with: "_")
+        ref = Database.database().reference()
+        var headers:HTTPHeaders = HTTPHeaders()
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)","project_id":"81643141779"]
+        let notification = ["operation": "remove","notification_key_name":newString,"notification_key":notificationKey,"registration_ids":[ProfileVC.DEVICEID]] as [String:Any]
+        
+        Alamofire.request("https://fcm.googleapis.com/fcm/notification" as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+            print(response)
+            do {
+                guard let json = try JSONSerialization.jsonObject(with: response.data!, options: .mutableContainers) as? JSON else {return}
+                //                let par = ["notification_key": json["notification_key"]] as [String: Any]
+                //                self.ref.child("Classes").child(self.selClassId).updateChildValues(par)
+            } catch {
+                
+            }
+        }
+    }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "profileToClasses" {
@@ -734,25 +796,17 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             let className = uni_sub_array[indexPath.row].title
             let uid = Auth.auth().currentUser?.uid
             let parameters: [String:String] = ["uid" : key!,
-                                               "className":className ?? ""]
+                                               "className":className ?? "",
+                                               "notificationKey":uni_sub_array[indexPath.row].notificationKey]
             let parameters2: [String:String] = ["uid" : uid!,
                                                 "studentName":self.student.full_name ?? ""]
             if myClassesArr.contains(where: { $0.uid == key }) {
                 cell?.accessoryType = .checkmark
             } else {
                 cell?.accessoryType = .checkmark
-                DispatchQueue.main.async {
-                    Messaging.messaging().subscribe(toTopic: "\(self.uni_sub_array[indexPath.row].uniName ?? "")\(self.uni_sub_array[indexPath.row].subName ?? "")\(self.uni_sub_array[indexPath.row].title ?? "")") { error in
-                        if error  == nil {
-                            print("********I did not got in ********")
-                        } else {
-                            print("********I got in ********")
-                        }
-                        print("********I got in ********")
-                    }
-                }
                 ref.child("Students").child(uid!).child("Classes").child(key!).updateChildValues(parameters)
                 ref.child("Classes").child(key!).child("Students").child(uid!).updateChildValues(parameters2)
+                self.addToGrpMessg(keyName: uni_sub_array[indexPath.row].title!, notificationKey: uni_sub_array[indexPath.row].notificationKey)
             }
             // delete it from the class array
          }
@@ -768,6 +822,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 
                 myClassesArr.remove(at: indexPath.row)
                 myClassesTableView.deleteRows(at: [indexPath], with: .fade)
+//                rmFrmGrpMessg(keyName: myClassesArr[indexPath.row].title!, notificationKey: myClassesArr[indexPath.row].notificationKey)
             }
         }
        

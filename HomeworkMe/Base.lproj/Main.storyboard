@@ -396,6 +396,63 @@
             </objects>
             <point key="canvasLocation" x="143.19999999999999" y="837.93103448275872"/>
         </scene>
+        <!--Classes EditVC-->
+        <scene sceneID="Xo2-IS-Ai7">
+            <objects>
+                <viewController id="l9H-0j-LgM" customClass="ClassesEditVC" customModule="HomeworkMe" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="doW-4i-MlB">
+                        <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="28" sectionFooterHeight="28" translatesAutoresizingMaskIntoConstraints="NO" id="c4u-tn-9hb">
+                                <rect key="frame" x="0.0" y="149" width="375" height="518"/>
+                                <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <prototypes>
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="classEdit" id="b3v-i5-E5x">
+                                        <rect key="frame" x="0.0" y="28" width="375" height="44"/>
+                                        <autoresizingMask key="autoresizingMask"/>
+                                        <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="b3v-i5-E5x" id="96P-71-xYM">
+                                            <rect key="frame" x="0.0" y="0.0" width="375" height="43.5"/>
+                                            <autoresizingMask key="autoresizingMask"/>
+                                        </tableViewCellContentView>
+                                    </tableViewCell>
+                                </prototypes>
+                                <connections>
+                                    <outlet property="dataSource" destination="l9H-0j-LgM" id="BdZ-Dq-poT"/>
+                                    <outlet property="delegate" destination="l9H-0j-LgM" id="Ip9-yS-rzL"/>
+                                </connections>
+                            </tableView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="RP0-RR-Z8z">
+                                <rect key="frame" x="35" y="43" width="46" height="30"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="30" id="QUK-g0-SkS"/>
+                                    <constraint firstAttribute="width" constant="46" id="xFq-jA-oIh"/>
+                                </constraints>
+                                <state key="normal" title="Button"/>
+                                <connections>
+                                    <action selector="backPrsd:" destination="l9H-0j-LgM" eventType="touchUpInside" id="Ueg-Pm-uKE"/>
+                                </connections>
+                            </button>
+                        </subviews>
+                        <color key="backgroundColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                        <constraints>
+                            <constraint firstItem="RP0-RR-Z8z" firstAttribute="top" secondItem="Xh3-u4-cqY" secondAttribute="top" constant="23" id="109-lb-ZpY"/>
+                            <constraint firstItem="RP0-RR-Z8z" firstAttribute="leading" secondItem="Xh3-u4-cqY" secondAttribute="leading" constant="35" id="I32-zq-6Ws"/>
+                            <constraint firstItem="c4u-tn-9hb" firstAttribute="bottom" secondItem="Xh3-u4-cqY" secondAttribute="bottom" id="XSZ-i1-oCd"/>
+                            <constraint firstItem="c4u-tn-9hb" firstAttribute="top" secondItem="Xh3-u4-cqY" secondAttribute="top" constant="129" id="bzE-p2-cSZ"/>
+                            <constraint firstItem="c4u-tn-9hb" firstAttribute="trailing" secondItem="Xh3-u4-cqY" secondAttribute="trailing" id="kNb-Xl-dom"/>
+                            <constraint firstItem="c4u-tn-9hb" firstAttribute="leading" secondItem="Xh3-u4-cqY" secondAttribute="leading" id="o5f-uC-NVr"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="Xh3-u4-cqY"/>
+                    </view>
+                    <connections>
+                        <outlet property="classesTable" destination="c4u-tn-9hb" id="Klg-m9-8ZS"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="riz-Eo-bMk" userLabel="First Responder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="141.59999999999999" y="1539.5802098950526"/>
+        </scene>
         <!--Sign Up-->
         <scene sceneID="ou4-k0-uRo">
             <objects>
@@ -650,6 +707,9 @@
                                                 <state key="normal" title="Admin">
                                                     <color key="titleColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                 </state>
+                                                <connections>
+                                                    <segue destination="l9H-0j-LgM" kind="show" id="j68-mw-xEm"/>
+                                                </connections>
                                             </button>
                                             <button opaque="NO" alpha="0.20000000000000001" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="P5u-yq-You">
                                                 <rect key="frame" x="191" y="0.0" width="78" height="40"/>
@@ -2380,7 +2440,7 @@
     </resources>
     <inferredMetricsTieBreakers>
         <segue reference="2gh-bn-gdF"/>
-        <segue reference="0dN-Rq-Ded"/>
+        <segue reference="vam-tv-Fox"/>
         <segue reference="gPz-g1-dw9"/>
     </inferredMetricsTieBreakers>
 </document>

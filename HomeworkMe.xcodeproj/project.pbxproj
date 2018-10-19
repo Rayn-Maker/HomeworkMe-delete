@@ -41,6 +41,7 @@
 		685EB6252113F885001A7A5C /* UniSubCrteVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685EB6242113F885001A7A5C /* UniSubCrteVC.swift */; };
 		685EB628211A7DA4001A7A5C /* MyClasses.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685EB627211A7DA4001A7A5C /* MyClasses.swift */; };
 		685EB62A211A86D3001A7A5C /* MyClassRoomVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685EB629211A86D3001A7A5C /* MyClassRoomVC.swift */; };
+		6878D67321773F8C00A0DF0B /* ClassesEditVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6878D67221773F8C00A0DF0B /* ClassesEditVC.swift */; };
 		688EBCA32152121F0011CFA3 /* CheckoutRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBC9C2152121F0011CFA3 /* CheckoutRowView.swift */; };
 		688EBCA42152121F0011CFA3 /* Buttons.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBC9D2152121F0011CFA3 /* Buttons.swift */; };
 		688EBCA52152121F0011CFA3 /* SettingsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBC9E2152121F0011CFA3 /* SettingsViewController.swift */; };
@@ -89,6 +90,7 @@
 		685EB6242113F885001A7A5C /* UniSubCrteVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UniSubCrteVC.swift; sourceTree = "<group>"; };
 		685EB627211A7DA4001A7A5C /* MyClasses.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClasses.swift; sourceTree = "<group>"; };
 		685EB629211A86D3001A7A5C /* MyClassRoomVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyClassRoomVC.swift; sourceTree = "<group>"; };
+		6878D67221773F8C00A0DF0B /* ClassesEditVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassesEditVC.swift; sourceTree = "<group>"; };
 		688EBC9C2152121F0011CFA3 /* CheckoutRowView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CheckoutRowView.swift; sourceTree = "<group>"; };
 		688EBC9D2152121F0011CFA3 /* Buttons.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Buttons.swift; sourceTree = "<group>"; };
 		688EBC9E2152121F0011CFA3 /* SettingsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SettingsViewController.swift; sourceTree = "<group>"; };
@@ -185,7 +187,6 @@
 				68226CB92122867700277FC5 /* MyRequests.swift */,
 				683C83AB2165C97500BBFAF6 /* WebViewController.swift */,
 				6844213821228EF50017C9D5 /* EditBio.swift */,
-				68281820216DF47200D51568 /* OnboardingView.swift */,
 			);
 			path = ViewControls;
 			sourceTree = "<group>";
@@ -204,6 +205,8 @@
 			isa = PBXGroup;
 			children = (
 				685EB6242113F885001A7A5C /* UniSubCrteVC.swift */,
+				6878D67221773F8C00A0DF0B /* ClassesEditVC.swift */,
+				68281820216DF47200D51568 /* OnboardingView.swift */,
 			);
 			path = Admin;
 			sourceTree = "<group>";
@@ -452,6 +455,7 @@
 				685EB628211A7DA4001A7A5C /* MyClasses.swift in Sources */,
 				68226CB821226AA600277FC5 /* PostView.swift in Sources */,
 				68129E572150DAFE000F319A /* RowView.swift in Sources */,
+				6878D67321773F8C00A0DF0B /* ClassesEditVC.swift in Sources */,
 				6844213921228EF50017C9D5 /* EditBio.swift in Sources */,
 				68129E182150B73F000F319A /* StripeClient.swift in Sources */,
 				68129E602150DAFE000F319A /* CheckoutPuppyTableViewCell.swift in Sources */,

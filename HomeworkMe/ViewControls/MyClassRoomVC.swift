@@ -55,6 +55,8 @@ class MyClassRoomVC: UIViewController {
     var student = Student()
     var isGiveHelp = false
     var isRequest = false
+    var notificationKey: String!
+    var notificationKeyName: String!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -406,7 +408,7 @@ class MyClassRoomVC: UIViewController {
                 ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
                 ref.child("Posts").child(postKey).updateChildValues(parameters!)
                 ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GiveHelp").updateChildValues(postParam)
-                setupPushNotification(fromDevice: "", title: "Material Request", body: "\(authorFname) Needs resources for \(fetchObject.title)")
+                
             } else {
                 ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
                 ref.child("Posts").child(postKey).updateChildValues(parameters!)
@@ -414,6 +416,7 @@ class MyClassRoomVC: UIViewController {
             }
             self.postPresetView.isHidden = true
             categoryBtn.isSelected = false
+            setupPushNotification()
         } else {
             // shake text
         }
@@ -430,6 +433,12 @@ class MyClassRoomVC: UIViewController {
                 let posts = response.value as! [String:AnyObject]
                 if let dict = posts["Posts"] as? [String : AnyObject] {
                     self.fetchPostInfo(dictCheck: dict)
+                }
+                if let notificationKey = posts["notificationKey"] as? String {
+                        self.notificationKey = notificationKey
+                }
+                if let notificationKeyName = posts["notificationKeyName"] as? String {
+                    self.notificationKeyName = notificationKeyName
                 }
             }
         })
@@ -550,7 +559,7 @@ class MyClassRoomVC: UIViewController {
         }
     }
     
-    fileprivate func setupPushNotification(fromDevice:String, title:String, body:String)
+    fileprivate func setupPushNotification()
     {
         //        guard let message = "text.text" else {return}
         
@@ -559,9 +568,9 @@ class MyClassRoomVC: UIViewController {
         headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)"
             
         ]
-        let notification = ["to":"/topics/\(self.fetchObject.uniName ?? "")\(self.fetchObject.subName ?? "")\(self.fetchObject.title ?? "")","notification":["body":body,"title":title,"badge":1,"sound":"default"]] as [String:Any]
+        let notification = ["to":self.notificationKey,"data":["hello": "This is a Firebase Cloud Messaging Device Group Message!"]] as [String:Any]
         
-        Alamofire.request(AppDelegate.NOTIFICATION_URL as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
+        Alamofire.request("https://fcm.googleapis.com/fcm/send" as URLConvertible, method: .post as HTTPMethod, parameters: notification, encoding: JSONEncoding.default, headers: headers).responseJSON { (response) in
             print(response)
         }
         
