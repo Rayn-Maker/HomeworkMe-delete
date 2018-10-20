@@ -349,7 +349,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         let ok = UIAlertAction(title: "Ok", style: .default) { (_) in
             guard let text = alert.textFields?.first?.text else { return }
             
-            if text == "addMySchool100" { 
+            if text == "addMySchool100" {
                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
                 let newViewController = storyBoard.instantiateViewController(withIdentifier: "UniSubCrteVC") as! UniSubCrteVC
                 self.present(newViewController, animated: true, completion: nil)
@@ -680,9 +680,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         for (_,y) in dictCheck {
             fetchObject.title = y["className"] as? String
             fetchObject.uid = y["uid"] as? String
-            if let notificationKey  = y["notificationKey"] as? String {
-                fetchObject.notificationKey = notificationKey
-            }
+//            if let notificationKey  = y["notificationKey"] as? String {
+//                fetchObject.notificationKey = notificationKey
+//            }
             self.myClassesArr.append(fetchObject)
         }
         self.activitySpinner.stopAnimating()
@@ -741,12 +741,12 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
                                 if let title = b["uniId"] {
                                     subject.uniID = title as? String
                                 }
-                                if let notificationKey = b["notificationKey"] {
-                                    subject.notificationKey = notificationKey as? String
-                                }
-                                if let notificationName = b["notificationKeyName"] {
-                                    subject.notificationKeyName = notificationName as? String
-                                }//Notification_Devices
+//                                if let notificationKey = b["notificationKey"] {
+//                                    subject.notificationKey = notificationKey as? String
+//                                }
+//                                if let notificationName = b["notificationKeyName"] {
+//                                    subject.notificationKeyName = notificationName as? String
+//                                }//Notification_Devices
                                 if let notificationName = b["Notification_Devices"] {
                                     subject.Notification_Devices = notificationName as? [String] ?? []
                                 }
@@ -842,8 +842,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
             let className = uni_sub_array[indexPath.row].title
             let uid = Auth.auth().currentUser?.uid
             let parameters: [String:String] = ["uid" : key!,
-                                               "className":className ?? "",
-                                               "notificationKey":uni_sub_array[indexPath.row].notificationKey]
+                                               "className":className ?? ""]
             let parameters2: [String:String] = ["uid" : uid!,
                                                 "studentName":self.student.full_name ?? ""]
             if myClassesArr.contains(where: { $0.uid == key }) {
@@ -860,7 +859,7 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                     devicNotes.append(ProfileVC.DEVICEID)
                 }
                 ref.child("Classes").child(key!).child("Notification_Devices").setValue(devicNotes)
-                self.addToGrpMessg(keyName: uni_sub_array[indexPath.row].title!, notificationKey: uni_sub_array[indexPath.row].notificationKey)
+//                self.addToGrpMessg(keyName: uni_sub_array[indexPath.row].title!, notificationKey: uni_sub_array[indexPath.row].notificationKey)
 
             }
             

@@ -180,8 +180,8 @@ struct FetchObject {
     var subName:String!
     var uniID: String?
     var uniName: String?
-    var notificationKey: String!
-    var notificationKeyName: String!
+//    var notificationKey: String!
+//    var notificationKeyName: String!
     var Notification_Devices = [String]()
 }
 
