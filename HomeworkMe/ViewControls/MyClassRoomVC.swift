@@ -17,30 +17,19 @@ import paper_onboarding
 
 class MyClassRoomVC: UIViewController {
 
-    @IBOutlet weak var addPostBtn: UIButton!
-    @IBOutlet weak var classRoomLbl: UILabel!
     @IBOutlet weak var popupView: UIView!
-    @IBOutlet weak var categoryBtn: UISegmentedControl!
+    @IBOutlet weak var greyBkGrnd: UIView!
+    @IBOutlet weak var switchView: UILabel!
     @IBOutlet weak var postsTableView: UITableView!
     @IBOutlet weak var requestsTableView: UITableView!
-    @IBOutlet weak var priceSlider: UISlider!
-    @IBOutlet weak var priceLbl: UILabel!
-    @IBOutlet weak var postPresetView: UIView!
-    @IBOutlet weak var newPostView1: UIStackView!
-    @IBOutlet weak var newPostView2: UIStackView!
-    @IBOutlet weak var titleText: UITextField!
-    @IBOutlet weak var teacherName: UITextField!
-    @IBOutlet weak var titleLabel: UILabel!
-    @IBOutlet weak var inClassSwitch: UISwitch!
     @IBOutlet weak var activitySpinner: UIActivityIndicatorView!
-    @IBOutlet weak var homeWorkTitleLbl: UILabel!
-    @IBOutlet weak var switchView: UIBarButtonItem!
     @IBOutlet weak var onBoardingView: OnboardingView!
     @IBOutlet weak var getStarted: UIButton!
+    @IBOutlet weak var switchViewBtn: UIButton!
     
     var fetchObject = FetchObject()
     var postTitle:String?; var price:Int = 5; var category:String!
-    var handle: DatabaseHandle?; var handle2: DatabaseHandle?
+    var handle: DatabaseHandle?; var handle2: DatabaseHandle?; var handle3: DatabaseHandle?
     var myPostArr = [Post](); var hmwrkArr = [Post](); var testArr = [Post](); var notesArr = [Post](); var otherArr = [Post](); var tutorArr = [Post](); var allPostHolder = [Post]()
     
     var myPostArrReq = [Post](); var hmwrkArrReq = [Post](); var testArrReq = [Post](); var notesArrReq = [Post](); var otherArrReq = [Post](); var tutorArrReq = [Post](); var allPostHolderReq = [Post]()
@@ -59,6 +48,7 @@ class MyClassRoomVC: UIViewController {
     var notificationKeyName: String!
     var devicNotes = [String]()
     var isOffering: Bool!
+    var tutorsInClass = [String:AnyObject]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,12 +59,9 @@ class MyClassRoomVC: UIViewController {
         postsTableView.rowHeight = UITableViewAutomaticDimension
         requestsTableView.estimatedRowHeight = 45
         requestsTableView.rowHeight = UITableViewAutomaticDimension
-        classRoomLbl.text = fetchObject.title
-        fetchMyPostsKey()
-        priceLbl.text = "$5"
         onBoardingView.dataSource = self
         onBoardingView.delegate = self
-        
+        fetchStudent()
         if let ob = UserDefaults.standard.object(forKey: "hasSeenOS2") as? Bool {
             if ob {
                 onBoardingView.isHidden = true
@@ -85,20 +72,15 @@ class MyClassRoomVC: UIViewController {
     
     @IBAction func addPostPrsd(_ sender: Any) {
         let ref = Database.database().reference()
+        greyBkGrnd.isHidden = false 
         if student.paymentSource != nil {
             let alert4 = UIAlertController(title: "Give or Get help", message: "", preferredStyle: .alert)
             let giveHelp = UIAlertAction(title: "Give Help", style: .default) { (_) in
                 self.isGiveHelp = true
-                self.postPresetView.isHidden = false
-                self.newPostView1.isHidden = false
-                self.newPostView2.isHidden = true
                
             }
             let getHelp = UIAlertAction(title: "Get Help", style: .default) { (_) in
                 self.isGiveHelp = false
-                self.postPresetView.isHidden = false
-                self.newPostView1.isHidden = false
-                self.newPostView2.isHidden = true
                 
             }
             alert4.addAction(giveHelp); alert4.addAction(getHelp)
@@ -181,18 +163,12 @@ class MyClassRoomVC: UIViewController {
 //        priceLbl.text = "$\(Int(sender.value) )"
         let roundedValue = round(sender.value / step) * step
         sender.value = roundedValue
-        priceLbl.text = "$\(Int(sender.value))"
+        
         price = Int(sender.value)
         // Do something else with the value
     }
     
-    @IBAction func backPrsd(_ sender: Any) {
-        self.dismiss(animated: true, completion: nil)
-    }
-    
-    @IBAction func creatPostPrsd(_ sender: Any) {
-        creatPost()
-    }
+
     
     @IBAction func getStarted(_ sender: Any) {
         UIView.animate(withDuration: 0.3) {
@@ -202,20 +178,16 @@ class MyClassRoomVC: UIViewController {
         }
     }
     
-    @IBAction func cancelPrsd(_ sender: Any) {
-        postPresetView.isHidden = true
-        newPostView1.isHidden = true
-        newPostView2.isHidden = true
-    }
-    
     @IBAction func switchView(_ sender: Any) {
         if requestsTableView.isHidden {
             requestsTableView.isHidden = false
-            switchView.title = "View Offers"
+            switchView.text = "Get Help"
+            switchViewBtn.setTitle("Give Help", for: .normal)
             isRequest = true
         } else {
              requestsTableView.isHidden = true
-            switchView.title = " View Requests"
+            switchView.text = "Give Help"
+            switchViewBtn.setTitle("Get Help", for: .normal)
             isRequest = true
         }
     }
@@ -288,54 +260,54 @@ class MyClassRoomVC: UIViewController {
         
     }
     
-    @IBAction func categoryPrsd(_ sender: UISegmentedControl) {
-        if sender.selectedSegmentIndex == 0 {
-            category = "Homework"
-            titleText.placeholder = "#"
-            homeWorkTitleLbl.text = "Homework number or title"
-            
-            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Homework"
-            newPostView1.isHidden = true
-            newPostView2.isHidden = false
-//            postPresetView.isHidden = true
-        }
-        if sender.selectedSegmentIndex == 1 {
-            category = "Test"
-            postTitle = fetchObject.title! + " Test "
-            newPostView1.isHidden = true
-            newPostView2.isHidden = false
-            homeWorkTitleLbl.text = "Test number"
-            titleText.placeholder = "# "
-            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Test"
-        }
-        if sender.selectedSegmentIndex == 2 {
-            category = "Notes"
-            newPostView1.isHidden = true
-            newPostView2.isHidden = false
-            let dateFormatter = DateFormatter()
-            dateFormatter.dateFormat = "E MMM dd"
-            let dateString = dateFormatter.string(from: Date())
-            homeWorkTitleLbl.text = ""
-            titleText.text = "Notes for \(dateString)"
-            titleLabel.text = priceLbl.text! + " " + fetchObject.title!
-        }
-        if sender.selectedSegmentIndex == 3 {
-            category = "Tutoring"
-            newPostView1.isHidden = true
-            newPostView2.isHidden = false
-            homeWorkTitleLbl.text = ""
-            titleText.text = "0"
-            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Tutoring"
-        }
-        if sender.selectedSegmentIndex == 4 {
-            category = "Other"
-            newPostView1.isHidden = true
-            newPostView2.isHidden = false
-            homeWorkTitleLbl.text = ""
-            titleText.text = "0"
-            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Other"
-        }
-    }
+//    @IBAction func categoryPrsd(_ sender: UISegmentedControl) {
+//        if sender.selectedSegmentIndex == 0 {
+//            category = "Homework"
+//            titleText.placeholder = "#"
+//            homeWorkTitleLbl.text = "Homework number or title"
+//
+//            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Homework"
+//            newPostView1.isHidden = true
+//            newPostView2.isHidden = false
+////            postPresetView.isHidden = true
+//        }
+//        if sender.selectedSegmentIndex == 1 {
+//            category = "Test"
+//            postTitle = fetchObject.title! + " Test "
+//            newPostView1.isHidden = true
+//            newPostView2.isHidden = false
+//            homeWorkTitleLbl.text = "Test number"
+//            titleText.placeholder = "# "
+//            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Test"
+//        }
+//        if sender.selectedSegmentIndex == 2 {
+//            category = "Notes"
+//            newPostView1.isHidden = true
+//            newPostView2.isHidden = false
+//            let dateFormatter = DateFormatter()
+//            dateFormatter.dateFormat = "E MMM dd"
+//            let dateString = dateFormatter.string(from: Date())
+//            homeWorkTitleLbl.text = ""
+//            titleText.text = "Notes for \(dateString)"
+//            titleLabel.text = priceLbl.text! + " " + fetchObject.title!
+//        }
+//        if sender.selectedSegmentIndex == 3 {
+//            category = "Tutoring"
+//            newPostView1.isHidden = true
+//            newPostView2.isHidden = false
+//            homeWorkTitleLbl.text = ""
+//            titleText.text = "0"
+//            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Tutoring"
+//        }
+//        if sender.selectedSegmentIndex == 4 {
+//            category = "Other"
+//            newPostView1.isHidden = true
+//            newPostView2.isHidden = false
+//            homeWorkTitleLbl.text = ""
+//            titleText.text = "0"
+//            titleLabel.text = priceLbl.text! + " " + fetchObject.title! + " Other"
+//        }
+//    }
     
     @objc func dateChanged(_ sender: UIDatePicker) {
         let components = Calendar.current.dateComponents([.year, .month, .day, .hour, .minute], from: sender.date)
@@ -347,6 +319,8 @@ class MyClassRoomVC: UIViewController {
         }
     }
     
+
+    
     func dismissKeyboard() {
         let tap = UITapGestureRecognizer(target: self.view, action: #selector(UIView.endEditing(_:)))
         tap.cancelsTouchesInView = false
@@ -357,79 +331,94 @@ class MyClassRoomVC: UIViewController {
         return Storage.storage()
     }
     
-    func creatPost(){
-        let ref = Database.database().reference()
-        let authrName = Auth.auth().currentUser?.email
-        let postKey = ref.child("Posts").childByAutoId().key
-        let dateString = String(describing: Date())
-        var picUrl:String!
-        var authorFname: String!
-        var authorLname: String!
-        var phoneNumber: String?
-        if let picurl = UserDefaults.standard.object(forKey: "pictureUrl") as? String {
-           picUrl = picurl
-        } //UserDefaults.standard.set(lname, forKey: "lName")
-        if let fname = UserDefaults.standard.object(forKey: "fName") as? String {
-            authorFname = fname
-        }
-        if let lname = UserDefaults.standard.object(forKey: "lName") as? String {
-            authorLname = lname
-        } // UserDefaults.standard.set(phone, forKey: "phoneNumber")
-        if let phone = UserDefaults.standard.object(forKey: "phoneNumber") as? String {
-            phoneNumber = phone
-        }
-        if titleText.text != "" || titleText.text != nil {
-            let name = titleLabel.text! + " " + titleText.text! + " " + teacherName.text!
-            
-            let parameters = ["uid":postKey,
-                              "name": name,
-                              "authorID":Auth.auth().currentUser?.uid ?? " ",
-                              "authorEmail": authrName ?? " ",
-                              "authorName": authorFname + " " + authorLname,
-                              "timeStamp":dateString,
-                              "category":self.category,
-                              "price": self.price,
-                              //                              "schedule": self.schedules,
-                "studentInClass":self.inClassSwitch.isOn,
-                "postPic": picUrl,
-                "classId": self.fetchObject.uid ?? "",
-                "className":self.fetchObject.title ?? "",
-                "phoneNumber":phoneNumber as Any] as? [String : Any]
-            
-            let parameters2 = ["uid":postKey,
-                               "name": name,
-                               "authorID":Auth.auth().currentUser?.uid ?? " ",
-                               "authorName": authorFname + " " + authorLname,
-                               "timeStamp":dateString,
-                               "category":self.category,
-                               "price": self.price ] as? [String : Any]
-            
-            let postParam = [postKey : parameters2]
-            
-            if isGiveHelp {
-                ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
-                ref.child("Posts").child(postKey).updateChildValues(parameters!)
-                ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GiveHelp").updateChildValues(postParam)
-                self.callForHelp(title: "HomeworkMe Assignement Offer", body: "Your classmate in \(self.fetchObject.title ?? ""), under Offers posted: \(name ?? "")")
+//    func creatPost(){
+//        let ref = Database.database().reference()
+//        let authrName = Auth.auth().currentUser?.email
+//        let postKey = ref.child("Posts").childByAutoId().key
+//        let dateString = String(describing: Date())
+//        var picUrl:String!
+//        var authorFname: String!
+//        var authorLname: String!
+//        var phoneNumber: String?
+//        if let picurl = UserDefaults.standard.object(forKey: "pictureUrl") as? String {
+//           picUrl = picurl
+//        } //UserDefaults.standard.set(lname, forKey: "lName")
+//        if let fname = UserDefaults.standard.object(forKey: "fName") as? String {
+//            authorFname = fname
+//        }
+//        if let lname = UserDefaults.standard.object(forKey: "lName") as? String {
+//            authorLname = lname
+//        } // UserDefaults.standard.set(phone, forKey: "phoneNumber")
+//        if let phone = UserDefaults.standard.object(forKey: "phoneNumber") as? String {
+//            phoneNumber = phone
+//        }
+//        if titleText.text != "" || titleText.text != nil {
+//            let name = titleLabel.text! + " " + titleText.text! + " " + teacherName.text!
+//
+//            let parameters = ["uid":postKey,
+//                              "name": name,
+//                              "authorID":Auth.auth().currentUser?.uid ?? " ",
+//                              "authorEmail": authrName ?? " ",
+//                              "authorName": authorFname + " " + authorLname,
+//                              "timeStamp":dateString,
+//                              "category":self.category,
+//                              "price": self.price,
+//                              //                              "schedule": self.schedules,
+//                "studentInClass":self.inClassSwitch.isOn,
+//                "postPic": picUrl,
+//                "classId": self.fetchObject.uid ?? "",
+//                "className":self.fetchObject.title ?? "",
+//                "phoneNumber":phoneNumber as Any] as? [String : Any]
+//
+//            let parameters2 = ["uid":postKey,
+//                               "name": name,
+//                               "authorID":Auth.auth().currentUser?.uid ?? " ",
+//                               "authorName": authorFname + " " + authorLname,
+//                               "timeStamp":dateString,
+//                               "category":self.category,
+//                               "price": self.price ] as? [String : Any]
+//
+//            let postParam = [postKey : parameters2]
+//
+//            if isGiveHelp {
+//                ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
+//                ref.child("Posts").child(postKey).updateChildValues(parameters!)
+//                ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GiveHelp").updateChildValues(postParam)
+//                self.callForHelp(title: "HomeworkMe Assignement Offer", body: "Your classmate in \(self.fetchObject.title ?? ""), under Offers posted: \(name ?? "")")
+//            } else {
+//                ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
+//                ref.child("Posts").child(postKey).updateChildValues(parameters!)
+//                ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GetHelp").updateChildValues(postParam)
+//                self.callForHelp(title: "HomeworkMe Help Request", body: "Your classmate in \(self.fetchObject.title ?? ""), under Requests posted: \(name )")
+//            }
+//            self.postPresetView.isHidden = true
+//            categoryBtn.isSelected = false
+//
+//        } else {
+//            // shake text
+//        }
+//    }
+    
+    func fetchStudent() {
+        let uid = Auth.auth().currentUser?.uid
+        handle3 = ref.child("Students").child(uid!).queryOrderedByKey().observe( .value, with: { response in
+            if response.value is NSNull {
+                /// dont do anything
             } else {
-                ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").child("Myposts").updateChildValues(postParam ?? [:])
-                ref.child("Posts").child(postKey).updateChildValues(parameters!)
-                ref.child("Classes").child(self.fetchObject.uid!).child("Posts").child("GetHelp").updateChildValues(postParam)
-                self.callForHelp(title: "HomeworkMe Help Request", body: "Your classmate in \(self.fetchObject.title ?? ""), under Requests posted: \(name )")
+                self.hmwrkArr.removeAll(); self.hmwrkArrReq.removeAll(); self.notesArr.removeAll(); self.notesArrReq.removeAll(); self.tutorArr.removeAll(); self.tutorArrReq.removeAll(); self.testArrReq.removeAll(); self.testArr.removeAll(); self.otherArr.removeAll(); self.otherArrReq.removeAll(); self.myPostArrReq.removeAll(); self.myPostArr.removeAll()
+                let myclass = response.value as! [String:AnyObject]
+                if let dict = myclass["Classes"] as? [String : AnyObject] {
+                    for (x,y) in dict {
+                        self.fetchMyPostsKey(clasUid: x)
+                    }
+                }
             }
-            self.postPresetView.isHidden = true
-            categoryBtn.isSelected = false
-            
-        } else {
-            // shake text
-        }
-        
-        
+        })
     }
     
-    func fetchMyPostsKey() {
+    func fetchMyPostsKey(clasUid:String) {
         let ref = Database.database().reference()
-        handle = ref.child("Classes").child(fetchObject.uid!).queryOrderedByKey().observe( .value, with: { response in
+        handle = ref.child("Classes").child(clasUid).queryOrderedByKey().observe( .value, with: { response in
             if response.value is NSNull {
                 /// dont do anything
             } else {
@@ -445,13 +434,16 @@ class MyClassRoomVC: UIViewController {
                 }
                 if let Notification_Devices = posts["Notification_Devices"] as? [String] {
                     self.devicNotes = Notification_Devices
+                } // Students
+                if let tutorsInClass = posts["Students"] as? [String:AnyObject] {
+                     self.tutorsInClass = tutorsInClass
                 }
             }
         })
     }
     
     func fetchPostInfo(dictCheck: [String:AnyObject]){
-        hmwrkArr.removeAll(); hmwrkArrReq.removeAll(); notesArr.removeAll(); notesArrReq.removeAll(); tutorArr.removeAll(); tutorArrReq.removeAll(); testArrReq.removeAll(); testArr.removeAll(); otherArr.removeAll(); otherArrReq.removeAll(); myPostArrReq.removeAll(); myPostArr.removeAll()
+        
         for (x,d) in dictCheck {
             for (_,b) in d as! [String:AnyObject] {
                 let postss = Post()
@@ -486,31 +478,36 @@ class MyClassRoomVC: UIViewController {
                 } else {
                     postss.price = 0
                 }
+                
                 if x == "GetHelp" {
-                    self.myPostArrReq.append(postss)
-                    if postss.category == "Homework" {
-                        self.hmwrkArrReq.append(postss)
-                    } else if postss.category == "Notes" {
-                        self.notesArrReq.append(postss)
-                    }else if postss.category == "Tutoring" {
-                        self.tutorArrReq.append(postss)
-                    }else  if postss.category == "Test" {
-                        self.testArrReq.append(postss)
-                    }else if postss.category == "Other" {
-                        self.otherArrReq.append(postss)
+                    if !self.myPostArrReq.contains(where: {$0.uid == postss.uid}) {
+                        self.myPostArrReq.append(postss)
+                        if postss.category == "Homework" {
+                            self.hmwrkArrReq.append(postss)
+                        } else if postss.category == "Notes" {
+                            self.notesArrReq.append(postss)
+                        }else if postss.category == "Tutoring" {
+                            self.tutorArrReq.append(postss)
+                        }else  if postss.category == "Test" {
+                            self.testArrReq.append(postss)
+                        }else if postss.category == "Other" {
+                            self.otherArrReq.append(postss)
+                        }
                     }
                 } else {
-                    self.myPostArr.append(postss)
-                    if postss.category == "Homework" {
-                        self.hmwrkArr.append(postss)
-                    } else if postss.category == "Notes" {
-                        self.notesArr.append(postss)
-                    }else if postss.category == "Tutoring" {
-                        self.tutorArr.append(postss)
-                    }else  if postss.category == "Test" {
-                        self.testArr.append(postss)
-                    }else if postss.category == "Other" {
-                        self.otherArr.append(postss)
+                    if !self.myPostArr.contains(where: {$0.uid == postss.uid}) {
+                        self.myPostArr.append(postss)
+                        if postss.category == "Homework" {
+                            self.hmwrkArr.append(postss)
+                        } else if postss.category == "Notes" {
+                            self.notesArr.append(postss)
+                        }else if postss.category == "Tutoring" {
+                            self.tutorArr.append(postss)
+                        }else  if postss.category == "Test" {
+                            self.testArr.append(postss)
+                        }else if postss.category == "Other" {
+                            self.otherArr.append(postss)
+                        }
                     }
                 }
             }
@@ -530,7 +527,6 @@ class MyClassRoomVC: UIViewController {
 
     }
     
-
     func imageWithImage(image:UIImage,scaledToSize newSize:CGSize)-> UIImage {
         
         UIGraphicsBeginImageContext( newSize )
@@ -565,8 +561,13 @@ class MyClassRoomVC: UIViewController {
             vc?.isOffering = self.isOffering
             vc?.classObject = self.fetchObject
         }
+        
+        if segue.identifier == "showTutorsSeg" {
+            let vc = segue.destination as? TutorsInClassVC
+            vc?.fetchObject = self.fetchObject
+            vc?.tutorsInClass = self.tutorsInClass
+        }
     }
-    
    
     func callForHelp(title:String, body:String){
         for x in 0...devicNotes.count - 1 {
@@ -581,7 +582,7 @@ class MyClassRoomVC: UIViewController {
         let toDeviceID = fromDevice
         var headers:HTTPHeaders = HTTPHeaders()
         
-        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)" ]
+        headers = ["Content-Type":"application/json","Authorization":"key=\(AppDelegate.SERVERKEY)"]
         
         let notification = ["to": fromDevice,
                             "notification":[

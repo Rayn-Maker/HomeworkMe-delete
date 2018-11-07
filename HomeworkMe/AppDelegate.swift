@@ -49,9 +49,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         logUser()
         GIDSignIn.sharedInstance().clientID = FirebaseApp.app()?.options.clientID
         GIDSignIn.sharedInstance().delegate = self
-        
-       
-        
+         
         return FBSDKApplicationDelegate.sharedInstance().application(application, didFinishLaunchingWithOptions: launchOptions)
     }
     
@@ -67,15 +65,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         completionHandler([.alert, .badge, .sound])
     }
     
-//    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-//
-//        let notification =  response.notification.request.content.body
-//        let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! MyRequests
-//        self.window?.rootViewController = vc
-//        print(notification)
-//
-//        completionHandler()
-//    }
+ 
     
     func application(_ application: UIApplication, didReceiveRemoteNotification userInfo: [AnyHashable: Any], fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void) {
         
@@ -83,7 +73,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
         if ( application.applicationState == .inactive || application.applicationState == .background){
             
 //            let notification =  response.notification.request.content.body
-            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! MyRequests
+            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "requests") as! Requests
             self.window?.rootViewController = vc
         }
     }
@@ -111,10 +101,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, GIDSignInDelegate, UNUser
     
     func logUser(){
         if Auth.auth().currentUser != nil {
-            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile") as! ProfileVC
+            let vc = UIStoryboard(name: "Main", bundle: nil).instantiateViewController(withIdentifier: "userProfile") as! HomeTabBarVC
             self.window?.rootViewController = vc 
         }
-        
     }
     
     func sign(_ signIn: GIDSignIn!, didSignInFor user: GIDGoogleUser!, withError error: Error?) {

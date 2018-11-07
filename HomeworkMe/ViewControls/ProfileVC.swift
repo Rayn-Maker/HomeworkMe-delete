@@ -275,6 +275,35 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
         tutorEdit.isHidden = true
     }
     
+    @IBAction func tutorRegistrationPrsd(_ sender: Any) {
+        let alert = UIAlertController(title: "Tutor Registration", message: "Get extra cash tutoring your peers on the go!", preferredStyle: .alert)
+        alert.addTextField { (textfield) in
+            textfield.placeholder = "What classes are you taking?"
+        }
+        alert.addTextField { (textfield2) in
+            textfield2.placeholder = "What subjects are you best at?"
+        }
+        let cancel = UIAlertAction(title: "Cancel", style: .default, handler: nil)
+        let Register = UIAlertAction(title: "Register", style: .default) { (_) in
+            guard let text = alert.textFields?.first?.text else { return }
+            guard let text2 = alert.textFields?[1].text else { return }
+            if text != "" && text != nil && text2 != nil && text2 != "" {
+                let userInfo: [String: Any] = ["isTutor":true]
+                
+                self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").updateChildValues(userInfo) { (err, resp) in
+                    if err != nil {
+                        
+                    }
+                }
+            } else {
+                self.present(alert, animated: true, completion: nil)
+            }
+        }
+        
+        alert.addAction(Register); alert.addAction(cancel)
+        present(alert, animated: true, completion: nil)
+    }
+    
     
     @IBAction func saveTutor(_ sender: Any) {
         if changePicBtn.isHidden {
@@ -333,7 +362,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             
             if text == "addMySchool100" {
                 let storyBoard: UIStoryboard = UIStoryboard(name: "Main", bundle: nil)
-                let newViewController = storyBoard.instantiateViewController(withIdentifier: "ClassesEditVC") as! ClassesEditVC
+                let newViewController = storyBoard.instantiateViewController(withIdentifier: "ClassesEditVC") as! UsersVC
                 self.present(newViewController, animated: true, completion: nil)
             }
         }
@@ -795,7 +824,7 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
             do {
                 guard let json = try JSONSerialization.jsonObject(with: response.data!, options: .mutableContainers) as? JSON else {return}
                 //                let par = ["notification_key": json["notification_key"]] as [String: Any]
-                //                self.ref.child("Classes").child(self.selClassId).updateChildValues(par)
+                // self.ref.child("Classes").child(self.selClassId).updateChildValues(par)
             } catch {
                 
             }

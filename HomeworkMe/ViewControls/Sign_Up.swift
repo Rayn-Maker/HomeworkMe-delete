@@ -30,13 +30,19 @@ class Sign_Up: UIViewController {
     @IBAction func registerPrsd(_ sender: Any) {
         ref = Database.database().reference()
         if passwordTxt.text != conPaswordTxt.text {
-            
+            let alert = UIAlertController(title: "Error", message: "please make sure your passwords match", preferredStyle: .alert)
+            let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
+            alert.addAction(ok)
+            present(alert, animated: true, completion: nil)
         } else if fNameTxt.text != nil && phoneNumber.text != nil && lNameTxt.text != nil && passwordTxt.text != nil && conPaswordTxt.text != nil && emailTxt.text != nil && fNameTxt.text != "" && phoneNumber.text != "" && lNameTxt.text != "" && passwordTxt.text != "" && conPaswordTxt.text != "" && emailTxt.text != "" {
             Auth.auth().createUser(withEmail: self.emailTxt.text!, password: self.passwordTxt.text!) { (user, error) in
                 if error != nil {
-//                    let alert = self.alert.alertWithOk(errorMessagTitle: "Something went wrong", errorMessage: (error?.localizedDescription)!)
-//                    self.present(alert, animated: true, completion: nil)
-                }  /// Catch any errors and present it to the screen.
+
+                    let alert = UIAlertController(title: "Error", message: error?.localizedDescription, preferredStyle: .alert)
+                    let ok = UIAlertAction(title: "Ok", style: .default, handler: nil)
+                    alert.addAction(ok)
+                    self.present(alert, animated: true, completion: nil)
+                }
                 
                 if let user = user {
                     let userInfo: [String: Any] = ["uid": user.user.uid,

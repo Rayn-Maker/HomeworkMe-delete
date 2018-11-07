@@ -57,6 +57,7 @@ class Student {
     var paymentSource: [String]?
     var hasCard = Bool()
     var currLoc = Place()
+    var isTutor = Bool()
 }
 
 enum Location {

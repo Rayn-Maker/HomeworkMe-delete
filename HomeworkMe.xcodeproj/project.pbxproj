@@ -24,9 +24,10 @@
 		68129E622150DAFE000F319A /* puppies.json in Resources */ = {isa = PBXBuildFile; fileRef = 68129E542150DAFD000F319A /* puppies.json */; };
 		68226CB2211BB24600277FC5 /* Log_in.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB1211BB24600277FC5 /* Log_in.swift */; };
 		68226CB821226AA600277FC5 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB721226AA600277FC5 /* PostView.swift */; };
-		68226CBA2122867800277FC5 /* MyRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB92122867700277FC5 /* MyRequests.swift */; };
+		68226CBA2122867800277FC5 /* Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB92122867700277FC5 /* Requests.swift */; };
 		68281821216DF47200D51568 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68281820216DF47200D51568 /* OnboardingView.swift */; };
 		683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683C83AB2165C97500BBFAF6 /* WebViewController.swift */; };
+		683DF29C2183B2D50098CA9A /* HomeTabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683DF29B2183B2D50098CA9A /* HomeTabBarVC.swift */; };
 		6844213921228EF50017C9D5 /* EditBio.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6844213821228EF50017C9D5 /* EditBio.swift */; };
 		685EB60421124DFB001A7A5C /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 685EB60321124DFB001A7A5C /* AppDelegate.swift */; };
 		685EB60921124DFB001A7A5C /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 685EB60721124DFB001A7A5C /* Main.storyboard */; };
@@ -50,6 +51,9 @@
 		688EBCA92152121F0011CFA3 /* PaymentContextFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBCA22152121F0011CFA3 /* PaymentContextFooterView.swift */; };
 		688EBCAB2152129B0011CFA3 /* BrowseProductsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBCAA2152129B0011CFA3 /* BrowseProductsViewController.swift */; };
 		68E513862127978900E2C149 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68E513852127978900E2C149 /* StoreKit.framework */; };
+		68EFFA55217E4D0E00D967D6 /* GetHelpRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EFFA54217E4D0D00D967D6 /* GetHelpRequest.swift */; };
+		68EFFA57217ED8F100D967D6 /* TutorsInClassVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EFFA56217ED8F100D967D6 /* TutorsInClassVC.swift */; };
+		68EFFA592180774000D967D6 /* UsersVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EFFA582180774000D967D6 /* UsersVC.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,10 +74,11 @@
 		68129E542150DAFD000F319A /* puppies.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = puppies.json; sourceTree = "<group>"; };
 		68226CB1211BB24600277FC5 /* Log_in.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log_in.swift; sourceTree = "<group>"; };
 		68226CB721226AA600277FC5 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
-		68226CB92122867700277FC5 /* MyRequests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyRequests.swift; sourceTree = "<group>"; };
+		68226CB92122867700277FC5 /* Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requests.swift; sourceTree = "<group>"; };
 		68281820216DF47200D51568 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6829B6892156322A0052DD75 /* HomeworkMe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeworkMe.entitlements; sourceTree = "<group>"; };
 		683C83AB2165C97500BBFAF6 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
+		683DF29B2183B2D50098CA9A /* HomeTabBarVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeTabBarVC.swift; sourceTree = "<group>"; };
 		6844213821228EF50017C9D5 /* EditBio.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EditBio.swift; sourceTree = "<group>"; };
 		685EB60021124DFB001A7A5C /* HomeworkMe.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HomeworkMe.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		685EB60321124DFB001A7A5C /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -99,6 +104,9 @@
 		688EBCA22152121F0011CFA3 /* PaymentContextFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentContextFooterView.swift; sourceTree = "<group>"; };
 		688EBCAA2152129B0011CFA3 /* BrowseProductsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowseProductsViewController.swift; sourceTree = "<group>"; };
 		68E513852127978900E2C149 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
+		68EFFA54217E4D0D00D967D6 /* GetHelpRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetHelpRequest.swift; sourceTree = "<group>"; };
+		68EFFA56217ED8F100D967D6 /* TutorsInClassVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorsInClassVC.swift; sourceTree = "<group>"; };
+		68EFFA582180774000D967D6 /* UsersVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UsersVC.swift; sourceTree = "<group>"; };
 		6D08416A4A4A518A47337D74 /* Pods_HomeworkMe.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_HomeworkMe.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		ACF7072DC197FF2E95719453 /* Pods-HomeworkMe.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-HomeworkMe.release.xcconfig"; path = "Pods/Target Support Files/Pods-HomeworkMe/Pods-HomeworkMe.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -184,7 +192,10 @@
 				685EB6222113E716001A7A5C /* ProfileVC.swift */,
 				685EB629211A86D3001A7A5C /* MyClassRoomVC.swift */,
 				68226CB721226AA600277FC5 /* PostView.swift */,
-				68226CB92122867700277FC5 /* MyRequests.swift */,
+				68EFFA56217ED8F100D967D6 /* TutorsInClassVC.swift */,
+				683DF29B2183B2D50098CA9A /* HomeTabBarVC.swift */,
+				68226CB92122867700277FC5 /* Requests.swift */,
+				68EFFA54217E4D0D00D967D6 /* GetHelpRequest.swift */,
 				683C83AB2165C97500BBFAF6 /* WebViewController.swift */,
 				6844213821228EF50017C9D5 /* EditBio.swift */,
 			);
@@ -204,6 +215,7 @@
 		685EB6262113F8B2001A7A5C /* Admin */ = {
 			isa = PBXGroup;
 			children = (
+				68EFFA582180774000D967D6 /* UsersVC.swift */,
 				685EB6242113F885001A7A5C /* UniSubCrteVC.swift */,
 				6878D67221773F8C00A0DF0B /* ClassesEditVC.swift */,
 				68281820216DF47200D51568 /* OnboardingView.swift */,
@@ -431,11 +443,13 @@
 				685EB6232113E716001A7A5C /* ProfileVC.swift in Sources */,
 				68129E1521502C4B000F319A /* Constants.swift in Sources */,
 				685EB60C21124DFB001A7A5C /* HomeworkMe.xcdatamodeld in Sources */,
+				683DF29C2183B2D50098CA9A /* HomeTabBarVC.swift in Sources */,
 				688EBCA32152121F0011CFA3 /* CheckoutRowView.swift in Sources */,
 				68129E5C2150DAFE000F319A /* CheckoutTotalTableViewCell.swift in Sources */,
 				685EB62A211A86D3001A7A5C /* MyClassRoomVC.swift in Sources */,
 				68129E582150DAFE000F319A /* Puppy.swift in Sources */,
-				68226CBA2122867800277FC5 /* MyRequests.swift in Sources */,
+				68EFFA57217ED8F100D967D6 /* TutorsInClassVC.swift in Sources */,
+				68226CBA2122867800277FC5 /* Requests.swift in Sources */,
 				68129E5A2150DAFE000F319A /* InventoryViewController.swift in Sources */,
 				68129E612150DAFE000F319A /* FeaturedViewController.swift in Sources */,
 				688EBCA62152121F0011CFA3 /* CheckoutViewController.swift in Sources */,
@@ -460,7 +474,9 @@
 				68129E182150B73F000F319A /* StripeClient.swift in Sources */,
 				68129E602150DAFE000F319A /* CheckoutPuppyTableViewCell.swift in Sources */,
 				683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */,
+				68EFFA55217E4D0E00D967D6 /* GetHelpRequest.swift in Sources */,
 				688EBCA92152121F0011CFA3 /* PaymentContextFooterView.swift in Sources */,
+				68EFFA592180774000D967D6 /* UsersVC.swift in Sources */,
 				685EB61F2112BB5F001A7A5C /* Sign_Up.swift in Sources */,
 				688EBCAB2152129B0011CFA3 /* BrowseProductsViewController.swift in Sources */,
 				68129E552150DAFE000F319A /* NumberFormat.swift in Sources */,
