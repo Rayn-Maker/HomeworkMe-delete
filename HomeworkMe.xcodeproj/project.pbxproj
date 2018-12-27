@@ -25,6 +25,7 @@
 		68226CB2211BB24600277FC5 /* Log_in.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB1211BB24600277FC5 /* Log_in.swift */; };
 		68226CB821226AA600277FC5 /* PostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB721226AA600277FC5 /* PostView.swift */; };
 		68226CBA2122867800277FC5 /* Requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68226CB92122867700277FC5 /* Requests.swift */; };
+		6826B223219537FE00785A3A /* TutorHomeVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6826B222219537FE00785A3A /* TutorHomeVC.swift */; };
 		68281821216DF47200D51568 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68281820216DF47200D51568 /* OnboardingView.swift */; };
 		683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683C83AB2165C97500BBFAF6 /* WebViewController.swift */; };
 		683DF29C2183B2D50098CA9A /* HomeTabBarVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 683DF29B2183B2D50098CA9A /* HomeTabBarVC.swift */; };
@@ -50,6 +51,8 @@
 		688EBCA82152121F0011CFA3 /* MyAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBCA12152121F0011CFA3 /* MyAPIClient.swift */; };
 		688EBCA92152121F0011CFA3 /* PaymentContextFooterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBCA22152121F0011CFA3 /* PaymentContextFooterView.swift */; };
 		688EBCAB2152129B0011CFA3 /* BrowseProductsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 688EBCAA2152129B0011CFA3 /* BrowseProductsViewController.swift */; };
+		68B61F092192C5EF00E3AE5D /* ProfileSetupVCViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B61F082192C5EF00E3AE5D /* ProfileSetupVCViewController.swift */; };
+		68B61F0B2192D48900E3AE5D /* UIExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68B61F0A2192D48900E3AE5D /* UIExtensions.swift */; };
 		68E513862127978900E2C149 /* StoreKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 68E513852127978900E2C149 /* StoreKit.framework */; };
 		68EFFA55217E4D0E00D967D6 /* GetHelpRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EFFA54217E4D0D00D967D6 /* GetHelpRequest.swift */; };
 		68EFFA57217ED8F100D967D6 /* TutorsInClassVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 68EFFA56217ED8F100D967D6 /* TutorsInClassVC.swift */; };
@@ -75,6 +78,7 @@
 		68226CB1211BB24600277FC5 /* Log_in.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Log_in.swift; sourceTree = "<group>"; };
 		68226CB721226AA600277FC5 /* PostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PostView.swift; sourceTree = "<group>"; };
 		68226CB92122867700277FC5 /* Requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Requests.swift; sourceTree = "<group>"; };
+		6826B222219537FE00785A3A /* TutorHomeVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorHomeVC.swift; sourceTree = "<group>"; };
 		68281820216DF47200D51568 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		6829B6892156322A0052DD75 /* HomeworkMe.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HomeworkMe.entitlements; sourceTree = "<group>"; };
 		683C83AB2165C97500BBFAF6 /* WebViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebViewController.swift; sourceTree = "<group>"; };
@@ -103,6 +107,8 @@
 		688EBCA12152121F0011CFA3 /* MyAPIClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MyAPIClient.swift; sourceTree = "<group>"; };
 		688EBCA22152121F0011CFA3 /* PaymentContextFooterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PaymentContextFooterView.swift; sourceTree = "<group>"; };
 		688EBCAA2152129B0011CFA3 /* BrowseProductsViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BrowseProductsViewController.swift; sourceTree = "<group>"; };
+		68B61F082192C5EF00E3AE5D /* ProfileSetupVCViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileSetupVCViewController.swift; sourceTree = "<group>"; };
+		68B61F0A2192D48900E3AE5D /* UIExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtensions.swift; sourceTree = "<group>"; };
 		68E513852127978900E2C149 /* StoreKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = StoreKit.framework; path = System/Library/Frameworks/StoreKit.framework; sourceTree = SDKROOT; };
 		68EFFA54217E4D0D00D967D6 /* GetHelpRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetHelpRequest.swift; sourceTree = "<group>"; };
 		68EFFA56217ED8F100D967D6 /* TutorsInClassVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TutorsInClassVC.swift; sourceTree = "<group>"; };
@@ -185,6 +191,7 @@
 		685EB61821124E93001A7A5C /* ViewControls */ = {
 			isa = PBXGroup;
 			children = (
+				68B61F0A2192D48900E3AE5D /* UIExtensions.swift */,
 				68226CB1211BB24600277FC5 /* Log_in.swift */,
 				685EB61C21125303001A7A5C /* Sign_In.swift */,
 				685EB61E2112BB5F001A7A5C /* Sign_Up.swift */,
@@ -198,6 +205,8 @@
 				68EFFA54217E4D0D00D967D6 /* GetHelpRequest.swift */,
 				683C83AB2165C97500BBFAF6 /* WebViewController.swift */,
 				6844213821228EF50017C9D5 /* EditBio.swift */,
+				6826B222219537FE00785A3A /* TutorHomeVC.swift */,
+				68B61F082192C5EF00E3AE5D /* ProfileSetupVCViewController.swift */,
 			);
 			path = ViewControls;
 			sourceTree = "<group>";
@@ -455,6 +464,7 @@
 				688EBCA62152121F0011CFA3 /* CheckoutViewController.swift in Sources */,
 				685EB61A21124EB6001A7A5C /* Objects.swift in Sources */,
 				68129E5B2150DAFE000F319A /* InventoryPuppyTableViewCell.swift in Sources */,
+				68B61F0B2192D48900E3AE5D /* UIExtensions.swift in Sources */,
 				68281821216DF47200D51568 /* OnboardingView.swift in Sources */,
 				685EB60421124DFB001A7A5C /* AppDelegate.swift in Sources */,
 				688EBCA42152121F0011CFA3 /* Buttons.swift in Sources */,
@@ -472,9 +482,11 @@
 				6878D67321773F8C00A0DF0B /* ClassesEditVC.swift in Sources */,
 				6844213921228EF50017C9D5 /* EditBio.swift in Sources */,
 				68129E182150B73F000F319A /* StripeClient.swift in Sources */,
+				68B61F092192C5EF00E3AE5D /* ProfileSetupVCViewController.swift in Sources */,
 				68129E602150DAFE000F319A /* CheckoutPuppyTableViewCell.swift in Sources */,
 				683C83AC2165C97500BBFAF6 /* WebViewController.swift in Sources */,
 				68EFFA55217E4D0E00D967D6 /* GetHelpRequest.swift in Sources */,
+				6826B223219537FE00785A3A /* TutorHomeVC.swift in Sources */,
 				688EBCA92152121F0011CFA3 /* PaymentContextFooterView.swift in Sources */,
 				68EFFA592180774000D967D6 /* UsersVC.swift in Sources */,
 				685EB61F2112BB5F001A7A5C /* Sign_Up.swift in Sources */,

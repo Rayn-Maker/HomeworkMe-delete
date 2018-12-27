@@ -6,6 +6,8 @@
 //  Copyright © 2018 RayCo. All rights reserved.
 //
 
+// sign up/in through google button
+
 import UIKit
 import GoogleSignIn
 import Firebase
@@ -61,13 +63,15 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
             } else {
                 self.ref.child("Students").observeSingleEvent(of: .value, with: { (snapshot) in
                     if snapshot.hasChild(Auth.auth().currentUser?.uid ?? ""){
+                        // already has account.... do nothing regarding firebase direct them to first screen.
+                        
                         let userInfo: [String: Any] = ["uid": Auth.auth().currentUser?.uid ?? "",
                                                        "fName": user.profile.givenName ?? " ",
                                                        "lName": user.profile.familyName ?? " ",
                                                        "full_name": user.profile.name ?? " ",
                                                        "email": user.profile.email ?? " "]
-                        
 //                        self.ref.child("Students").child(Auth.auth().currentUser?.uid ?? "").setValue(userInfo)
+                        
                     } else {
                         let userInfo: [String: Any] = ["uid": Auth.auth().currentUser?.uid ?? "",
                                                        "fName": user.profile.givenName ?? " ",
@@ -108,8 +112,7 @@ class Sign_In: UIViewController, GIDSignInUIDelegate, GIDSignInDelegate {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "signIntoProf" {
-            let vc = segue.destination as? ProfileVC
-            vc?.classView = true
+            let vc = segue.destination as? ProfileVC 
         }
     }
     

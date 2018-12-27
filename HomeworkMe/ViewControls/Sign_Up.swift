@@ -6,6 +6,8 @@
 //  Copyright © 2018 RayCo. All rights reserved.
 //
 
+
+/// Sign up through firebase 
 import UIKit
 import Firebase
 import FirebaseAuth
@@ -79,8 +81,7 @@ class Sign_Up: UIViewController {
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "registerToProfile" {
-            let vc = segue.destination as? ProfileVC
-            vc?.classView = true
+            let vc = segue.destination as? ProfileVC 
             vc?.phoneNumberString = phoneNumber.text ?? ""
         }
     }

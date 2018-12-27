@@ -67,10 +67,29 @@
          </PersistentStrings>
       </ContextState>
       <ContextState
+         contextName = "closure #1 in closure #1 in ProfileVC.fetchClassesInUni(allClasses:):ProfileVC.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "allClassesArr">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
          contextName = "closure #1 in ProfileVC.fetchMyClassKey():ProfileVC.swift">
          <PersistentStrings>
             <PersistentString
                value = "student.paymentSource = status">
+            </PersistentString>
+         </PersistentStrings>
+      </ContextState>
+      <ContextState
+         contextName = "closure #1 in ProfileVC.fetchClassesInUni(allClasses:):ProfileVC.swift">
+         <PersistentStrings>
+            <PersistentString
+               value = "university">
+            </PersistentString>
+            <PersistentString
+               value = "">
             </PersistentString>
          </PersistentStrings>
       </ContextState>
