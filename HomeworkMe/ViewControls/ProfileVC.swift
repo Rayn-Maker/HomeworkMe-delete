@@ -322,7 +322,9 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     @IBAction func donePrsd(_ sender: Any) {
         // save info hide screens
-        
+        for x in 0...selectedClasses.count - 1 {
+            saveClasses(classs: selectedClasses[x])
+        }
         tutorEdit.isHidden = true
         classEdit.isHidden = true
     }
@@ -427,6 +429,34 @@ class ProfileVC: UIViewController, UIImagePickerControllerDelegate, UINavigation
     
     var storageRef: Storage {
         return Storage.storage()
+    }
+    
+    func saveClasses(classs:FetchObject){
+        let cell = classRoomTableView.cellForRow(at: indexPath)
+        let ref = Database.database().reference()
+        let key = classs.uid
+        let className = classs.title
+        let uid = Auth.auth().currentUser?.uid
+        let parameters: [String:String] = ["uid" : key!,
+                                           "className":className ?? ""]
+        let parameters2: [String:String] = ["uid" : uid!,
+                                            "studentName":self.student.full_name ?? ""]
+        if myClassesArr.contains(where: { $0.uid == key }) {
+            // student already in class
+        } else {
+            // student not in class therefore add student to class add class to student
+            
+            ref.child("Students").child(uid!).child("Classes").child(key!).updateChildValues(parameters)
+            ref.child("Classes").child(key!).child("Students").child(uid!).updateChildValues(parameters2)
+            
+            devicNotes = classs.Notification_Devices
+            if devicNotes.contains(ProfileVC.DEVICEID) {
+                
+            } else {
+                devicNotes.append(ProfileVC.DEVICEID)
+            }
+            ref.child("Classes").child(key!).child("Notification_Devices").setValue(devicNotes)
+        }
     }
     
     func addCard() {
@@ -743,11 +773,17 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
         }
         
         if tableView == classInUniSearch {
-            if inSearching {
-                selectedClasses.append(allClassesArrFilterd[indexPath.row])
+            let cell = tableView.cellForRow(at: indexPath)
+            if cell?.accessoryType != .checkmark {
+                if inSearching {
+                    selectedClasses.append(allClassesArrFilterd[indexPath.row])
+                } else {
+                    selectedClasses.append(allClassesArr[indexPath.row])
+                }
             } else {
-                selectedClasses.append(allClassesArr[indexPath.row])
+                // show it in the other tableview
             }
+            
             selectedClassesTableView.reloadData()
         }
     }
@@ -778,6 +814,12 @@ extension ProfileVC: UITableViewDataSource, UITableViewDelegate {
                 cell.textLabel?.text = allClassesArrFilterd[indexPath.row].title
             } else {
                 cell.textLabel?.text = allClassesArr[indexPath.row].title
+            }
+            if myClassesArr.contains(where: { $0.uid == allClassesArr[indexPath.row].uid }) {
+                // print a statement saying class already added
+                cell.accessoryType = .checkmark
+            } else {
+                cell.accessoryType = .none
             }
             return cell
          } else if tableView == selectedClassesTableView {
